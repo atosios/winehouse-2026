@@ -1,0 +1,181 @@
+<!-- ============================================================ HERO — poster style -->
+<section class="paper relative overflow-hidden">
+  <!-- wine-glass ring stains -->
+  <div class="wine-stain h-48 w-48 top-10 -left-16 float-slower"></div>
+  <div class="wine-stain h-72 w-72 -bottom-24 -right-20 float-slow"></div>
+
+  <!-- scattered ink doodles -->
+  <wh-doodle kind="corkscrew" class="absolute left-[6%] top-16 w-14 rotate-[-14deg] text-foreground/60 float-slow hidden sm:block" />
+  <wh-doodle kind="music" class="absolute right-[8%] top-14 w-14 rotate-[10deg] text-foreground/60 float-slower hidden sm:block" />
+  <wh-doodle kind="swirl" class="absolute bottom-24 left-[10%] w-16 text-primary/50 hidden lg:block" />
+  <wh-doodle kind="grapes" class="absolute right-[5%] top-1/2 w-16 rotate-[8deg] text-foreground/50 sway hidden lg:block" />
+  <wh-doodle kind="cork" class="absolute bottom-16 right-[14%] w-10 text-foreground/40 hidden md:block" />
+
+  <div class="shell relative flex flex-col items-center pt-14 pb-16 text-center md:pt-16 md:pb-20">
+
+    <!-- logo sticker -->
+    <wh-logo variant="rotated" [size]="54" whTilt [tiltMax]="14"
+             class="tilt-3d reveal mb-6 -rotate-6 drop-shadow-md md:mb-2" whReveal />
+
+    <!-- Giant blobby title -->
+    <h1 class="poster-title reveal text-[clamp(3.4rem,13vw,10rem)]" whReveal>
+      Winehouse
+    </h1>
+
+    <!-- Illustration + handwritten notes -->
+    <div class="relative mt-4 w-full max-w-md md:max-w-lg">
+      <wh-chin-chin class="draw-on-reveal reveal block text-foreground" whReveal />
+      <span class="hand-note reveal absolute -right-2 top-6 rotate-6 text-2xl text-foreground sm:right-4 sm:text-3xl"
+            whReveal [revealDelay]="700">chin&nbsp;chin!</span>
+      <span class="hand-note reveal absolute -left-2 bottom-10 -rotate-6 text-xl text-primary sm:left-4 sm:text-2xl"
+            whReveal [revealDelay]="900">¡salud!</span>
+    </div>
+
+    <p class="hand-note reveal mt-6 max-w-xl text-2xl leading-snug text-muted md:text-3xl" whReveal [revealDelay]="150">
+      a house of wine, stories &amp; slow living
+    </p>
+
+    <div class="reveal mt-8 flex flex-wrap items-center justify-center gap-4" whReveal [revealDelay]="250">
+      <a routerLink="/shop" class="btn btn-primary">Enter the e-Shop</a>
+      <a routerLink="/about" class="btn btn-outline">Our story</a>
+    </div>
+
+    <!-- hand-note info chips -->
+    <ul class="reveal mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3" whReveal [revealDelay]="380">
+      <li class="hand-note text-lg text-foreground/80">→ small vineyards only</li>
+      <li class="hand-note text-lg text-foreground/80">→ tastings &amp; tours</li>
+      <li class="hand-note text-lg text-foreground/80">→ a story in every bottle</li>
+    </ul>
+  </div>
+</section>
+
+<!-- ============================================================ WORD BAND (static) -->
+<div class="word-band" aria-hidden="true">
+  @for (word of bandWords; track word; let last = $last) {
+    <span class="poster-title text-lg md:text-xl">{{ word }}</span>
+    @if (!last) {
+      <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" class="shrink-0 opacity-80">
+        <circle cx="7" cy="7" r="3.5" />
+      </svg>
+    }
+  }
+</div>
+
+<!-- ============================================================ CELLAR SHELVES STRIP -->
+<section class="shell py-16">
+  <div class="reveal mb-8 flex flex-wrap items-end justify-between gap-4" whReveal>
+    <h2 class="poster-title text-3xl md:text-4xl">The cellar</h2>
+    <a routerLink="/shop" class="hand-note text-xl text-primary transition-colors hover:text-accent-hover">
+      wander all shelves →
+    </a>
+  </div>
+
+  <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+    @for (shelf of shelves; track shelf.name; let i = $index) {
+      <a routerLink="/shop"
+         class="hand-frame-soft tilt-3d reveal-scale flex flex-col items-center gap-2 px-3 py-6 text-center"
+         whTilt [tiltMax]="10" whReveal [revealDelay]="i * 80">
+        <wh-doodle [kind]="shelf.doodle" class="tilt-pop w-12 text-primary" />
+        <span class="poster-title text-base">{{ shelf.name }}</span>
+      </a>
+    }
+  </div>
+</section>
+
+<!-- ============================================================ HIGHLIGHTS -->
+<section class="shell pb-20">
+  <div class="grid gap-8 md:grid-cols-3">
+    @for (card of highlights; track card.title; let i = $index) {
+      <article class="hand-frame tilt-3d reveal-tilt flex flex-col gap-4 p-8 pb-9"
+               [class.md:rotate-1]="i === 0" [class.md:-rotate-1]="i === 2"
+               whTilt whReveal [revealDelay]="i * 140">
+        <!-- hand-drawn icon -->
+        <svg width="52" height="52" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2.2"
+             stroke-linecap="round" class="tilt-pop wiggle-on-hover text-foreground" aria-hidden="true">
+          @switch (card.icon) {
+            @case ('bottle') {
+              <path d="M18 4 Q 18 6 18 10 Q 13 14 13 20 L 13 37 Q 13 40 16 40 L 28 40 Q 31 40 31 37 L 31 20 Q 31 14 26 10 Q 26 6 26 4 Z" />
+              <path d="M16 24 Q 22 26 28 24" stroke-width="1.6" />
+            }
+            @case ('quill') {
+              <path d="M36 6 Q 22 8 14 20 Q 9 28 8 37 Q 16 36 24 30 Q 34 22 36 6 Z" />
+              <path d="M9 36 Q 20 24 32 11" stroke-width="1.6" />
+            }
+            @case ('grapes') {
+              <circle cx="17" cy="18" r="4.4" /><circle cx="27" cy="18" r="4.4" />
+              <circle cx="12" cy="26" r="4.4" /><circle cx="22" cy="26" r="4.4" /><circle cx="32" cy="26" r="4.4" />
+              <circle cx="17" cy="34" r="4.4" /><circle cx="27" cy="34" r="4.4" />
+              <path d="M22 13 Q 21 7 26 4" />
+            }
+          }
+        </svg>
+
+        <h3 class="poster-title text-2xl">{{ card.title }}</h3>
+        <p class="text-sm leading-relaxed text-muted">{{ card.text }}</p>
+        <a [routerLink]="card.link"
+           class="hand-note mt-auto text-lg text-primary transition-colors hover:text-accent-hover">
+          {{ card.linkLabel }} →
+        </a>
+      </article>
+    }
+  </div>
+</section>
+
+<!-- ============================================================ QUOTE -->
+<section class="relative overflow-hidden py-16" style="background-color: var(--color-surface-muted)">
+  <wh-doodle kind="glass" class="absolute left-[8%] top-10 w-16 -rotate-12 text-primary/60 float-slow hidden md:block" />
+  <wh-doodle kind="bottle" class="absolute right-[8%] bottom-8 w-14 rotate-12 text-foreground/50 float-slower hidden md:block" />
+  <wh-doodle kind="sparkle" class="absolute right-[20%] top-8 w-8 text-gold-500/70 hidden lg:block" />
+
+  <figure class="reveal shell mx-auto flex max-w-2xl flex-col items-center gap-6 text-center" whReveal>
+    <svg width="40" height="30" viewBox="0 0 40 30" fill="currentColor" class="text-gold-500" aria-hidden="true">
+      <path d="M2 28 Q 2 12 16 2 L 18 6 Q 9 12 9 18 Q 14 17 16 22 Q 17 28 10 29 Q 3 29 2 28 Z" />
+      <path d="M22 28 Q 22 12 36 2 L 38 6 Q 29 12 29 18 Q 34 17 36 22 Q 37 28 30 29 Q 23 29 22 28 Z" />
+    </svg>
+    <blockquote class="hand-note text-3xl leading-snug md:text-4xl">
+      “Wine is the only artwork you can drink.”
+    </blockquote>
+    <figcaption class="font-serif italic text-muted">— Luis Fernando Olaverri</figcaption>
+  </figure>
+</section>
+
+<wh-flourish class="block py-8" />
+
+<!-- ============================================================ JOURNAL TEASER -->
+<section class="shell pb-10">
+  <div class="reveal mb-10 flex flex-col items-center gap-3 text-center" whReveal>
+    <p class="hand-note text-xl text-primary">the journal</p>
+    <h2 class="poster-title text-4xl md:text-5xl">Notes from between the vines</h2>
+  </div>
+
+  <div class="grid gap-8 md:grid-cols-3">
+    @for (post of posts; track post.title; let i = $index) {
+      <article class="hand-frame-soft tilt-3d reveal-tilt flex flex-col gap-3 p-7"
+               whTilt whReveal [revealDelay]="i * 140">
+        <p class="eyebrow">{{ post.kicker }}</p>
+        <h3 class="text-xl leading-snug">{{ post.title }}</h3>
+        <p class="font-serif italic leading-relaxed text-muted">{{ post.excerpt }}</p>
+        <span class="hand-note mt-auto pt-2 text-base text-subtle">coming soon…</span>
+      </article>
+    }
+  </div>
+</section>
+
+<!-- ============================================================ CTA BAND -->
+<section class="shell py-20">
+  <div class="paper-dark hand-frame reveal-scale relative overflow-hidden !border-wine-950 px-8 py-16 text-center"
+       style="background-color: var(--color-wine-950)" whReveal>
+    <div class="wine-stain h-40 w-40 -top-12 right-10 float-slow"
+         style="border-color: color-mix(in srgb, var(--color-gold-500) 14%, transparent)"></div>
+    <wh-doodle kind="swirl" class="absolute bottom-6 left-8 w-16 text-gold-500/40 hidden sm:block" />
+
+    <div class="relative mx-auto flex max-w-xl flex-col items-center gap-6">
+      <wh-logo variant="white-mark" [size]="44" class="opacity-90" />
+      <h2 class="poster-title text-3xl text-gold-100 md:text-4xl">Come, the table is set</h2>
+      <p class="font-serif text-lg italic text-sand-300">
+        Ask us about tastings, tours, or that one bottle you have been chasing for years.
+      </p>
+      <a routerLink="/contact" class="btn btn-gold">Get in touch</a>
+    </div>
+  </div>
+</section>

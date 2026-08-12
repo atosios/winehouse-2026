@@ -1,0 +1,73 @@
+# =============================================================================
+# The Winehouse — local development stack (PHP + MySQL + phpMyAdmin)
+# Mirrors the production host (Apache/PHP/MySQL) closely enough for dev.
+#   Web (Laravel):   http://localhost:8080
+#   phpMyAdmin:      http://localhost:8081
+#   MySQL:           localhost:3306
+# Credentials here are DEV ONLY — never reuse them in production.
+# =============================================================================
+
+services:
+  app:
+    build: ./docker/php
+    container_name: winehouse-app
+    working_dir: /var/www/html
+    # Ensure the fpm worker (www-data) can write to Laravel's runtime dirs,
+    # then hand off to php-fpm.
+    command: sh -c "chown -R www-data:www-data storage bootstrap/cache && exec php-fpm"
+    volumes:
+      - ./:/var/www/html
+      - vendor:/var/www/html/vendor
+    depends_on:
+      - db
+    networks:
+      - winehouse
+
+  web:
+    image: nginx:1.27-alpine
+    container_name: winehouse-web
+    ports:
+      - "8080:80"
+    volumes:
+      - ./:/var/www/html
+      - ./docker/nginx/default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    networks:
+      - winehouse
+
+  db:
+    image: mysql:8.0
+    container_name: winehouse-db
+    environment:
+      MYSQL_DATABASE: winehouse
+      MYSQL_USER: winehouse
+      MYSQL_PASSWORD: winehouse_secret
+      MYSQL_ROOT_PASSWORD: root_secret
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+    networks:
+      - winehouse
+
+  pma:
+    image: phpmyadmin:5
+    container_name: winehouse-pma
+    environment:
+      PMA_HOST: db
+      UPLOAD_LIMIT: 64M
+    ports:
+      - "8081:80"
+    depends_on:
+      - db
+    networks:
+      - winehouse
+
+volumes:
+  db-data:
+  vendor:
+
+networks:
+  winehouse:
+    driver: bridge

@@ -1,0 +1,453 @@
+/* =============================================================================
+   The Winehouse — Artistic component classes
+   -----------------------------------------------------------------------------
+   Reusable "hand-drawn / atelier" building blocks. All colours & fonts come
+   from the tokens in theme.css — retune there, and these follow along.
+   ============================================================================= */
+
+@layer components {
+  /* ---------------------------------------------------------------------------
+     Layout helpers
+     --------------------------------------------------------------------------- */
+  .shell {
+    width: 100%;
+    max-width: var(--container-content);
+    margin-inline: auto;
+    padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+  }
+
+  .shell-wide {
+    max-width: var(--container-wide);
+  }
+
+  /* ---------------------------------------------------------------------------
+     Hand-drawn frame — the signature look. Irregular radii + double border
+     imitate an ink-drawn label. Use on cards, images, panels.
+     --------------------------------------------------------------------------- */
+  .hand-frame {
+    position: relative;
+    border: 1.5px solid var(--color-foreground);
+    border-radius: 255px 18px 225px 18px / 18px 225px 18px 255px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft);
+  }
+
+  .hand-frame::after {
+    content: '';
+    position: absolute;
+    inset: 6px;
+    border: 1px solid color-mix(in srgb, var(--color-accent) 65%, transparent);
+    border-radius: 225px 15px 255px 15px / 15px 255px 15px 225px;
+    pointer-events: none;
+  }
+
+  /* Variant: soft — no inner gold line, gentler border */
+  .hand-frame-soft {
+    position: relative;
+    border: 1.5px solid var(--color-border-strong);
+    border-radius: 225px 20px 255px 20px / 20px 255px 20px 225px;
+    background: var(--color-surface);
+    box-shadow: var(--shadow-soft);
+  }
+
+  /* ---------------------------------------------------------------------------
+     Buttons — wobbly ink outline, stamped fill
+     --------------------------------------------------------------------------- */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    padding: 0.8rem 1.9rem;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    letter-spacing: var(--tracking-wider);
+    text-transform: uppercase;
+    cursor: pointer;
+    border: 1.5px solid var(--color-foreground);
+    border-radius: 255px 15px 225px 15px / 15px 225px 15px 255px;
+    transition:
+      transform 200ms var(--ease-out-soft),
+      background-color 200ms var(--ease-out-soft),
+      color 200ms var(--ease-out-soft),
+      box-shadow 200ms var(--ease-out-soft);
+  }
+
+  .btn:hover {
+    transform: translateY(-2px) rotate(-0.4deg);
+    box-shadow: var(--shadow-card);
+  }
+
+  .btn:active {
+    transform: translateY(0) rotate(0deg);
+  }
+
+  .btn-primary {
+    background: var(--color-primary);
+    border-color: var(--color-primary);
+    color: var(--color-primary-foreground);
+  }
+
+  .btn-primary:hover {
+    background: var(--color-primary-hover);
+  }
+
+  .btn-outline {
+    background: transparent;
+    color: var(--color-foreground);
+  }
+
+  .btn-outline:hover {
+    background: var(--color-foreground);
+    color: var(--color-background);
+  }
+
+  .btn-gold {
+    background: var(--color-accent);
+    border-color: var(--color-accent);
+    color: var(--color-accent-foreground);
+  }
+
+  .btn-gold:hover {
+    background: var(--color-accent-hover);
+  }
+
+  /* ---------------------------------------------------------------------------
+     Sketch underline — wavy hand-inked stroke under words
+     --------------------------------------------------------------------------- */
+  .sketch-underline {
+    position: relative;
+    display: inline-block;
+  }
+
+  .sketch-underline::after {
+    content: '';
+    position: absolute;
+    left: -2%;
+    right: -2%;
+    bottom: -0.18em;
+    height: 0.32em;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M2 8 Q 18 3 34 7 T 66 7 T 98 6 T 118 8' fill='none' stroke='%23c9a227' stroke-width='2.4' stroke-linecap='round'/%3E%3C/svg%3E")
+      no-repeat center / 100% 100%;
+    pointer-events: none;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Flourish divider — centred vine ornament between sections
+     --------------------------------------------------------------------------- */
+  .flourish {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    justify-content: center;
+    color: var(--color-subtle);
+  }
+
+  .flourish::before,
+  .flourish::after {
+    content: '';
+    height: 1px;
+    width: min(120px, 20vw);
+    background: linear-gradient(to var(--tw-flourish-dir, right), transparent, var(--color-border-strong));
+  }
+
+  .flourish::before {
+    --tw-flourish-dir: right;
+  }
+
+  .flourish::after {
+    --tw-flourish-dir: left;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Wine stain — decorative ring, like a glass left on paper
+     --------------------------------------------------------------------------- */
+  .wine-stain {
+    position: absolute;
+    border-radius: 47% 53% 52% 48% / 51% 46% 54% 49%;
+    border: 10px solid color-mix(in srgb, var(--color-wine-700) 9%, transparent);
+    pointer-events: none;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Paper texture — very subtle grain overlay for large surfaces
+     --------------------------------------------------------------------------- */
+  .paper {
+    background-color: var(--color-background);
+    background-image: radial-gradient(
+        color-mix(in srgb, var(--color-sand-700) 5%, transparent) 0.75px,
+        transparent 0.75px
+      );
+    background-size: 5px 5px;
+  }
+
+  .paper-dark {
+    background-color: var(--color-wine-950);
+    background-image: radial-gradient(
+        color-mix(in srgb, var(--color-gold-200) 4%, transparent) 0.75px,
+        transparent 0.75px
+      );
+    background-size: 5px 5px;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Nav link — quill-style underline on hover / active
+     --------------------------------------------------------------------------- */
+  .nav-link {
+    position: relative;
+    font-family: var(--font-sans);
+    font-size: var(--text-sm);
+    font-weight: 500;
+    letter-spacing: var(--tracking-wide);
+    color: var(--color-muted);
+    padding-block: 0.25rem;
+    transition: color 180ms var(--ease-out-soft);
+  }
+
+  .nav-link:hover {
+    color: var(--color-foreground);
+  }
+
+  .nav-link.active {
+    color: var(--color-primary);
+  }
+
+  .nav-link.active::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -0.15rem;
+    height: 0.3em;
+    background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 120 12' preserveAspectRatio='none'%3E%3Cpath d='M2 8 Q 18 3 34 7 T 66 7 T 98 6 T 118 8' fill='none' stroke='%236e1423' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E")
+      no-repeat center / 100% 100%;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Form fields — inked inputs on parchment
+     --------------------------------------------------------------------------- */
+  .field-label {
+    display: block;
+    font-family: var(--font-sans);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: var(--tracking-widest);
+    text-transform: uppercase;
+    color: var(--color-muted);
+    margin-bottom: 0.45rem;
+  }
+
+  .field-input {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    background: var(--color-surface);
+    border: 1.5px solid var(--color-border-strong);
+    border-radius: 185px 12px 185px 12px / 12px 185px 12px 185px;
+    font-family: var(--font-sans);
+    font-size: var(--text-base);
+    color: var(--color-foreground);
+    transition: border-color 180ms var(--ease-out-soft);
+  }
+
+  .field-input:hover {
+    border-color: var(--color-subtle);
+  }
+
+  .field-input:focus {
+    outline: none;
+    border-color: var(--color-accent);
+    box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-accent) 20%, transparent);
+  }
+
+  .field-input::placeholder {
+    color: var(--color-subtle);
+    font-family: var(--font-serif);
+    font-style: italic;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Drop cap — illuminated first letter for editorial texts
+     --------------------------------------------------------------------------- */
+  .drop-cap::first-letter {
+    font-family: var(--font-display);
+    font-size: 3.4em;
+    line-height: 0.8;
+    float: left;
+    padding-right: 0.12em;
+    padding-top: 0.08em;
+    color: var(--color-primary);
+  }
+
+  /* ---------------------------------------------------------------------------
+     Poster typography — fat blobby titles & handwritten ink notes
+     --------------------------------------------------------------------------- */
+  .poster-title {
+    font-family: var(--font-poster);
+    font-weight: 400;
+    text-transform: uppercase;
+    line-height: 0.92;
+    letter-spacing: 0.01em;
+    color: var(--color-foreground);
+    text-wrap: balance;
+  }
+
+  .hand-note {
+    font-family: var(--font-hand);
+    letter-spacing: 0.02em;
+    color: var(--color-foreground);
+  }
+
+  /* ---------------------------------------------------------------------------
+     3D tilt — cards follow the pointer (WhTilt directive drives the transform)
+     --------------------------------------------------------------------------- */
+  .tilt-3d {
+    transition: transform 250ms var(--ease-out-soft), box-shadow 250ms var(--ease-out-soft);
+    will-change: transform;
+    transform-style: preserve-3d;
+  }
+
+  .tilt-3d:hover {
+    box-shadow: var(--shadow-elevated);
+  }
+
+  /* Children that should "pop out" of a tilting card */
+  .tilt-pop {
+    transform: translateZ(28px);
+  }
+
+  /* ---------------------------------------------------------------------------
+     Word band — static poster strip of words (no animation)
+     --------------------------------------------------------------------------- */
+  .word-band {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    column-gap: 1.25rem;
+    row-gap: 0.25rem;
+    padding: 0.9rem 1.5rem;
+    background: var(--color-primary);
+    color: var(--color-primary-foreground);
+    border-block: 2px solid var(--color-foreground);
+  }
+
+  .word-band .poster-title {
+    color: inherit;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Scroll reveal — elements start hidden, WhRevealDirective adds .in-view
+     --------------------------------------------------------------------------- */
+  .reveal {
+    opacity: 0;
+    transform: translateY(28px);
+    transition:
+      opacity 700ms var(--ease-out-soft) var(--reveal-delay, 0ms),
+      transform 700ms var(--ease-out-soft) var(--reveal-delay, 0ms);
+  }
+
+  .reveal-tilt {
+    opacity: 0;
+    transform: translateY(28px) rotate(2.5deg);
+    transition:
+      opacity 700ms var(--ease-out-soft) var(--reveal-delay, 0ms),
+      transform 800ms var(--ease-out-soft) var(--reveal-delay, 0ms);
+  }
+
+  .reveal-scale {
+    opacity: 0;
+    transform: scale(0.92);
+    transition:
+      opacity 700ms var(--ease-out-soft) var(--reveal-delay, 0ms),
+      transform 800ms var(--ease-out-soft) var(--reveal-delay, 0ms);
+  }
+
+  .reveal.in-view,
+  .reveal-tilt.in-view,
+  .reveal-scale.in-view {
+    opacity: 1;
+    transform: none;
+  }
+
+  /* SVG line-drawing: strokes draw themselves in when revealed */
+  .draw-on-reveal path,
+  .draw-on-reveal circle,
+  .draw-on-reveal line {
+    stroke-dasharray: 1000;
+    stroke-dashoffset: 1000;
+  }
+
+  .draw-on-reveal.in-view path,
+  .draw-on-reveal.in-view circle,
+  .draw-on-reveal.in-view line {
+    animation: draw-stroke 2.2s var(--ease-out-soft) forwards;
+  }
+
+  @keyframes draw-stroke {
+    to { stroke-dashoffset: 0; }
+  }
+
+  /* ---------------------------------------------------------------------------
+     Ambient motion — gentle floats & sways for decorative elements
+     --------------------------------------------------------------------------- */
+  .float-slow {
+    animation: float-y 7s ease-in-out infinite;
+  }
+
+  .float-slower {
+    animation: float-y 11s ease-in-out infinite reverse;
+  }
+
+  .sway {
+    animation: sway-rotate 9s ease-in-out infinite;
+    transform-origin: bottom center;
+  }
+
+  @keyframes float-y {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-14px); }
+  }
+
+  @keyframes sway-rotate {
+    0%, 100% { transform: rotate(-2deg); }
+    50% { transform: rotate(2.5deg); }
+  }
+
+  /* Wiggle on hover — for icons/illustrations inside links & cards */
+  .wiggle-on-hover:hover {
+    animation: wiggle 500ms var(--ease-out-soft);
+  }
+
+  @keyframes wiggle {
+    0%, 100% { transform: rotate(0); }
+    25% { transform: rotate(-4deg) scale(1.04); }
+    65% { transform: rotate(3deg); }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .float-slow,
+    .float-slower,
+    .sway {
+      animation: none !important;
+    }
+
+    .tilt-3d {
+      transition: none;
+    }
+
+    .reveal,
+    .reveal-tilt,
+    .reveal-scale {
+      opacity: 1;
+      transform: none;
+    }
+
+    .draw-on-reveal path,
+    .draw-on-reveal circle,
+    .draw-on-reveal line {
+      stroke-dasharray: none;
+      stroke-dashoffset: 0;
+    }
+  }
+}

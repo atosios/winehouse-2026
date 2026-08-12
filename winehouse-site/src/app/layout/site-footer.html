@@ -1,0 +1,53 @@
+<footer class="paper-dark relative mt-24 overflow-hidden text-sand-100">
+  <!-- decorative wine stains -->
+  <div class="wine-stain h-40 w-40 -top-10 -left-10 opacity-60" style="border-color: color-mix(in srgb, var(--color-gold-500) 12%, transparent)"></div>
+  <div class="wine-stain h-56 w-56 -bottom-20 -right-16 opacity-40" style="border-color: color-mix(in srgb, var(--color-gold-500) 10%, transparent)"></div>
+
+  <div class="shell relative grid gap-12 py-16 md:grid-cols-3">
+    <!-- Brand -->
+    <div class="flex flex-col gap-4">
+      <wh-logo variant="white" [size]="64" />
+      <p class="max-w-xs font-serif text-lg italic leading-relaxed text-sand-300">
+        {{ site.tagline }}
+      </p>
+    </div>
+
+    <!-- Explore -->
+    <nav aria-label="Footer">
+      <h5 class="mb-4 text-xs font-semibold uppercase tracking-widest text-gold-400">Explore</h5>
+      <ul class="flex flex-col gap-2">
+        @for (item of site.nav; track item.path) {
+          <li>
+            <a [routerLink]="item.path"
+               class="text-sm text-sand-200 transition-colors hover:text-gold-200">{{ item.label }}</a>
+          </li>
+        }
+      </ul>
+    </nav>
+
+    <!-- Visit -->
+    <div>
+      <h5 class="mb-4 text-xs font-semibold uppercase tracking-widest text-gold-400">Visit us</h5>
+      <address class="flex flex-col gap-2 text-sm not-italic text-sand-200">
+        <span>{{ site.contact.address.street }}, {{ site.contact.address.city }} {{ site.contact.address.postalCode }}</span>
+        <a href="tel:{{ site.contact.phone }}" class="transition-colors hover:text-gold-200">{{ site.contact.phone }}</a>
+        <a href="mailto:{{ site.contact.email }}" class="transition-colors hover:text-gold-200">{{ site.contact.email }}</a>
+      </address>
+      <div class="mt-4 flex gap-4">
+        @for (social of site.socials; track social.label) {
+          <a [href]="social.url" target="_blank" rel="noopener noreferrer"
+             class="text-sm font-medium text-sand-200 underline decoration-gold-600 underline-offset-4 transition-colors hover:text-gold-200">
+            {{ social.label }}
+          </a>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="relative border-t border-wine-900">
+    <div class="shell flex flex-col items-center justify-between gap-2 py-6 text-2xs tracking-wider text-sand-400 sm:flex-row">
+      <span>© {{ year }} {{ site.legalName }}. All rights reserved.</span>
+      <span class="font-serif italic">Drink responsibly — savour slowly.</span>
+    </div>
+  </div>
+</footer>

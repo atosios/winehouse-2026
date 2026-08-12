@@ -1,0 +1,10 @@
+/* =============================================================================
+   The Winehouse — global stylesheet entry
+   Order matters: Tailwind first, then design tokens (@theme), then base layer.
+   ============================================================================= */
+
+@import 'tailwindcss';
+
+@import './styles/theme.css';
+@import './styles/base.css';
+@import './styles/components.css';

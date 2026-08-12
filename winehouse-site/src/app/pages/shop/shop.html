@@ -1,0 +1,49 @@
+<!-- ============================================================ INTRO -->
+<section class="paper relative overflow-hidden">
+  <div class="wine-stain h-52 w-52 -top-16 right-[6%]"></div>
+  <div class="wine-stain h-32 w-32 bottom-2 -left-8"></div>
+
+  <div class="shell relative flex flex-col items-center gap-6 py-20 text-center md:py-24">
+    <p class="eyebrow">e-Shop</p>
+    <h1 class="max-w-2xl text-5xl">
+      The cellar is being <span class="sketch-underline font-serif italic">stocked</span>
+    </h1>
+    <p class="max-w-lg font-serif text-xl italic text-muted">
+      Our online shelves are on their way. Here is a first look at what will live on them.
+    </p>
+  </div>
+</section>
+
+<wh-flourish class="block py-6" />
+
+<!-- ============================================================ SHELVES PREVIEW -->
+<section class="shell pb-10">
+  <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
+    @for (shelf of shelves; track shelf.name; let i = $index) {
+      <article class="hand-frame-soft flex flex-col items-center gap-3 p-8 text-center"
+               [class.sm:rotate-1]="i % 3 === 0" [class.sm:-rotate-1]="i % 3 === 2">
+        <!-- hand-drawn bottle -->
+        <svg width="34" height="46" viewBox="0 0 34 46" fill="none" stroke="currentColor" stroke-width="1.5"
+             stroke-linecap="round" class="text-primary" aria-hidden="true">
+          <path d="M14 3 Q 14 5 14 10 Q 9 14 9 20 L 9 40 Q 9 43 12 43 L 22 43 Q 25 43 25 40 L 25 20 Q 25 14 20 10 Q 20 5 20 3 Z" />
+          <path d="M11.5 25 Q 17 27 22.5 25" stroke-width="1.1" />
+          <path d="M11.5 33 Q 17 35 22.5 33" stroke-width="1.1" />
+        </svg>
+        <h3 class="text-2xl">{{ shelf.name }}</h3>
+        <p class="font-serif italic text-muted">{{ shelf.note }}</p>
+        <span class="mt-2 text-2xs uppercase tracking-widest text-subtle">Opening soon</span>
+      </article>
+    }
+  </div>
+</section>
+
+<!-- ============================================================ NOTIFY CTA -->
+<section class="shell py-16 text-center">
+  <div class="mx-auto flex max-w-xl flex-col items-center gap-6">
+    <h2 class="text-3xl">Want a first pour?</h2>
+    <p class="font-serif text-lg italic text-muted">
+      Drop us a line and we will let you know the moment the cellar door opens.
+    </p>
+    <a routerLink="/contact" class="btn btn-gold">Keep me posted</a>
+  </div>
+</section>

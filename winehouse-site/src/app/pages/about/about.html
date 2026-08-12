@@ -1,0 +1,73 @@
+<!-- ============================================================ INTRO -->
+<section class="paper relative overflow-hidden">
+  <div class="wine-stain h-56 w-56 -top-20 -right-16"></div>
+  <div class="wine-stain h-32 w-32 bottom-6 left-[6%] hidden md:block"></div>
+
+  <div class="shell relative flex flex-col items-center gap-6 py-20 text-center md:py-28">
+    <p class="eyebrow">About us</p>
+    <h1 class="max-w-2xl text-5xl">
+      A house built on <span class="sketch-underline font-serif italic">corks</span> &amp; conversations
+    </h1>
+  </div>
+</section>
+
+<!-- ============================================================ STORY -->
+<section class="shell max-w-prose py-14" style="max-width: var(--container-prose)">
+  <div class="flex flex-col gap-6 text-lg leading-relaxed text-foreground">
+    <p class="drop-cap">
+      The Winehouse began the way most good things do — around a table, long after the plates were
+      cleared, when someone opened one more bottle "just to try". What started as a shelf of
+      favourites for friends slowly grew into a cellar, then a shop, then a small world of its own.
+    </p>
+    <p>
+      We are not sommeliers in suits. We are people who fell for wine sideways — through harvest
+      trips, through winemakers who talk about their vines like family, through bottles that tasted
+      like the hillside they came from. That is the wine we look for, and the only kind we sell.
+    </p>
+    <p class="font-serif text-xl italic text-muted">
+      Every bottle on our shelves has been opened, argued about, and loved by at least one of us.
+    </p>
+    <p>
+      Beyond the shelves, The Winehouse is a place for stories: tasting notes and grape lore,
+      vineyard tours and long evenings, facts and myths and everything poured in between. Whether
+      you are a first-glass beginner or a seasoned cellar-rat, pull up a chair — you are already
+      one of us.
+    </p>
+  </div>
+</section>
+
+<wh-flourish class="block py-8" />
+
+<!-- ============================================================ VALUES -->
+<section class="shell py-8">
+  <div class="mb-10 flex flex-col items-center gap-3 text-center">
+    <p class="eyebrow">What we believe</p>
+    <h2 class="text-4xl">Our house rules</h2>
+  </div>
+
+  <div class="grid gap-8 md:grid-cols-3">
+    @for (value of values; track value.title; let i = $index) {
+      <article class="hand-frame flex flex-col gap-4 p-8"
+               [class.md:-rotate-1]="i === 0" [class.md:rotate-1]="i === 2">
+        <span class="font-display text-4xl text-gold-500">{{ i + 1 }}.</span>
+        <h3 class="text-2xl">{{ value.title }}</h3>
+        <p class="text-sm leading-relaxed text-muted">{{ value.text }}</p>
+      </article>
+    }
+  </div>
+</section>
+
+<!-- ============================================================ CTA -->
+<section class="shell py-20 text-center">
+  <div class="mx-auto flex max-w-xl flex-col items-center gap-6">
+    <h2 class="text-3xl">Curious? Thirsty? Both?</h2>
+    <p class="font-serif text-lg italic text-muted">
+      Come find us at {{ site.contact.address.street }}, {{ site.contact.address.city }} — or start
+      wandering the cellar online.
+    </p>
+    <div class="flex flex-wrap justify-center gap-4">
+      <a routerLink="/shop" class="btn btn-primary">Visit the e-Shop</a>
+      <a routerLink="/contact" class="btn btn-outline">Contact us</a>
+    </div>
+  </div>
+</section>
