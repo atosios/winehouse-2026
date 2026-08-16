@@ -19,8 +19,8 @@ class AssetController extends Controller
             'file' => [
                 'required',
                 'file',
-                'max:10240', // 10 MB
-                'mimes:jpg,jpeg,png,webp,gif,svg,pdf',
+                'max:51200', // 50 MB for images & videos
+                'mimes:jpg,jpeg,png,webp,gif,svg,pdf,mp4,webm,mov,ogg,m4v',
             ],
         ]);
 
@@ -41,7 +41,6 @@ class AssetController extends Controller
     {
         Storage::disk('public')->delete($asset->path);
         $asset->delete();
-
         return response()->json(['ok' => true]);
     }
 }

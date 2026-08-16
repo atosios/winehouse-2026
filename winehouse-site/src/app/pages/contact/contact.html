@@ -1,86 +1,259 @@
-<!-- ============================================================ INTRO -->
-<section class="paper relative overflow-hidden">
-  <div class="wine-stain h-44 w-44 -top-14 left-[8%]"></div>
-  <div class="wine-stain h-28 w-28 bottom-4 right-[10%] hidden md:block"></div>
-
-  <div class="shell relative flex flex-col items-center gap-6 py-20 text-center md:py-24">
-    <p class="eyebrow">Contact</p>
-    <h1 class="max-w-2xl text-5xl">
-      Write to us — we always <span class="sketch-underline font-serif italic">write back</span>
-    </h1>
-    <p class="max-w-lg font-serif text-xl italic text-muted">
-      Questions, tour bookings, wine hunts, or just to say hello.
-    </p>
+<!-- ============================================================ 01: HERO -->
+<section class="shell pt-28 pb-16 md:pt-36 md:pb-20 border-b-[1.5px] border-[var(--color-foreground)]">
+  
+  <div class="mb-8">
+    <span class="editorial-tag">{{ t(page().hero.tag) }}</span>
   </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
+    <div class="lg:col-span-8 reveal" whReveal>
+      <h1 class="font-big text-[clamp(2.8rem,5.5vw,5.5rem)] uppercase leading-[0.9] tracking-tight text-[var(--color-foreground)]">
+        {{ t(page().hero.headline) }}
+      </h1>
+    </div>
+    <div class="lg:col-span-4 reveal" whReveal [revealDelay]="120">
+      <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/70 leading-relaxed">
+        {{ t(page().hero.subtext) }}
+      </p>
+    </div>
+  </div>
+
 </section>
 
-<wh-flourish class="block py-6" />
+<!-- ============================================================ 02: FORM & TERRACOTTA CARD -->
+<section class="shell py-20 md:py-28 border-b-[1.5px] border-[var(--color-foreground)]">
+  
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    
+    <!-- Left: Minimalist Line Form -->
+    <div class="lg:col-span-7 reveal" whReveal>
+      @if (!sent()) {
+        <form (ngSubmit)="send()" class="flex flex-col gap-8">
+          
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <div>
+              <label class="font-mono text-[10px] uppercase tracking-widest text-[var(--color-foreground)]/60 font-semibold block mb-1">
+                Your Full Name *
+              </label>
+              <input type="text"
+                     name="name"
+                     [(ngModel)]="name"
+                     required
+                     placeholder="ALEXANDER BOND"
+                     class="editorial-input font-mono text-xs uppercase" />
+            </div>
+            <div>
+              <label class="font-mono text-[10px] uppercase tracking-widest text-[var(--color-foreground)]/60 font-semibold block mb-1">
+                Email Address *
+              </label>
+              <input type="email"
+                     name="email"
+                     [(ngModel)]="email"
+                     required
+                     placeholder="HELLO@DOMAIN.COM"
+                     class="editorial-input font-mono text-xs uppercase" />
+            </div>
+          </div>
 
-<!-- ============================================================ DETAILS + FORM -->
-<section class="shell grid gap-10 pb-24 lg:grid-cols-5">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+            <!-- Custom Editorial Dropdown -->
+            <div class="relative" (click)="$event.stopPropagation()">
+              <label class="font-mono text-[10px] uppercase tracking-widest text-[var(--color-foreground)]/60 font-semibold block mb-1">
+                Subject / Occasion *
+              </label>
+              
+              <button type="button"
+                      (click)="toggleDropdown($event)"
+                      [attr.aria-expanded]="dropdownOpen()"
+                      aria-haspopup="listbox"
+                      class="w-full flex items-center justify-between py-2 text-left border-b-[1.5px] border-[var(--color-foreground)] bg-transparent cursor-pointer transition-colors duration-200 group focus:outline-none focus:border-[var(--color-primary)]"
+                      [class.border-[var(--color-primary)]]="dropdownOpen()">
+                <span class="font-mono text-xs uppercase tracking-wider font-bold text-[var(--color-foreground)] group-hover:text-[var(--color-primary)] transition-colors">
+                  {{ selectedSubjectLabel }}
+                </span>
+                <span class="text-xs text-[var(--color-foreground)]/70 group-hover:text-[var(--color-primary)] transition-transform duration-200 transform"
+                      [class.rotate-180]="dropdownOpen()"
+                      [class.text-[var(--color-primary)]]="dropdownOpen()">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 inline-block" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                  </svg>
+                </span>
+              </button>
 
-  <!-- Details -->
-  <div class="flex flex-col gap-8 lg:col-span-2">
-    <div class="hand-frame-soft flex flex-col gap-5 p-8">
-      <h2 class="text-2xl">Find us</h2>
-      <address class="flex flex-col gap-3 text-base not-italic text-muted">
-        <span>
-          {{ site.contact.address.street }}, {{ site.contact.address.postalCode }}
-          {{ site.contact.address.city }}, {{ site.contact.address.country }}
-        </span>
-        <a href="tel:{{ site.contact.phone }}" class="transition-colors hover:text-primary">{{ site.contact.phone }}</a>
-        <a href="mailto:{{ site.contact.email }}" class="transition-colors hover:text-primary">{{ site.contact.email }}</a>
-      </address>
-      <a [href]="site.contact.mapUrl" target="_blank" rel="noopener noreferrer"
-         class="text-sm font-semibold uppercase tracking-wider text-primary transition-colors hover:text-accent-hover">
-        Open in maps →
-      </a>
+              @if (dropdownOpen()) {
+                <div class="absolute left-0 right-0 top-full mt-1.5 z-30 bg-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] shadow-[4px_4px_0px_0px_var(--color-foreground)] overflow-hidden"
+                     role="listbox">
+                  @for (opt of subjectOptions(); track opt.value) {
+                    <button type="button"
+                            (click)="selectProjectType(opt.value)"
+                            role="option"
+                            [attr.aria-selected]="projectType === opt.value"
+                            class="w-full text-left px-4 py-3 border-b-[1.5px] border-[var(--color-foreground)]/10 last:border-b-0 flex items-center justify-between font-mono text-xs uppercase tracking-wider transition-colors duration-150 cursor-pointer group"
+                            [class.bg-[var(--color-foreground)]]="projectType === opt.value"
+                            [class.text-[var(--color-paper-light)]]="projectType === opt.value"
+                            [class.text-[var(--color-foreground)]/80]="projectType !== opt.value"
+                            [class.hover:bg-[var(--color-foreground)]]="projectType !== opt.value"
+                            [class.hover:text-[var(--color-paper-light)]]="projectType !== opt.value">
+                      <span class="font-semibold">{{ opt.label }}</span>
+                      @if (projectType === opt.value) {
+                        <span class="text-xs text-[var(--color-paper-light)] font-bold">✓</span>
+                      } @else {
+                        <span class="text-xs opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                      }
+                    </button>
+                  }
+                </div>
+              }
+            </div>
+
+            <div>
+              <label class="font-mono text-[10px] uppercase tracking-widest text-[var(--color-foreground)]/60 font-semibold block mb-1">
+                Phone Number (Optional)
+              </label>
+              <input type="tel"
+                     name="phone"
+                     [(ngModel)]="phone"
+                     placeholder="+30 210 000 0000"
+                     class="editorial-input font-mono text-xs uppercase" />
+            </div>
+          </div>
+
+          <div>
+            <label class="font-mono text-[10px] uppercase tracking-widest text-[var(--color-foreground)]/60 font-semibold block mb-1">
+              Your Message or Request *
+            </label>
+            <textarea name="message"
+                      [(ngModel)]="message"
+                      rows="4"
+                      required
+                      placeholder="TELL US ABOUT YOUR OCCASION, CELLAR REQUIREMENTS, OR VISIT DATES..."
+                      class="editorial-input resize-none font-mono text-xs uppercase"></textarea>
+          </div>
+
+          <div class="pt-2">
+            <button type="submit"
+                    class="font-mono text-sm font-bold uppercase tracking-wider text-[var(--color-foreground)] hover:text-[var(--color-primary)] transition-colors flex items-center gap-3 cursor-pointer py-2 group">
+              <span>{{ t(page().form.button_text) }}</span>
+              <span class="text-lg group-hover:translate-x-1 transition-transform">→</span>
+            </button>
+          </div>
+
+        </form>
+      } @else {
+        <div class="p-8 border-[1.5px] border-[var(--color-foreground)] bg-white shadow-[4px_4px_0px_0px_var(--color-foreground)]">
+          <span class="tape-sticker mb-4">MESSAGE INGESTED</span>
+          <h4 class="font-big text-3xl uppercase mt-2">Thank you!</h4>
+          <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/70 mt-2 leading-relaxed">
+            Your email application has been prepared with your request. We will be in touch shortly to assist your cellar needs.
+          </p>
+        </div>
+      }
     </div>
 
-    <div class="hand-frame-soft flex flex-col gap-5 p-8">
-      <h2 class="text-2xl">Opening hours</h2>
-      <ul class="flex flex-col gap-3">
-        @for (slot of site.hours; track slot.days) {
-          <li class="flex items-baseline justify-between gap-4 border-b border-dashed border-border pb-2 text-base">
-            <span class="text-muted">{{ slot.days }}</span>
-            <span class="font-serif italic">{{ slot.time }}</span>
-          </li>
-        }
-      </ul>
-    </div>
-  </div>
+    <!-- Right: Terracotta Contact Card with Torn Top Edge -->
+    <div class="lg:col-span-5 torn-edge-card p-8 sm:p-10 border-[1.5px] border-[var(--color-foreground)] shadow-xl flex flex-col justify-between gap-10 reveal" whReveal [revealDelay]="160">
+      
+      <div class="torn-edge-top"></div>
 
-  <!-- Form -->
-  <div class="hand-frame p-8 md:p-10 lg:col-span-3">
-    <h2 class="mb-2 text-2xl">Send a note</h2>
-    <p class="mb-8 font-serif italic text-muted">This opens your email app with the message ready to send.</p>
+      <div>
+        <span class="tape-sticker bg-[var(--color-foreground)] text-white mb-4 inline-block">{{ t(page().dispatch.tape) }}</span>
+        
+        <p class="font-mono text-[11px] uppercase tracking-widest text-white/70 font-semibold mb-1">Primary Cellar</p>
+        <p class="font-mono text-xs uppercase text-white font-bold mb-4 whitespace-pre-line leading-relaxed">
+          {{ site.contact.address.street }}
+          {{ site.contact.address.city }} {{ site.contact.address.postalCode }}, {{ site.contact.address.country }}
+        </p>
 
-    <form (ngSubmit)="send()" class="flex flex-col gap-6">
-      <div class="grid gap-6 sm:grid-cols-2">
-        <div>
-          <label class="field-label" for="contact-name">Your name</label>
-          <input id="contact-name" name="name" type="text" class="field-input"
-                 placeholder="Ariadne…" required [(ngModel)]="name" />
-        </div>
-        <div>
-          <label class="field-label" for="contact-email">Your email</label>
-          <input id="contact-email" name="email" type="email" class="field-input"
-                 placeholder="you@example.com" required [(ngModel)]="email" />
-        </div>
+        <p class="font-mono text-[11px] uppercase tracking-widest text-white/70 font-semibold mb-1">Direct Lines</p>
+        <a [href]="'mailto:' + site.contact.email" class="font-mono text-xs uppercase text-white font-bold block hover:underline">
+          {{ site.contact.email }}
+        </a>
+        <a [href]="'tel:' + site.contact.phone" class="font-mono text-xs uppercase text-white font-bold block mt-1 hover:underline">
+          {{ site.contact.phone }}
+        </a>
       </div>
 
       <div>
-        <label class="field-label" for="contact-message">Message</label>
-        <textarea id="contact-message" name="message" rows="6" class="field-input resize-y"
-                  placeholder="Tell us what you are looking for…" required [(ngModel)]="message"></textarea>
+        <p class="font-mono text-[11px] uppercase tracking-widest text-white/70 font-semibold mb-2">Connect &amp; Follow</p>
+        <div class="flex flex-col gap-1 font-mono text-xs uppercase text-white font-bold">
+          @for (soc of site.socials; track soc.label) {
+            <a [href]="soc.url" target="_blank" rel="noopener noreferrer" class="hover:underline flex items-center justify-between border-b border-white/15 py-1">
+              <span>{{ soc.label }}</span>
+              <span>↗</span>
+            </a>
+          }
+        </div>
       </div>
 
-      <div class="flex items-center gap-4">
-        <button type="submit" class="btn btn-primary">Send message</button>
-        @if (sent()) {
-          <span class="font-serif italic text-success">Your email app should now be open — thank you!</span>
-        }
+      <div class="pt-2">
+        <span class="kraft-tape-note block text-center whitespace-pre-line text-xs font-mono font-bold">
+          {{ t(page().dispatch.kraft_note) }}
+        </span>
       </div>
-    </form>
+
+    </div>
+
   </div>
+
+</section>
+
+<!-- ============================================================ 03: HOURS & LOCATION GRID -->
+<section class="shell py-20 md:py-28">
+  
+  <div class="mb-10 flex items-center justify-between">
+    <span class="editorial-tag">{{ t(page().schedule.tag) }}</span>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+    
+    <!-- Opening Hours Box -->
+    <div class="p-8 border-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] flex flex-col justify-between gap-6 reveal" whReveal>
+      <div class="flex items-center justify-between border-b border-[var(--color-foreground)]/15 pb-4">
+        <span class="font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)]">{{ t(page().schedule.hours_title) }}</span>
+        <span class="tape-sticker">{{ t(page().schedule.hours_tape) }}</span>
+      </div>
+
+      <ul class="flex flex-col divide-y divide-[var(--color-foreground)]/10 font-mono text-xs">
+        @for (slot of site.hours; track slot.days) {
+          <li class="flex items-center justify-between py-3">
+            <span class="font-bold text-[var(--color-foreground)] uppercase">{{ slot.days }}</span>
+            <span class="text-[var(--color-primary)] font-bold">{{ slot.time }}</span>
+          </li>
+        }
+      </ul>
+
+      <p class="font-mono text-[11px] uppercase text-[var(--color-foreground)]/60">
+        {{ t(page().schedule.hours_note) }}
+      </p>
+    </div>
+
+    <!-- Map & Directions Box -->
+    <div class="p-8 border-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] flex flex-col justify-between gap-6 reveal" whReveal [revealDelay]="120">
+      <div class="flex items-center justify-between border-b border-[var(--color-foreground)]/15 pb-4">
+        <span class="font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)]">{{ t(page().schedule.location_title) }}</span>
+        <span class="tape-sticker">{{ t(page().schedule.location_tape) }}</span>
+      </div>
+
+      <div class="space-y-3 font-mono text-xs text-[var(--color-foreground)]/80 leading-relaxed">
+        <p class="font-bold text-[var(--color-foreground)] uppercase">
+          {{ site.contact.address.street }}, {{ site.contact.address.city }} {{ site.contact.address.postalCode }}
+        </p>
+        <p>
+          {{ t(page().schedule.location_desc) }}
+        </p>
+      </div>
+
+      <div class="pt-4 border-t border-[var(--color-foreground)]/10">
+        <a [href]="site.contact.mapUrl"
+           target="_blank"
+           rel="noopener noreferrer"
+           class="btn btn-primary font-mono text-xs uppercase font-bold tracking-wider w-full flex items-center justify-center gap-2">
+          <span>{{ t(page().schedule.map_button_text) }}</span>
+          <span>↗</span>
+        </a>
+      </div>
+    </div>
+
+  </div>
+
 </section>

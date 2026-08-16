@@ -1,181 +1,647 @@
-<!-- ============================================================ HERO — poster style -->
-<section class="paper relative overflow-hidden">
-  <!-- wine-glass ring stains -->
-  <div class="wine-stain h-48 w-48 top-10 -left-16 float-slower"></div>
-  <div class="wine-stain h-72 w-72 -bottom-24 -right-20 float-slow"></div>
-
-  <!-- scattered ink doodles -->
-  <wh-doodle kind="corkscrew" class="absolute left-[6%] top-16 w-14 rotate-[-14deg] text-foreground/60 float-slow hidden sm:block" />
-  <wh-doodle kind="music" class="absolute right-[8%] top-14 w-14 rotate-[10deg] text-foreground/60 float-slower hidden sm:block" />
-  <wh-doodle kind="swirl" class="absolute bottom-24 left-[10%] w-16 text-primary/50 hidden lg:block" />
-  <wh-doodle kind="grapes" class="absolute right-[5%] top-1/2 w-16 rotate-[8deg] text-foreground/50 sway hidden lg:block" />
-  <wh-doodle kind="cork" class="absolute bottom-16 right-[14%] w-10 text-foreground/40 hidden md:block" />
-
-  <div class="shell relative flex flex-col items-center pt-14 pb-16 text-center md:pt-16 md:pb-20">
-
-    <!-- logo sticker -->
-    <wh-logo variant="rotated" [size]="54" whTilt [tiltMax]="14"
-             class="tilt-3d reveal mb-6 -rotate-6 drop-shadow-md md:mb-2" whReveal />
-
-    <!-- Giant blobby title -->
-    <h1 class="poster-title reveal text-[clamp(3.4rem,13vw,10rem)]" whReveal>
-      Winehouse
-    </h1>
-
-    <!-- Illustration + handwritten notes -->
-    <div class="relative mt-4 w-full max-w-md md:max-w-lg">
-      <wh-chin-chin class="draw-on-reveal reveal block text-foreground" whReveal />
-      <span class="hand-note reveal absolute -right-2 top-6 rotate-6 text-2xl text-foreground sm:right-4 sm:text-3xl"
-            whReveal [revealDelay]="700">chin&nbsp;chin!</span>
-      <span class="hand-note reveal absolute -left-2 bottom-10 -rotate-6 text-xl text-primary sm:left-4 sm:text-2xl"
-            whReveal [revealDelay]="900">¡salud!</span>
-    </div>
-
-    <p class="hand-note reveal mt-6 max-w-xl text-2xl leading-snug text-muted md:text-3xl" whReveal [revealDelay]="150">
-      a house of wine, stories &amp; slow living
-    </p>
-
-    <div class="reveal mt-8 flex flex-wrap items-center justify-center gap-4" whReveal [revealDelay]="250">
-      <a routerLink="/shop" class="btn btn-primary">Enter the e-Shop</a>
-      <a routerLink="/about" class="btn btn-outline">Our story</a>
-    </div>
-
-    <!-- hand-note info chips -->
-    <ul class="reveal mt-10 flex flex-wrap items-center justify-center gap-x-8 gap-y-3" whReveal [revealDelay]="380">
-      <li class="hand-note text-lg text-foreground/80">→ small vineyards only</li>
-      <li class="hand-note text-lg text-foreground/80">→ tastings &amp; tours</li>
-      <li class="hand-note text-lg text-foreground/80">→ a story in every bottle</li>
-    </ul>
+<!-- ============================================================ HERO — big type + sticky video -->
+<section class="paper-dark relative">
+  <!-- Sticky Video Background — stays locked in the background while content scrolls over -->
+  <div class="hero-sticky-media">
+    <video #heroVideo class="hero-video" autoplay muted loop playsinline disablePictureInPicture>
+      <source [src]="hp().hero.video_url" type="video/mp4" />
+      @if (hp().hero.video_alt_url) {
+        <source [src]="hp().hero.video_alt_url" type="video/mp4" />
+      }
+    </video>
+    <!-- Subtle uniform dark tint -->
+    <div class="hero-video-tint"></div>
   </div>
-</section>
 
-<!-- ============================================================ WORD BAND (static) -->
-<div class="word-band" aria-hidden="true">
-  @for (word of bandWords; track word; let last = $last) {
-    <span class="poster-title text-lg md:text-xl">{{ word }}</span>
-    @if (!last) {
-      <svg width="14" height="14" viewBox="0 0 14 14" fill="currentColor" class="shrink-0 opacity-80">
-        <circle cx="7" cy="7" r="3.5" />
-      </svg>
-    }
+  @if (hp().hero.show_stain) {
+    <div class="wine-stain h-64 w-64 -top-20 -right-20 pointer-events-none"
+      style="border-color: color-mix(in srgb, var(--color-gold-500) 12%, transparent)"></div>
   }
-</div>
 
-<!-- ============================================================ CELLAR SHELVES STRIP -->
-<section class="shell py-16">
-  <div class="reveal mb-8 flex flex-wrap items-end justify-between gap-4" whReveal>
-    <h2 class="poster-title text-3xl md:text-4xl">The cellar</h2>
-    <a routerLink="/shop" class="hand-note text-xl text-primary transition-colors hover:text-accent-hover">
-      wander all shelves →
-    </a>
+  <!-- Giant headline — scrolls upwards OVER the sticky background video -->
+  <div class="hero-headline-wrap relative z-10 flex items-end justify-center">
+    <span class="big-title reveal select-none text-[clamp(1rem,3vw,2.4rem)] leading-none"
+      style="color: var(--color-background); position: relative; top: -90px" whReveal>{{ t(hp().hero.small_prefix) }}</span>
+    <h1 class="big-title reveal select-none whitespace-nowrap text-[clamp(4.2rem,19.5vw,17rem)] leading-none"
+      style="color: var(--color-background)" whReveal [revealDelay]="120">
+      {{ t(hp().hero.big_title) }}
+    </h1>
   </div>
 
-  <div class="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-    @for (shelf of shelves; track shelf.name; let i = $index) {
-      <a routerLink="/shop"
-         class="hand-frame-soft tilt-3d reveal-scale flex flex-col items-center gap-2 px-3 py-6 text-center"
-         whTilt [tiltMax]="10" whReveal [revealDelay]="i * 80">
-        <wh-doodle [kind]="shelf.doodle" class="tilt-pop w-12 text-primary" />
-        <span class="poster-title text-base">{{ shelf.name }}</span>
-      </a>
+  <!-- ============================================================ EDITORIAL CANVAS — slides over video -->
+  <div
+    id="editorial-canvas"
+    class="relative z-10 mx-2 mb-16 -mt-[clamp(2.4rem,7.5vw,6rem)] overflow-hidden rounded-[26px] bg-[var(--color-paper-light)] text-[var(--color-foreground)] md:mx-6 md:mb-24 lg:mb-32 shadow-2xl">
+    
+    <!-- Corner rivets -->
+    <span class="absolute left-5 top-5 h-2.5 w-2.5 rounded-full bg-[var(--color-foreground)]/80" aria-hidden="true"></span>
+    <span class="absolute right-5 top-5 h-2.5 w-2.5 rounded-full bg-[var(--color-foreground)]/80" aria-hidden="true"></span>
+
+    <!-- 01: HERO EDITORIAL INTRO — Split typography & Sommelier portrait -->
+    @if (hp().intro.enabled) {
+      <section class="shell relative pt-16 pb-16 md:pt-24 md:pb-24 border-b-[1.5px] border-[var(--color-foreground)]">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          
+          <!-- Left 6 cols: Massive condensed typography, label tape, bullets -->
+          <div class="lg:col-span-6 flex flex-col justify-between h-full reveal" whReveal>
+            <div>
+              <div class="flex items-center gap-3 mb-6">
+                <span class="editorial-tag">{{ t(hp().intro.tag) }}</span>
+                @if (hp().intro.tape_sticker) {
+                  <span class="tape-sticker">{{ t(hp().intro.tape_sticker) }}</span>
+                }
+              </div>
+
+              <h2 class="font-big text-[clamp(3.8rem,10vw,8.2rem)] leading-[0.88] uppercase tracking-tighter text-[var(--color-foreground)]">
+                {{ t(hp().intro.heading_line1) }}<br />{{ t(hp().intro.heading_line2) }}
+              </h2>
+
+              <div class="mt-8 flex flex-col gap-1 font-mono text-xs uppercase tracking-widest text-[var(--color-foreground)]/70 font-medium">
+                @for (bullet of hp().intro.bullet_points; track $index) {
+                  <span>{{ t(bullet) }}</span>
+                }
+              </div>
+            </div>
+
+            <div class="mt-12 pt-8 border-t border-[var(--color-foreground)]/20">
+              <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/60 mb-2">{{ t(hp().intro.philosophy_label) }}</p>
+              <p class="font-serif italic text-xl md:text-2xl leading-snug text-[var(--color-foreground)]">
+                {{ t(hp().intro.philosophy_quote) }}
+              </p>
+            </div>
+          </div>
+
+          <!-- Right 6 cols: High-fashion portrait + Terracotta backing + Let's Taste badge -->
+          <div class="lg:col-span-6 relative flex flex-col sm:flex-row items-center justify-end gap-6 reveal" whReveal [revealDelay]="150">
+            
+            <!-- Editorial image container with terracotta block backing -->
+            <div class="relative w-full max-w-md bg-[var(--color-paper-dark)] p-2 border-[1.5px] border-[var(--color-foreground)] shadow-xl group">
+              
+              <!-- Red accent rectangle behind image -->
+              <div class="absolute -top-4 -left-4 w-28 h-40 bg-[var(--color-terracotta)] -z-10 transition-transform duration-300 group-hover:-translate-x-1 group-hover:-translate-y-1"></div>
+
+              <div class="relative overflow-hidden aspect-[3/4] bg-[var(--color-paper-dark)]">
+                <img [src]="hp().intro.image_url" [alt]="t(hp().hero.big_title) + ' Atelier'" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+                
+                @if (hp().intro.image_tag) {
+                  <div class="absolute top-4 left-4 bg-[var(--color-paper-dark)]/70 backdrop-blur-sm px-2.5 py-1 text-white font-mono text-[10px] tracking-widest uppercase border border-white/20">
+                    {{ t(hp().intro.image_tag) }}
+                  </div>
+                }
+
+                @if (hp().intro.monogram) {
+                  <div class="absolute bottom-4 right-4 bg-[var(--color-terracotta)] text-white p-2.5 border border-white/20 flex items-center justify-center shadow-lg">
+                    <span class="font-serif font-bold text-lg leading-none tracking-tighter">{{ hp().intro.monogram }}</span>
+                  </div>
+                }
+              </div>
+            </div>
+
+            <!-- Vertical text & Floating circular action badge directly below it -->
+            <div class="flex flex-col items-center justify-start gap-4 py-2 shrink-0">
+              @if (hp().intro.vertical_banner) {
+                <div class="whitespace-nowrap font-mono text-[11px] uppercase tracking-widest text-[var(--color-foreground)]/70 font-semibold [writing-mode:vertical-rl] rotate-180 select-none">
+                  {{ t(hp().intro.vertical_banner) }}
+                </div>
+              }
+
+              @if (hp().intro.cta_text) {
+                <a
+                  [attr.href]="isExternal(hp().intro.cta_link) ? hp().intro.cta_link : null"
+                  [routerLink]="isExternal(hp().intro.cta_link) ? null : hp().intro.cta_link"
+                  [attr.target]="isExternal(hp().intro.cta_link) ? '_blank' : null"
+                  [attr.rel]="isExternal(hp().intro.cta_link) ? 'noopener noreferrer' : null"
+                  class="badge-action-circle shrink-0 whitespace-pre-line text-center leading-tight mt-2 cursor-pointer"
+                  aria-label="Book a private tasting"
+                >
+                  {{ t(hp().intro.cta_text) }}
+                </a>
+              }
+            </div>
+          </div>
+
+        </div>
+      </section>
     }
-  </div>
-</section>
 
-<!-- ============================================================ HIGHLIGHTS -->
-<section class="shell pb-20">
-  <div class="grid gap-8 md:grid-cols-3">
-    @for (card of highlights; track card.title; let i = $index) {
-      <article class="hand-frame tilt-3d reveal-tilt flex flex-col gap-4 p-8 pb-9"
-               [class.md:rotate-1]="i === 0" [class.md:-rotate-1]="i === 2"
-               whTilt whReveal [revealDelay]="i * 140">
-        <!-- hand-drawn icon -->
-        <svg width="52" height="52" viewBox="0 0 44 44" fill="none" stroke="currentColor" stroke-width="2.2"
-             stroke-linecap="round" class="tilt-pop wiggle-on-hover text-foreground" aria-hidden="true">
-          @switch (card.icon) {
-            @case ('bottle') {
-              <path d="M18 4 Q 18 6 18 10 Q 13 14 13 20 L 13 37 Q 13 40 16 40 L 28 40 Q 31 40 31 37 L 31 20 Q 31 14 26 10 Q 26 6 26 4 Z" />
-              <path d="M16 24 Q 22 26 28 24" stroke-width="1.6" />
-            }
-            @case ('quill') {
-              <path d="M36 6 Q 22 8 14 20 Q 9 28 8 37 Q 16 36 24 30 Q 34 22 36 6 Z" />
-              <path d="M9 36 Q 20 24 32 11" stroke-width="1.6" />
-            }
-            @case ('grapes') {
-              <circle cx="17" cy="18" r="4.4" /><circle cx="27" cy="18" r="4.4" />
-              <circle cx="12" cy="26" r="4.4" /><circle cx="22" cy="26" r="4.4" /><circle cx="32" cy="26" r="4.4" />
-              <circle cx="17" cy="34" r="4.4" /><circle cx="27" cy="34" r="4.4" />
-              <path d="M22 13 Q 21 7 26 4" />
-            }
+    <!-- 02: DARK MANIFESTO BANNER (/ MANIFESTO) -->
+    @if (hp().manifesto.enabled) {
+      <section data-dark-section class="relative bg-[var(--color-paper-dark)] text-[var(--color-paper-light)] py-20 md:py-28 overflow-hidden border-b-[1.5px] border-[var(--color-foreground)]">
+        
+        <div class="shell relative z-10">
+          
+          <div class="mb-8">
+            <span class="editorial-tag text-[var(--color-terracotta)]">{{ t(hp().manifesto.tag) }}</span>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+            
+            <!-- Col 1: Giant headline -->
+            <div class="lg:col-span-5 reveal" whReveal>
+              <h3 class="font-big text-[clamp(2.8rem,6.5vw,5.2rem)] leading-[0.9] uppercase tracking-tight text-white whitespace-pre-line">
+                {{ t(hp().manifesto.headline) }}
+              </h3>
+            </div>
+
+            <!-- Col 2: Editorial body paragraph -->
+            <div class="lg:col-span-4 reveal" whReveal [revealDelay]="100">
+              <p class="font-mono text-sm leading-relaxed text-[var(--color-paper-light)]/80 mb-4">
+                {{ t(hp().manifesto.paragraph_1) }}
+              </p>
+              <p class="font-mono text-sm leading-relaxed text-[var(--color-paper-light)]/70">
+                {{ t(hp().manifesto.paragraph_2) }}
+              </p>
+            </div>
+
+            <!-- Col 3: Distressed vintage rotating stamp & tags -->
+            <div class="lg:col-span-3 flex flex-col items-center lg:items-end justify-center gap-6 reveal" whReveal [revealDelay]="200">
+              
+              <!-- Animated circular stamp -->
+              <div class="stamp-seal text-[var(--color-paper-light)]/80">
+                <svg viewBox="0 0 100 100" class="w-full h-full p-1">
+                  <path id="stampPath" fill="none" d="M 50, 50 m -37, 0 a 37,37 0 1,1 74,0 a 37,37 0 1,1 -74,0" />
+                  <text class="font-mono text-[9.5px] uppercase font-bold fill-current tracking-[0.24em]">
+                    <textPath href="#stampPath" startOffset="0%">
+                      {{ t(hp().manifesto.stamp_text) }}
+                    </textPath>
+                  </text>
+                </svg>
+                <div class="absolute inset-0 flex items-center justify-center font-serif text-xl font-bold">
+                  {{ hp().manifesto.stamp_icon }}
+                </div>
+              </div>
+
+              @if (hp().manifesto.side_tags) {
+                <div class="font-mono text-[11px] uppercase tracking-widest text-[var(--color-paper-light)]/50 text-right whitespace-pre-line">
+                  {{ t(hp().manifesto.side_tags) }}
+                </div>
+              }
+
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+    }
+
+    <!-- 03: SERVICES GRID (/ SERVICES) — 4-Column Numbered Table -->
+    @if (hp().services.enabled) {
+      <section class="shell py-20 md:py-24 border-b-[1.5px] border-[var(--color-foreground)]">
+        
+        <div class="mb-8">
+          <span class="editorial-tag">{{ t(hp().services.tag) }}</span>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 border-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)]">
+          @for (service of hp().services.items; track service.num; let i = $index) {
+            <a
+              [attr.href]="isExternal(service.link) ? service.link : null"
+              [routerLink]="isExternal(service.link) ? null : service.link"
+              [attr.target]="isExternal(service.link) ? '_blank' : null"
+              [attr.rel]="isExternal(service.link) ? 'noopener noreferrer' : null"
+              class="service-card-editorial p-8 md:p-10 flex flex-col justify-between gap-12 border-b-[1.5px] md:border-b-0 md:border-r-[1.5px] border-[var(--color-foreground)] last:border-b-0 lg:last:border-r-0 group cursor-pointer reveal"
+              whReveal [revealDelay]="i * 80"
+            >
+              <div>
+                <span class="font-mono text-xs text-[var(--color-foreground)]/50 font-bold block mb-6">{{ service.num }}</span>
+                <h4 class="font-big text-2xl md:text-3xl uppercase leading-tight text-[var(--color-foreground)] mb-4">
+                  {{ t(service.title) }}
+                </h4>
+                <p class="font-mono text-[11px] uppercase leading-relaxed text-[var(--color-foreground)]/70 tracking-wider">
+                  {{ t(service.subtitle) }}
+                </p>
+              </div>
+
+              <div class="pt-4 flex items-center justify-between border-t border-[var(--color-foreground)]/10">
+                <span class="service-arrow font-mono text-xl text-[var(--color-foreground)] transition-transform duration-300 font-bold">→</span>
+              </div>
+            </a>
           }
-        </svg>
+        </div>
 
-        <h3 class="poster-title text-2xl">{{ card.title }}</h3>
-        <p class="text-sm leading-relaxed text-muted">{{ card.text }}</p>
-        <a [routerLink]="card.link"
-           class="hand-note mt-auto text-lg text-primary transition-colors hover:text-accent-hover">
-          {{ card.linkLabel }} →
-        </a>
-      </article>
+      </section>
     }
-  </div>
-</section>
 
-<!-- ============================================================ QUOTE -->
-<section class="relative overflow-hidden py-16" style="background-color: var(--color-surface-muted)">
-  <wh-doodle kind="glass" class="absolute left-[8%] top-10 w-16 -rotate-12 text-primary/60 float-slow hidden md:block" />
-  <wh-doodle kind="bottle" class="absolute right-[8%] bottom-8 w-14 rotate-12 text-foreground/50 float-slower hidden md:block" />
-  <wh-doodle kind="sparkle" class="absolute right-[20%] top-8 w-8 text-gold-500/70 hidden lg:block" />
+    <!-- 04: EXPERTISE & CRAFT METRICS (/ EXPERTISE & CRAFT) — 3-part layout -->
+    @if (hp().craft.enabled) {
+      <section class="shell py-20 md:py-24 border-b-[1.5px] border-[var(--color-foreground)]">
+        
+        <div class="mb-8">
+          <span class="editorial-tag">{{ t(hp().craft.tag) }}</span>
+        </div>
 
-  <figure class="reveal shell mx-auto flex max-w-2xl flex-col items-center gap-6 text-center" whReveal>
-    <svg width="40" height="30" viewBox="0 0 40 30" fill="currentColor" class="text-gold-500" aria-hidden="true">
-      <path d="M2 28 Q 2 12 16 2 L 18 6 Q 9 12 9 18 Q 14 17 16 22 Q 17 28 10 29 Q 3 29 2 28 Z" />
-      <path d="M22 28 Q 22 12 36 2 L 38 6 Q 29 12 29 18 Q 34 17 36 22 Q 37 28 30 29 Q 23 29 22 28 Z" />
-    </svg>
-    <blockquote class="hand-note text-3xl leading-snug md:text-4xl">
-      “Wine is the only artwork you can drink.”
-    </blockquote>
-    <figcaption class="font-serif italic text-muted">— Luis Fernando Olaverri</figcaption>
-  </figure>
-</section>
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-8 items-stretch">
+          
+          <!-- Left: Vibrant Terracotta block with large asterisk & Kraft paper sticker -->
+          <div class="lg:col-span-3 terracotta-block p-8 md:p-10 flex flex-col justify-between items-center text-center border-[1.5px] border-[var(--color-foreground)] shadow-lg reveal" whReveal>
+            
+            <div class="w-full flex justify-end">
+              <span class="tape-sticker bg-[var(--color-foreground)] text-white">{{ t(hp().craft.asterisk_tape) }}</span>
+            </div>
 
-<wh-flourish class="block py-8" />
+            <div class="py-6">
+              <span class="asterisk-giant">{{ hp().craft.asterisk_symbol }}</span>
+            </div>
 
-<!-- ============================================================ JOURNAL TEASER -->
-<section class="shell pb-10">
-  <div class="reveal mb-10 flex flex-col items-center gap-3 text-center" whReveal>
-    <p class="hand-note text-xl text-primary">the journal</p>
-    <h2 class="poster-title text-4xl md:text-5xl">Notes from between the vines</h2>
-  </div>
+            <div class="kraft-tape-note whitespace-pre-line">
+              {{ t(hp().craft.kraft_note) }}
+            </div>
 
-  <div class="grid gap-8 md:grid-cols-3">
-    @for (post of posts; track post.title; let i = $index) {
-      <article class="hand-frame-soft tilt-3d reveal-tilt flex flex-col gap-3 p-7"
-               whTilt whReveal [revealDelay]="i * 140">
-        <p class="eyebrow">{{ post.kicker }}</p>
-        <h3 class="text-xl leading-snug">{{ post.title }}</h3>
-        <p class="font-serif italic leading-relaxed text-muted">{{ post.excerpt }}</p>
-        <span class="hand-note mt-auto pt-2 text-base text-subtle">coming soon…</span>
-      </article>
+          </div>
+
+          <!-- Middle: Progress bars with numbers & percentages -->
+          <div class="lg:col-span-5 flex flex-col justify-center py-2 reveal" whReveal [revealDelay]="100">
+            <div class="flex flex-col">
+              @for (metric of hp().craft.metrics; track metric.num) {
+                <div class="craft-stat-row">
+                  <span class="font-mono text-xs text-[var(--color-foreground)]/50 font-bold w-6">{{ metric.num }}</span>
+                  <span class="font-mono text-xs uppercase font-bold tracking-wider text-[var(--color-foreground)] w-48 shrink-0">{{ t(metric.name) }}</span>
+                  <div class="craft-stat-bar-track">
+                    <div class="craft-stat-bar-fill" [style.width.%]="metric.pct"></div>
+                  </div>
+                  <span class="font-mono text-xs font-bold text-[var(--color-foreground)] w-10 text-right">{{ metric.pct }}%</span>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Right: Stacked condensed bold typography -->
+          <div class="lg:col-span-4 flex flex-col justify-center reveal" whReveal [revealDelay]="180">
+            <div class="font-big text-[clamp(2.4rem,4.2vw,3.8rem)] uppercase leading-[0.95] text-[var(--color-foreground)] tracking-tight flex flex-col gap-1">
+              @for (kw of hp().craft.keywords; track $index) {
+                <span>{{ t(kw) }}</span>
+              }
+            </div>
+          </div>
+
+        </div>
+
+      </section>
     }
-  </div>
-</section>
 
-<!-- ============================================================ CTA BAND -->
-<section class="shell py-20">
-  <div class="paper-dark hand-frame reveal-scale relative overflow-hidden !border-wine-950 px-8 py-16 text-center"
-       style="background-color: var(--color-wine-950)" whReveal>
-    <div class="wine-stain h-40 w-40 -top-12 right-10 float-slow"
-         style="border-color: color-mix(in srgb, var(--color-gold-500) 14%, transparent)"></div>
-    <wh-doodle kind="swirl" class="absolute bottom-6 left-8 w-16 text-gold-500/40 hidden sm:block" />
+    <!-- 05: SELECTED WORK / SHOWCASE (/ SELECTED WORK & CELLAR) — Editorial Cards -->
+    @if (hp().cellar.enabled) {
+      <section class="shell py-20 md:py-28 border-b-[1.5px] border-[var(--color-foreground)]">
+        
+        <div class="flex flex-wrap items-end justify-between gap-4 mb-10">
+          <span class="editorial-tag">{{ t(hp().cellar.tag) }}</span>
+          @if (hp().cellar.view_all_text) {
+            <a
+              [attr.href]="isExternal(hp().cellar.view_all_link) ? hp().cellar.view_all_link : null"
+              [routerLink]="isExternal(hp().cellar.view_all_link) ? null : hp().cellar.view_all_link"
+              [attr.target]="isExternal(hp().cellar.view_all_link) ? '_blank' : null"
+              [attr.rel]="isExternal(hp().cellar.view_all_link) ? 'noopener noreferrer' : null"
+              class="font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)] hover:text-[var(--color-primary)] transition-colors flex items-center gap-2 cursor-pointer"
+            >
+              {{ t(hp().cellar.view_all_text) }} <span class="text-sm">→</span>
+            </a>
+          }
+        </div>
 
-    <div class="relative mx-auto flex max-w-xl flex-col items-center gap-6">
-      <wh-logo variant="white-mark" [size]="44" class="opacity-90" />
-      <h2 class="poster-title text-3xl text-gold-100 md:text-4xl">Come, the table is set</h2>
-      <p class="font-serif text-lg italic text-sand-300">
-        Ask us about tastings, tours, or that one bottle you have been chasing for years.
-      </p>
-      <a routerLink="/contact" class="btn btn-gold">Get in touch</a>
-    </div>
+        <!-- Cards Grid -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          @for (item of hp().cellar.items; track $index; let i = $index) {
+            <a
+              [attr.href]="isExternal(item.link) ? item.link : null"
+              [routerLink]="isExternal(item.link) ? null : item.link"
+              [attr.target]="isExternal(item.link) ? '_blank' : null"
+              [attr.rel]="isExternal(item.link) ? 'noopener noreferrer' : null"
+              class="showcase-cellar-card border-[1.5px] border-[var(--color-foreground)] group reveal cursor-pointer"
+              whReveal [revealDelay]="i * 90"
+            >
+              <!-- Card Header with custom typography -->
+              <div class="p-6 border-b border-white/15 flex items-center justify-between text-white bg-[var(--color-paper-dark)] z-10">
+                <h5 class="text-2xl md:text-3xl leading-none uppercase" [class]="item.font_style">
+                  {{ t(item.name) }}
+                </h5>
+                <span class="font-mono text-xs text-white/50 group-hover:translate-x-1 transition-transform">→</span>
+              </div>
+
+              <!-- Card Image -->
+              <div class="cellar-img-wrap">
+                <img [src]="item.img" [alt]="t(item.name) + ' — ' + t(hp().hero.big_title) + ' selection'" />
+              </div>
+
+              <!-- Card Footer Pills -->
+              <div class="p-4 bg-[var(--color-paper-dark)] border-t border-white/15 flex flex-wrap items-center gap-2 z-10">
+                @for (tag of item.tags; track $index) {
+                  <span class="showcase-pill-tag">{{ t(tag) }}</span>
+                }
+              </div>
+            </a>
+          }
+        </div>
+
+      </section>
+    }
+
+    <!-- 06: PRESS & WORDS / ACCLAIM (/ PRESS & WORDS) -->
+    @if (hp().press.enabled) {
+      <section class="shell py-20 md:py-28 border-b-[1.5px] border-[var(--color-foreground)]">
+        
+        <div class="mb-10">
+          <span class="editorial-tag">{{ t(hp().press.tag) }}</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          
+          <!-- Left: Huge quote block with quotation mark & dots -->
+          <div class="lg:col-span-5 flex flex-col justify-between h-full reveal" whReveal>
+            @if (hp().press.quotes.length > 0) {
+              <div>
+                <span class="font-serif text-6xl md:text-8xl leading-none text-[var(--color-foreground)] block mb-2">“</span>
+                <blockquote class="font-big text-2xl md:text-3xl lg:text-4xl uppercase leading-tight text-[var(--color-foreground)] mb-6">
+                  {{ t(hp().press.quotes[activeQuoteIndex() % hp().press.quotes.length].quote) }}
+                </blockquote>
+                <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/70 font-semibold">
+                  {{ t(hp().press.quotes[activeQuoteIndex() % hp().press.quotes.length].author) }}
+                </p>
+              </div>
+
+              <!-- Carousel Dots -->
+              @if (hp().press.quotes.length > 1) {
+                <div class="flex items-center gap-2.5 mt-10">
+                  @for (q of hp().press.quotes; track $index; let i = $index) {
+                    <button type="button"
+                            (click)="setQuoteIndex(i)"
+                            class="h-3 w-3 rounded-full border border-[var(--color-foreground)] transition-all cursor-pointer"
+                            [class.bg-[var(--color-foreground)]]="activeQuoteIndex() === i"
+                            [class.bg-transparent]="activeQuoteIndex() !== i"
+                            [attr.aria-label]="'Quote ' + (i + 1)">
+                    </button>
+                  }
+                </div>
+              }
+            }
+          </div>
+
+          <!-- Right: Partner logos row + testimonial columns -->
+          <div class="lg:col-span-7 flex flex-col gap-10 reveal" whReveal [revealDelay]="120">
+            
+            <!-- Top Row: Logos in clean bordered strip (Supports Image Logos & Typography Names with Seamless Multi-Row Wrapping) -->
+            @if (hp().press.logos.length > 0) {
+              <div class="border-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] overflow-hidden">
+                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 -mr-[1.5px] -mb-[1.5px]">
+                  @for (logo of hp().press.logos; track $index) {
+                    <div class="relative flex items-center justify-center h-16 sm:h-20 border-r-[1.5px] border-b-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] overflow-hidden">
+                      @if (getLogoImg(logo)) {
+                        <img
+                          [src]="getLogoImg(logo)"
+                          [alt]="getLogoName(logo)"
+                          [title]="getLogoName(logo)"
+                          class="w-full h-full object-cover filter grayscale hover:grayscale-0 transition-all duration-300"
+                          loading="lazy"
+                          decoding="async"
+                        />
+                      } @else {
+                        <div class="w-full h-full p-2.5 sm:p-3 flex items-center justify-center overflow-hidden">
+                          <span
+                            class="font-serif text-[11px] sm:text-xs lg:text-[13px] tracking-wider font-bold uppercase text-[var(--color-foreground)]/80 hover:text-[var(--color-primary)] transition-colors cursor-default leading-snug text-center break-words max-w-full line-clamp-2 md:line-clamp-3 select-none"
+                            [title]="getLogoName(logo)">
+                            {{ getLogoName(logo) }}
+                          </span>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Bottom: Testimonial columns with quotes & titles -->
+            @if (hp().press.testimonials.length > 0) {
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-6 pt-4 border-t-[1.5px] border-[var(--color-foreground)]">
+                @for (review of hp().press.testimonials; track $index) {
+                  <div class="flex flex-col justify-between gap-6">
+                    <p class="font-mono text-xs leading-relaxed text-[var(--color-foreground)]/80">
+                      {{ t(review.text) }}
+                    </p>
+                    <div>
+                      <span class="font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)] block">— {{ t(review.author) }}</span>
+                      <span class="font-mono text-[10px] uppercase text-[var(--color-foreground)]/60 block">{{ t(review.title) }}</span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+
+          </div>
+
+        </div>
+
+      </section>
+    }
+
+    <!-- 07: GET IN TOUCH (/ GET IN TOUCH) -->
+    @if (hp().contact.enabled) {
+      <section class="shell py-20 md:py-28">
+        
+        <div class="mb-10">
+          <span class="editorial-tag">{{ t(hp().contact.tag) }}</span>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+          
+          <!-- Left: Bold condensed headline -->
+          <div class="lg:col-span-4 reveal" whReveal>
+            <h3 class="font-big text-[clamp(3.2rem,6vw,5.4rem)] uppercase leading-[0.9] tracking-tight text-[var(--color-foreground)] whitespace-pre-line">
+              {{ t(hp().contact.headline) }}
+            </h3>
+            <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/70 mt-6 leading-relaxed">
+              {{ t(hp().contact.subtext) }}
+            </p>
+          </div>
+
+          <!-- Middle: Minimalist Line Form -->
+          <div class="lg:col-span-5 reveal" whReveal [revealDelay]="100">
+            @if (!formSubmitted()) {
+              <form (ngSubmit)="submitContact()" class="flex flex-col gap-8">
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+                  <div>
+                    <input type="text"
+                           name="name"
+                           [(ngModel)]="contactData.name"
+                           required
+                           placeholder="YOUR NAME"
+                           class="editorial-input" />
+                  </div>
+                  <div>
+                    <input type="email"
+                           name="email"
+                           [(ngModel)]="contactData.email"
+                           required
+                           placeholder="EMAIL ADDRESS"
+                           class="editorial-input" />
+                  </div>
+                </div>
+
+                <!-- Custom Editorial Dropdown: Subject / Occasion -->
+                <div class="relative" (click)="$event.stopPropagation()">
+                  <label class="font-mono text-[10px] uppercase tracking-widest text-[var(--color-foreground)]/60 font-semibold block mb-1">
+                    Subject / Occasion
+                  </label>
+                  
+                  <button type="button"
+                          (click)="toggleDropdown($event)"
+                          [attr.aria-expanded]="dropdownOpen()"
+                          aria-haspopup="listbox"
+                          class="w-full flex items-center justify-between py-2 text-left border-b-[1.5px] border-[var(--color-foreground)] bg-transparent cursor-pointer transition-colors duration-200 group focus:outline-none focus:border-[var(--color-primary)]"
+                          [class.border-[var(--color-primary)]]="dropdownOpen()">
+                    <span class="font-mono text-xs uppercase tracking-wider font-bold text-[var(--color-foreground)] group-hover:text-[var(--color-primary)] transition-colors">
+                      {{ selectedSubjectLabel }}
+                    </span>
+                    <span class="text-xs text-[var(--color-foreground)]/70 group-hover:text-[var(--color-primary)] transition-transform duration-200 transform"
+                          [class.rotate-180]="dropdownOpen()"
+                          [class.text-[var(--color-primary)]]="dropdownOpen()">
+                      <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 inline-block" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
+                      </svg>
+                    </span>
+                  </button>
+
+                  <!-- Popover Options Menu -->
+                  @if (dropdownOpen()) {
+                    <div class="absolute left-0 right-0 top-full mt-1.5 z-30 bg-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] shadow-[4px_4px_0px_0px_var(--color-foreground)] overflow-hidden"
+                         role="listbox">
+                      @for (opt of subjectOptions; track opt.value) {
+                        <button type="button"
+                                (click)="selectProjectType(opt.value)"
+                                role="option"
+                                [attr.aria-selected]="contactData.projectType === opt.value"
+                                class="w-full text-left px-4 py-3 border-b-[1.5px] border-[var(--color-foreground)]/10 last:border-b-0 flex items-center justify-between font-mono text-xs uppercase tracking-wider transition-colors duration-150 cursor-pointer group"
+                                [class.bg-[var(--color-foreground)]]="contactData.projectType === opt.value"
+                                [class.text-[var(--color-paper-light)]]="contactData.projectType === opt.value"
+                                [class.text-[var(--color-foreground)]/80]="contactData.projectType !== opt.value"
+                                [class.hover:bg-[var(--color-foreground)]]="contactData.projectType !== opt.value"
+                                [class.hover:text-[var(--color-paper-light)]]="contactData.projectType !== opt.value">
+                          <span class="font-semibold">{{ opt.label }}</span>
+                          @if (contactData.projectType === opt.value) {
+                            <span class="text-xs text-[var(--color-paper-light)] font-bold">✓</span>
+                          } @else {
+                            <span class="text-xs opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                          }
+                        </button>
+                      }
+                    </div>
+                  }
+                </div>
+
+                <div>
+                  <textarea name="message"
+                            [(ngModel)]="contactData.message"
+                            rows="3"
+                            required
+                            placeholder="TELL US ABOUT YOUR OCCASION OR REQUEST"
+                            class="editorial-input resize-none"></textarea>
+                </div>
+
+                <div class="pt-2">
+                  <button type="submit"
+                          class="font-mono text-sm font-bold uppercase tracking-wider text-[var(--color-foreground)] hover:text-[var(--color-primary)] transition-colors flex items-center gap-3 cursor-pointer py-2">
+                    <span>{{ t(hp().contact.button_text) }}</span>
+                    <span class="text-lg">→</span>
+                  </button>
+                </div>
+
+              </form>
+            } @else {
+              <div class="p-8 border-[1.5px] border-[var(--color-foreground)] bg-white">
+                <span class="tape-sticker mb-4">MESSAGE RECEIVED</span>
+                <h4 class="font-big text-2xl uppercase mt-2">Thank you!</h4>
+                <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/70 mt-2">
+                  We will be in touch shortly to plan your wine experience.
+                </p>
+              </div>
+            }
+          </div>
+
+          <!-- Right: Terracotta contact card with torn top edge -->
+          <div class="lg:col-span-3 torn-edge-card p-8 sm:p-10 border-[1.5px] border-[var(--color-foreground)] shadow-xl flex flex-col justify-between gap-10 reveal" whReveal [revealDelay]="200">
+            
+            <div class="torn-edge-top"></div>
+
+            <div>
+              <p class="font-mono text-[11px] uppercase tracking-widest text-white/70 font-semibold mb-1">{{ t(hp().contact.card_cellar_label) }}</p>
+              <p class="font-mono text-xs uppercase text-white font-bold mb-4 whitespace-pre-line">
+                {{ t(hp().contact.card_cellar_text) }}
+              </p>
+
+              <p class="font-mono text-[11px] uppercase tracking-widest text-white/70 font-semibold mb-1">{{ t(hp().contact.card_direct_label) }}</p>
+              <a [href]="'mailto:' + hp().contact.card_email" class="font-mono text-xs uppercase text-white font-bold block hover:underline">
+                {{ hp().contact.card_email }}
+              </a>
+              <a [href]="'tel:' + hp().contact.card_phone" class="font-mono text-xs uppercase text-white font-bold block mt-1 hover:underline">
+                {{ hp().contact.card_phone }}
+              </a>
+            </div>
+
+            <div>
+              <p class="font-mono text-[11px] uppercase tracking-widest text-white/70 font-semibold mb-2">Connect</p>
+              <div class="flex flex-col gap-1 font-mono text-xs uppercase text-white font-bold">
+                @for (soc of hp().contact.card_socials; track $index) {
+                  <a [href]="soc.url" target="_blank" rel="noopener noreferrer" class="hover:underline">{{ t(soc.label) }}</a>
+                }
+              </div>
+            </div>
+
+            <div class="pt-2">
+              <span class="kraft-tape-note block text-center whitespace-pre-line">
+                {{ t(hp().contact.card_kraft_note) }}
+              </span>
+            </div>
+
+          </div>
+
+        </div>
+
+      </section>
+    }
+
+    <!-- 08: MINIMAL EDITORIAL FOOTER INSIDE CARD BOX (DARK) -->
+    <footer data-dark-section class="bg-[var(--color-paper-dark)] text-sand-100 border-t-[1.5px] border-[var(--color-foreground)] pt-12 pb-8 px-6 sm:px-12">
+      <div class="flex flex-col sm:flex-row items-center justify-between gap-6 pb-8 border-b border-white/15">
+        <!-- Brand Name & Logo Badge directly under it -->
+        <div class="flex flex-col items-center sm:items-start gap-2.5">
+          <span class="font-big text-2xl sm:text-3xl uppercase tracking-tight text-white leading-none">
+            {{ t(hp().footer.brand_name) }}
+          </span>
+          <img
+            [src]="hp().footer.badge_logo || '/logo_badge.png'"
+            [alt]="t(hp().footer.brand_name) + ' Badge'"
+            class="h-8 sm:h-9 w-auto object-contain select-none rounded-[6px] shadow-sm hover:scale-105 transition-transform"
+          />
+        </div>
+
+        <!-- Navigation Links -->
+        <div class="flex flex-wrap items-center justify-center sm:justify-end gap-6 sm:gap-8 font-mono text-xs uppercase tracking-wider">
+          @for (item of site.nav; track item.path) {
+            <a [routerLink]="item.path" class="text-sand-300 hover:text-white transition-colors">
+              {{ item.label }}
+            </a>
+          }
+        </div>
+      </div>
+
+      <!-- Bottom Bar: Copyright, Responsible drinking & Legal Links -->
+      <div class="pt-6 flex flex-col sm:flex-row items-center justify-between gap-4 font-mono text-[11px] uppercase tracking-wider text-sand-400">
+        <span>{{ t(hp().footer.copyright_text) }}</span>
+        <span class="font-serif italic text-xs capitalize text-gold-300/80">Drink responsibly — savour slowly.</span>
+        <div class="flex items-center gap-5">
+          @for (link of hp().footer.links; track $index) {
+            <a
+              [attr.href]="isExternal(link.path) ? link.path : null"
+              [routerLink]="isExternal(link.path) ? null : link.path"
+              [attr.target]="isExternal(link.path) ? '_blank' : null"
+              [attr.rel]="isExternal(link.path) ? 'noopener noreferrer' : null"
+              class="hover:text-white transition-colors cursor-pointer"
+            >
+              {{ t(link.label) }}
+            </a>
+          }
+        </div>
+      </div>
+    </footer>
+
   </div>
 </section>

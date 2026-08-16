@@ -1,30 +1,26 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { SITE } from '../../core/site-config';
-import { Flourish } from '../../shared/flourish';
+import { SiteSettingsService } from '../../core/site-settings.service';
+import { I18nService, I18nText } from '../../core/i18n.service';
+import { WhReveal } from '../../shared/reveal';
 
 @Component({
   selector: 'wh-about',
-  imports: [RouterLink, Flourish],
+  imports: [RouterLink, WhReveal],
   templateUrl: './about.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class About {
-  readonly site = SITE;
+  private settingsService = inject(SiteSettingsService);
+  private i18n = inject(I18nService);
 
-  /* ✏️ Edit the values/beliefs cards here */
-  readonly values = [
-    {
-      title: 'Small makers first',
-      text: 'We work with families and small estates — people who prune their own vines and answer their own phone.',
-    },
-    {
-      title: 'Stories over scores',
-      text: 'A wine is a place and a year in a bottle. We would rather tell you its story than give it a number.',
-    },
-    {
-      title: 'Slow by design',
-      text: 'Good wine is not in a hurry, and neither are we. Tastings run long, conversations run longer.',
-    },
-  ];
+  readonly page = computed(() => this.settingsService.about());
+
+  get site() {
+    return this.settingsService.settings();
+  }
+
+  t(val: I18nText | string): string {
+    return this.i18n.t(val as I18nText);
+  }
 }

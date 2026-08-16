@@ -1,49 +1,160 @@
-<!-- ============================================================ INTRO -->
-<section class="paper relative overflow-hidden">
-  <div class="wine-stain h-52 w-52 -top-16 right-[6%]"></div>
-  <div class="wine-stain h-32 w-32 bottom-2 -left-8"></div>
-
-  <div class="shell relative flex flex-col items-center gap-6 py-20 text-center md:py-24">
-    <p class="eyebrow">e-Shop</p>
-    <h1 class="max-w-2xl text-5xl">
-      The cellar is being <span class="sketch-underline font-serif italic">stocked</span>
-    </h1>
-    <p class="max-w-lg font-serif text-xl italic text-muted">
-      Our online shelves are on their way. Here is a first look at what will live on them.
-    </p>
+<!-- ============================================================ 01: HERO -->
+<section class="shell pt-28 pb-14 md:pt-36 md:pb-16 border-b-[1.5px] border-[var(--color-foreground)]">
+  
+  <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
+    <span class="editorial-tag">{{ t(page().hero.tag) }}</span>
+    <span class="font-mono text-xs uppercase tracking-widest text-[var(--color-primary)] font-bold">{{ t(page().hero.badge) }}</span>
   </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
+    <div class="lg:col-span-8 reveal" whReveal>
+      <h1 class="font-big text-[clamp(2.8rem,5.5vw,5.5rem)] uppercase leading-[0.9] tracking-tight text-[var(--color-foreground)]">
+        {{ t(page().hero.headline) }}
+      </h1>
+    </div>
+    <div class="lg:col-span-4 reveal" whReveal [revealDelay]="120">
+      <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/70 leading-relaxed">
+        {{ t(page().hero.subtext) }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Category Filter Bar -->
+  <div class="flex flex-wrap gap-2 pt-10 border-t-[1.5px] border-[var(--color-foreground)]/15 mt-10">
+    @for (cat of categories(); track cat.key) {
+      <button
+        type="button"
+        (click)="setCategory(cat.key)"
+        class="px-4 py-2 text-2xs md:text-xs font-mono font-bold uppercase tracking-wider transition-all duration-200 border-[1.5px] border-[var(--color-foreground)] cursor-pointer"
+        [class.bg-[var(--color-foreground)]]="activeCategory() === cat.key"
+        [class.text-[var(--color-paper-light)]]="activeCategory() === cat.key"
+        [class.bg-[var(--color-paper-light)]]="activeCategory() !== cat.key"
+        [class.text-[var(--color-foreground)]]="activeCategory() !== cat.key"
+        [class.hover:bg-[var(--color-primary)]]="activeCategory() !== cat.key"
+        [class.hover:text-white]="activeCategory() !== cat.key"
+        [class.hover:border-[var(--color-primary)]]="activeCategory() !== cat.key"
+      >
+        {{ t(cat.label) }}
+      </button>
+    }
+  </div>
+
 </section>
 
-<wh-flourish class="block py-6" />
+<!-- ============================================================ 02: BOTTLES ALLOCATION GRID -->
+<section class="shell py-16 md:py-24 border-b-[1.5px] border-[var(--color-foreground)]">
+  
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+    @for (bottle of filteredItems(); track bottle.id; let i = $index) {
+      <article
+        class="border-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] shadow-[4px_4px_0px_0px_var(--color-foreground)] hover:-translate-y-1.5 transition-all duration-300 flex flex-col justify-between overflow-hidden group reveal"
+        whReveal
+        [revealDelay]="(i % 3) * 100"
+      >
+        <!-- Card Top Bar: Region & Status Pill -->
+        <div class="p-4 sm:p-5 border-b-[1.5px] border-[var(--color-foreground)] flex items-center justify-between bg-white/50">
+          <span class="font-mono text-[11px] uppercase tracking-wider font-bold text-[var(--color-foreground)]/70">
+            {{ t(bottle.region) }}
+          </span>
+          <span class="tape-sticker {{ bottle.statusBg }} text-white text-[9px]">
+            {{ t(bottle.status) }}
+          </span>
+        </div>
 
-<!-- ============================================================ SHELVES PREVIEW -->
-<section class="shell pb-10">
-  <div class="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-    @for (shelf of shelves; track shelf.name; let i = $index) {
-      <article class="hand-frame-soft flex flex-col items-center gap-3 p-8 text-center"
-               [class.sm:rotate-1]="i % 3 === 0" [class.sm:-rotate-1]="i % 3 === 2">
-        <!-- hand-drawn bottle -->
-        <svg width="34" height="46" viewBox="0 0 34 46" fill="none" stroke="currentColor" stroke-width="1.5"
-             stroke-linecap="round" class="text-primary" aria-hidden="true">
-          <path d="M14 3 Q 14 5 14 10 Q 9 14 9 20 L 9 40 Q 9 43 12 43 L 22 43 Q 25 43 25 40 L 25 20 Q 25 14 20 10 Q 20 5 20 3 Z" />
-          <path d="M11.5 25 Q 17 27 22.5 25" stroke-width="1.1" />
-          <path d="M11.5 33 Q 17 35 22.5 33" stroke-width="1.1" />
-        </svg>
-        <h3 class="text-2xl">{{ shelf.name }}</h3>
-        <p class="font-serif italic text-muted">{{ shelf.note }}</p>
-        <span class="mt-2 text-2xs uppercase tracking-widest text-subtle">Opening soon</span>
+        <!-- Image Showcase Frame -->
+        <div class="relative h-64 sm:h-72 w-full overflow-hidden bg-[var(--color-foreground)]/5 border-b-[1.5px] border-[var(--color-foreground)]">
+          <img
+            [src]="bottle.img"
+            [alt]="bottle.name + ' ' + bottle.vintage"
+            class="w-full h-full object-cover object-center filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+            loading="lazy"
+            decoding="async"
+          />
+          <div class="absolute bottom-3 left-3">
+            <span class="px-2.5 py-1 bg-[var(--color-foreground)] text-white font-mono text-[10px] font-bold uppercase tracking-widest">
+              VINTAGE {{ bottle.vintage }}
+            </span>
+          </div>
+          <div class="absolute bottom-3 right-3">
+            <span class="px-2.5 py-1 bg-white text-[var(--color-foreground)] font-mono text-[10px] font-bold uppercase tracking-widest border border-[var(--color-foreground)]">
+              {{ bottle.alcohol }} ABV
+            </span>
+          </div>
+        </div>
+
+        <!-- Card Body Content -->
+        <div class="p-6 sm:p-7 flex flex-col justify-between flex-1 gap-6">
+          
+          <div>
+            <div class="flex items-baseline justify-between gap-2 mb-2">
+              <h2 class="font-big text-3xl sm:text-4xl uppercase tracking-tight text-[var(--color-foreground)] group-hover:text-[var(--color-primary)] transition-colors">
+                {{ bottle.name }}
+              </h2>
+              <span class="font-mono text-base font-bold text-[var(--color-primary)]">
+                {{ bottle.price }}
+              </span>
+            </div>
+
+            <p class="font-mono text-xs uppercase font-bold tracking-wider text-[var(--color-foreground)]/80 mb-1">
+              {{ t(bottle.varietal) }}
+            </p>
+            <p class="font-mono text-[10px] uppercase text-[var(--color-foreground)]/60 mb-4">
+              Soil: {{ t(bottle.soil) }}
+            </p>
+
+            <p class="font-sans text-xs leading-relaxed text-[var(--color-foreground)]/80 border-t border-[var(--color-foreground)]/10 pt-3 italic">
+              “{{ t(bottle.tastingNote) }}”
+            </p>
+          </div>
+
+          <!-- Card Action Button -->
+          <div class="pt-2 border-t border-[var(--color-foreground)]/15">
+            <a
+              routerLink="/contact"
+              class="w-full py-2.5 px-4 bg-transparent group-hover:bg-[var(--color-foreground)] text-[var(--color-foreground)] group-hover:text-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between transition-all duration-200"
+            >
+              <span>Inquire &amp; Allocate</span>
+              <span class="text-sm group-hover:translate-x-1 transition-transform">→</span>
+            </a>
+          </div>
+
+        </div>
+
       </article>
     }
   </div>
+
 </section>
 
-<!-- ============================================================ NOTIFY CTA -->
-<section class="shell py-16 text-center">
-  <div class="mx-auto flex max-w-xl flex-col items-center gap-6">
-    <h2 class="text-3xl">Want a first pour?</h2>
-    <p class="font-serif text-lg italic text-muted">
-      Drop us a line and we will let you know the moment the cellar door opens.
-    </p>
-    <a routerLink="/contact" class="btn btn-gold">Keep me posted</a>
+<!-- ============================================================ 03: PRIVATE CELLAR ADVISORY BANNER -->
+<section class="shell py-20 md:py-28">
+  
+  <div class="terracotta-block p-8 md:p-14 border-[1.5px] border-[var(--color-foreground)] shadow-2xl reveal" whReveal>
+    <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-center">
+      
+      <div class="lg:col-span-8 space-y-4">
+        <span class="tape-sticker bg-[var(--color-foreground)] text-white">{{ t(page().concierge.tape) }}</span>
+        <h2 class="font-big text-3xl sm:text-5xl uppercase leading-[0.9] tracking-tight text-white">
+          {{ t(page().concierge.headline) }}
+        </h2>
+        <p class="font-mono text-xs uppercase tracking-wider text-white/80 leading-relaxed max-w-xl">
+          {{ t(page().concierge.subtext) }}
+        </p>
+      </div>
+
+      <div class="lg:col-span-4 flex flex-col items-start lg:items-end justify-center gap-4">
+        <a
+          routerLink="/contact"
+          class="btn bg-white text-[var(--color-foreground)] hover:bg-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] font-mono text-xs font-bold uppercase tracking-wider w-full text-center py-3.5"
+        >
+          {{ t(page().concierge.button_text) }}
+        </a>
+        <span class="kraft-tape-note text-center w-full text-[10px]">
+          {{ t(page().concierge.kraft_note) }}
+        </span>
+      </div>
+
+    </div>
   </div>
+
 </section>

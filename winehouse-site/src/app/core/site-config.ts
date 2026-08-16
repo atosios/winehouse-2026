@@ -19,13 +19,13 @@ export const SITE = {
     email: 'hello@thewinehouse.gr',
     phone: '+30 210 000 0000',
     address: {
-      street: 'Oinou 12',
-      city: 'Athens',
-      postalCode: '105 58',
-      country: 'Greece',
+      street: 'Independent Wine Atelier',
+      city: 'Worldwide Curation & Delivery',
+      postalCode: '',
+      country: '',
     },
     /* Paste a Google Maps share link here */
-    mapUrl: 'https://maps.google.com/?q=Athens,Greece',
+    mapUrl: '',
   },
 
   /* Opening hours (shown on Contact page & footer) --------------------------- */

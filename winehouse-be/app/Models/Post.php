@@ -9,6 +9,13 @@ class Post extends Model
     protected $fillable = [
         'title',
         'slug',
+        'post_type',
+        'category',
+        'tags',
+        'author_name',
+        'layout_style',
+        'mood_color',
+        'meta_data',
         'excerpt',
         'body',
         'cover_image',
@@ -21,6 +28,8 @@ class Post extends Model
         return [
             'published' => 'boolean',
             'published_at' => 'datetime',
+            'tags' => 'array',
+            'meta_data' => 'array',
         ];
     }
 }

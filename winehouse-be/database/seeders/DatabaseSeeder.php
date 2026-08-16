@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -24,5 +25,12 @@ class DatabaseSeeder extends Seeder
                 'password' => Hash::make(env('ADMIN_PASSWORD', 'change-me-immediately')),
             ],
         );
+
+        // Seed default site settings if none exist
+        if (Setting::count() === 0) {
+            foreach (Setting::defaults() as $key => $value) {
+                Setting::set($key, $value);
+            }
+        }
     }
 }

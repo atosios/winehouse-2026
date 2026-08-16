@@ -1,6 +1,6 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
 import { RouterLink } from '@angular/router';
-import { SITE } from '../core/site-config';
+import { SiteSettingsService } from '../core/site-settings.service';
 import { WhLogo } from '../shared/brand-logo';
 
 @Component({
@@ -10,6 +10,9 @@ import { WhLogo } from '../shared/brand-logo';
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SiteFooter {
-  readonly site = SITE;
+  private settingsService = inject(SiteSettingsService);
+  get site() {
+    return this.settingsService.settings();
+  }
   readonly year = new Date().getFullYear();
 }

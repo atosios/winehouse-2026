@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Post;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Illuminate\Validation\Rule;
@@ -14,7 +15,21 @@ class PostController extends Controller
     {
         return Post::where('published', true)
             ->orderByDesc('published_at')
-            ->get(['id', 'title', 'slug', 'excerpt', 'cover_image', 'published_at']);
+            ->get([
+                'id',
+                'title',
+                'slug',
+                'post_type',
+                'category',
+                'tags',
+                'author_name',
+                'layout_style',
+                'mood_color',
+                'meta_data',
+                'excerpt',
+                'cover_image',
+                'published_at',
+            ]);
     }
 
     /** Public: single published post by slug. */
@@ -26,6 +41,103 @@ class PostController extends Controller
     public function index()
     {
         return Post::orderByDesc('created_at')->get();
+    }
+
+    public function categories()
+    {
+        $defaultCategories = [
+            'Tasting Notes',
+            'Cellar Stories',
+            'Vintage Reports',
+            'Producer Spotlight',
+            'Pairing Guide',
+            'Events & Tastings',
+        ];
+
+        $stored = Setting::get('article_categories', $defaultCategories);
+        if (!is_array($stored)) {
+            $stored = $defaultCategories;
+        }
+
+        $postCategories = Post::whereNotNull('category')
+            ->where('category', '!=', '')
+            ->distinct()
+            ->pluck('category')
+            ->values()
+            ->all();
+
+        $allCategories = array_values(array_unique(array_filter(array_merge($stored, $postCategories))));
+        return response()->json($allCategories);
+    }
+
+    public function storeCategory(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string', 'max:100'],
+        ]);
+
+        $name = trim($request->input('name'));
+        if (empty($name)) {
+            return response()->json(['message' => 'Category name cannot be empty'], 422);
+        }
+
+        $defaultCategories = [
+            'Tasting Notes',
+            'Cellar Stories',
+            'Vintage Reports',
+            'Producer Spotlight',
+            'Pairing Guide',
+            'Events & Tastings',
+        ];
+        $stored = Setting::get('article_categories', $defaultCategories);
+        if (!is_array($stored)) {
+            $stored = $defaultCategories;
+        }
+
+        if (!in_array($name, $stored, true)) {
+            $stored[] = $name;
+            Setting::set('article_categories', array_values(array_unique($stored)));
+        }
+
+        return $this->categories();
+    }
+
+    public function destroyCategory(Request $request)
+    {
+        $request->validate([
+            'name' => ['required', 'string'],
+        ]);
+
+        $name = trim($request->input('name'));
+
+        // 1. Remove category from all posts (they 'lose' this category)
+        $affected = Post::where('category', $name)->update(['category' => null]);
+
+        // 2. Remove from stored settings categories
+        $defaultCategories = [
+            'Tasting Notes',
+            'Cellar Stories',
+            'Vintage Reports',
+            'Producer Spotlight',
+            'Pairing Guide',
+            'Events & Tastings',
+        ];
+        $stored = Setting::get('article_categories', $defaultCategories);
+        if (!is_array($stored)) {
+            $stored = $defaultCategories;
+        }
+
+        $updatedCategories = array_values(array_filter($stored, function ($item) use ($name) {
+            return strcasecmp($item, $name) !== 0;
+        }));
+
+        Setting::set('article_categories', $updatedCategories);
+
+        return response()->json([
+            'success' => true,
+            'categories' => $updatedCategories,
+            'affected_posts' => $affected,
+        ]);
     }
 
     public function store(Request $request)
@@ -57,16 +169,28 @@ class PostController extends Controller
     private function validated(Request $request, ?Post $post = null): array
     {
         $data = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
+            'title' => ['nullable', 'string', 'max:255'],
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('posts', 'slug')->ignore($post?->id)],
+            'post_type' => ['nullable', 'string', 'max:50'],
+            'category' => ['nullable', 'string', 'max:100'],
+            'tags' => ['nullable', 'array'],
+            'tags.*' => ['string', 'max:50'],
+            'author_name' => ['nullable', 'string', 'max:150'],
+            'layout_style' => ['nullable', 'string', 'max:50'],
+            'mood_color' => ['nullable', 'string', 'max:50'],
+            'meta_data' => ['nullable', 'array'],
             'excerpt' => ['nullable', 'string', 'max:500'],
             'body' => ['nullable', 'string'],
-            'cover_image' => ['nullable', 'string', 'max:255'],
+            'cover_image' => ['nullable', 'string', 'max:500'],
             'published' => ['boolean'],
         ]);
 
+        if (empty($data['title'])) {
+            $data['title'] = 'Untitled';
+        }
+
         if (empty($data['slug'])) {
-            $base = Str::slug($data['title']) ?: 'post';
+            $base = Str::slug($data['title'] ?: 'post') ?: 'post';
             $slug = $base;
             $i = 2;
             while (Post::where('slug', $slug)->where('id', '!=', $post?->id)->exists()) {

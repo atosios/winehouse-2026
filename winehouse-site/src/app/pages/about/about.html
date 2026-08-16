@@ -1,73 +1,186 @@
-<!-- ============================================================ INTRO -->
-<section class="paper relative overflow-hidden">
-  <div class="wine-stain h-56 w-56 -top-20 -right-16"></div>
-  <div class="wine-stain h-32 w-32 bottom-6 left-[6%] hidden md:block"></div>
-
-  <div class="shell relative flex flex-col items-center gap-6 py-20 text-center md:py-28">
-    <p class="eyebrow">About us</p>
-    <h1 class="max-w-2xl text-5xl">
-      A house built on <span class="sketch-underline font-serif italic">corks</span> &amp; conversations
-    </h1>
+<!-- ============================================================ 01: HERO -->
+<section class="shell pt-28 pb-16 md:pt-36 md:pb-20 border-b-[1.5px] border-[var(--color-foreground)]">
+  
+  <div class="mb-8">
+    <span class="editorial-tag">{{ t(page().hero.tag) }}</span>
   </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-10 items-end">
+    <div class="lg:col-span-8 reveal" whReveal>
+      <h1 class="font-big text-[clamp(2.8rem,5.5vw,5.5rem)] uppercase leading-[0.9] tracking-tight text-[var(--color-foreground)]">
+        {{ t(page().hero.headline) }}
+      </h1>
+    </div>
+    <div class="lg:col-span-4 reveal" whReveal [revealDelay]="120">
+      <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/70 leading-relaxed">
+        {{ t(page().hero.subtext) }}
+      </p>
+    </div>
+  </div>
+
 </section>
 
-<!-- ============================================================ STORY -->
-<section class="shell max-w-prose py-14" style="max-width: var(--container-prose)">
-  <div class="flex flex-col gap-6 text-lg leading-relaxed text-foreground">
-    <p class="drop-cap">
-      The Winehouse began the way most good things do — around a table, long after the plates were
-      cleared, when someone opened one more bottle "just to try". What started as a shelf of
-      favourites for friends slowly grew into a cellar, then a shop, then a small world of its own.
-    </p>
-    <p>
-      We are not sommeliers in suits. We are people who fell for wine sideways — through harvest
-      trips, through winemakers who talk about their vines like family, through bottles that tasted
-      like the hillside they came from. That is the wine we look for, and the only kind we sell.
-    </p>
-    <p class="font-serif text-xl italic text-muted">
-      Every bottle on our shelves has been opened, argued about, and loved by at least one of us.
-    </p>
-    <p>
-      Beyond the shelves, The Winehouse is a place for stories: tasting notes and grape lore,
-      vineyard tours and long evenings, facts and myths and everything poured in between. Whether
-      you are a first-glass beginner or a seasoned cellar-rat, pull up a chair — you are already
-      one of us.
-    </p>
+<!-- ============================================================ 02: NARRATIVE & TERRACOTTA CARD -->
+<section class="shell py-20 md:py-28 border-b-[1.5px] border-[var(--color-foreground)]">
+  
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16 items-start">
+    
+    <!-- Left: Storytelling Narrative -->
+    <div class="lg:col-span-7 flex flex-col gap-8 reveal" whReveal>
+      
+      <div class="border-b-[1.5px] border-[var(--color-foreground)] pb-6">
+        <span class="font-mono text-xs uppercase font-bold tracking-widest text-[var(--color-primary)] block mb-2">{{ t(page().story.tag) }}</span>
+        <h2 class="font-serif text-2xl md:text-3xl italic text-[var(--color-foreground)] leading-snug">
+          {{ t(page().story.quote) }}
+        </h2>
+      </div>
+
+      <div class="space-y-6 font-sans text-base leading-relaxed text-[var(--color-foreground)]/85">
+        <p>
+          {{ t(page().story.body_1) }}
+        </p>
+        <p>
+          {{ t(page().story.body_2) }}
+        </p>
+        <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/70 pt-2 border-l-2 border-[var(--color-primary)] pl-4 italic">
+          {{ t(page().story.note) }}
+        </p>
+      </div>
+
+    </div>
+
+    <!-- Right: Terracotta Manifesto Card -->
+    <div class="lg:col-span-5 terracotta-block p-8 md:p-10 flex flex-col justify-between items-center text-center border-[1.5px] border-[var(--color-foreground)] shadow-xl reveal" whReveal [revealDelay]="160">
+      
+      <div class="w-full flex justify-between items-center">
+        <span class="font-mono text-[10px] uppercase font-bold tracking-widest text-white/70">EST. CELLAR ARCHIVE</span>
+        <span class="tape-sticker bg-[var(--color-foreground)] text-white">{{ t(page().story.manifesto_tape) }}</span>
+      </div>
+
+      <div class="py-8">
+        <span class="asterisk-giant">*</span>
+      </div>
+
+      <div class="kraft-tape-note whitespace-pre-line w-full text-center">
+        {{ t(page().story.manifesto_note) }}
+      </div>
+
+    </div>
+
   </div>
+
 </section>
 
-<wh-flourish class="block py-8" />
-
-<!-- ============================================================ VALUES -->
-<section class="shell py-8">
-  <div class="mb-10 flex flex-col items-center gap-3 text-center">
-    <p class="eyebrow">What we believe</p>
-    <h2 class="text-4xl">Our house rules</h2>
+<!-- ============================================================ 03: METRICS STRIP -->
+<section class="shell py-16 md:py-20 border-b-[1.5px] border-[var(--color-foreground)]">
+  
+  <div class="mb-8">
+    <span class="editorial-tag">{{ t(page().benchmarks.tag) }}</span>
   </div>
 
-  <div class="grid gap-8 md:grid-cols-3">
-    @for (value of values; track value.title; let i = $index) {
-      <article class="hand-frame flex flex-col gap-4 p-8"
-               [class.md:-rotate-1]="i === 0" [class.md:rotate-1]="i === 2">
-        <span class="font-display text-4xl text-gold-500">{{ i + 1 }}.</span>
-        <h3 class="text-2xl">{{ value.title }}</h3>
-        <p class="text-sm leading-relaxed text-muted">{{ value.text }}</p>
-      </article>
+  <div class="border-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] overflow-hidden">
+    <div class="grid grid-cols-2 lg:grid-cols-4 -mr-[1.5px] -mb-[1.5px]">
+      @for (stat of page().benchmarks.items; track $index) {
+        <div class="p-6 sm:p-8 md:p-10 border-r-[1.5px] border-b-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] flex flex-col justify-between min-h-[190px] sm:min-h-[220px] gap-6 reveal" whReveal [revealDelay]="$index * 80">
+          <span class="font-big text-4xl sm:text-5xl lg:text-6xl text-[var(--color-primary)] tracking-tight">{{ stat.num }}</span>
+          <div class="space-y-2.5 sm:space-y-3 pt-2">
+            <span class="font-mono text-xs sm:text-[13px] uppercase font-bold tracking-wider text-[var(--color-foreground)] block leading-snug">
+              {{ t(stat.label) }}
+            </span>
+            <span class="font-mono text-[11px] sm:text-xs text-[var(--color-foreground)]/65 block leading-relaxed">
+              {{ t(stat.note) }}
+            </span>
+          </div>
+        </div>
+      }
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================================================ 04: CORE VALUES / HOUSE RULES -->
+<section class="shell py-20 md:py-28 border-b-[1.5px] border-[var(--color-foreground)]">
+  
+  <div class="mb-12 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
+    <div>
+      <span class="editorial-tag mb-3 inline-block">{{ t(page().values.tag) }}</span>
+      <h2 class="font-big text-3xl sm:text-5xl uppercase tracking-tight text-[var(--color-foreground)]">
+        {{ t(page().values.headline) }}
+      </h2>
+    </div>
+    <span class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/60">{{ t(page().values.subtext) }}</span>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+    @for (val of page().values.items; track val.num; let i = $index) {
+      <div class="p-8 border-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] shadow-[4px_4px_0px_0px_var(--color-foreground)] hover:-translate-y-1 transition-all duration-200 flex flex-col justify-between gap-8 reveal" whReveal [revealDelay]="i * 120">
+        
+        <div class="flex items-center justify-between border-b border-[var(--color-foreground)]/15 pb-4">
+          <span class="font-mono text-sm font-bold text-[var(--color-primary)]">{{ val.num }}.</span>
+          <span class="tape-sticker">{{ val.tag }}</span>
+        </div>
+
+        <div>
+          <h3 class="font-big text-2xl uppercase tracking-tight text-[var(--color-foreground)] mb-3">
+            {{ t(val.title) }}
+          </h3>
+          <p class="font-mono text-xs leading-relaxed text-[var(--color-foreground)]/80">
+            {{ t(val.text) }}
+          </p>
+        </div>
+
+        <div class="pt-2">
+          <span class="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--color-primary)]">VERIFIED DISCIPLINE →</span>
+        </div>
+
+      </div>
     }
   </div>
+
 </section>
 
-<!-- ============================================================ CTA -->
-<section class="shell py-20 text-center">
-  <div class="mx-auto flex max-w-xl flex-col items-center gap-6">
-    <h2 class="text-3xl">Curious? Thirsty? Both?</h2>
-    <p class="font-serif text-lg italic text-muted">
-      Come find us at {{ site.contact.address.street }}, {{ site.contact.address.city }} — or start
-      wandering the cellar online.
+<!-- ============================================================ 05: HOW WE WORK (PILLARS) -->
+<section class="shell py-20 md:py-28 border-b-[1.5px] border-[var(--color-foreground)]">
+  
+  <div class="mb-10">
+    <span class="editorial-tag">{{ t(page().protocols.tag) }}</span>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    @for (pillar of page().protocols.items; track pillar.num; let i = $index) {
+      <div class="p-6 border-l-[1.5px] border-[var(--color-foreground)] flex flex-col justify-between gap-4 reveal" whReveal [revealDelay]="i * 100">
+        <span class="font-mono text-xs font-bold uppercase tracking-widest text-[var(--color-primary)]">PROTOCOL 0{{ i + 1 }}</span>
+        <h4 class="font-big text-xl uppercase text-[var(--color-foreground)]">{{ t(pillar.title) }}</h4>
+        <p class="font-mono text-xs text-[var(--color-foreground)]/70 leading-relaxed">{{ t(pillar.desc) }}</p>
+      </div>
+    }
+  </div>
+
+</section>
+
+<!-- ============================================================ 06: BOTTOM CTA -->
+<section class="shell py-20 md:py-28 text-center">
+  <div class="mx-auto max-w-2xl flex flex-col items-center gap-6 reveal" whReveal>
+    
+    <span class="tape-sticker mb-2">{{ t(page().cta.tape) }}</span>
+
+    <h2 class="font-big text-3xl sm:text-5xl uppercase tracking-tight text-[var(--color-foreground)]">
+      {{ t(page().cta.headline) }}
+    </h2>
+    
+    <p class="font-serif text-lg sm:text-xl italic text-[var(--color-foreground)]/80 max-w-lg leading-relaxed">
+      {{ t(page().cta.subtext) }}
     </p>
-    <div class="flex flex-wrap justify-center gap-4">
-      <a routerLink="/shop" class="btn btn-primary">Visit the e-Shop</a>
-      <a routerLink="/contact" class="btn btn-outline">Contact us</a>
+
+    <div class="flex flex-wrap items-center justify-center gap-4 pt-4">
+      <a routerLink="/shop" class="btn btn-primary font-mono text-xs uppercase tracking-wider font-bold">
+        <span>{{ t(page().cta.button_shop_text) }}</span>
+        <span>→</span>
+      </a>
+      <a routerLink="/contact" class="btn btn-outline font-mono text-xs uppercase tracking-wider font-bold">
+        <span>{{ t(page().cta.button_contact_text) }}</span>
+      </a>
     </div>
+
   </div>
 </section>
