@@ -3,6 +3,7 @@ import { RouterLink, RouterLinkActive, Router, NavigationEnd } from '@angular/ro
 import { filter } from 'rxjs';
 import { SiteSettingsService } from '../core/site-settings.service';
 import { I18nService } from '../core/i18n.service';
+import { CartService } from '../core/cart.service';
 import { WhLogo } from '../shared/brand-logo';
 
 @Component({
@@ -15,6 +16,7 @@ export class SiteHeader implements OnInit {
   private settingsService = inject(SiteSettingsService);
   private router = inject(Router);
   readonly i18n = inject(I18nService);
+  readonly cart = inject(CartService);
 
   get site() {
     return this.settingsService.settings();

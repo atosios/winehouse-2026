@@ -54,6 +54,21 @@ export const routes: Routes = [
         loadComponent: () => import('./admin/overview').then((m) => m.AdminOverview),
       },
       {
+        path: 'products',
+        title: title('Products Catalog'),
+        loadComponent: () => import('./admin/products').then((m) => m.AdminProducts),
+      },
+      {
+        path: 'orders',
+        title: title('Orders Ledger'),
+        loadComponent: () => import('./admin/orders').then((m) => m.AdminOrders),
+      },
+      {
+        path: 'store-config',
+        title: title('Store Configuration'),
+        loadComponent: () => import('./admin/store-config').then((m) => m.AdminStoreConfig),
+      },
+      {
         path: 'page-editor',
         title: title('Page Content Editor'),
         loadComponent: () => import('./admin/homepage-editor').then((m) => m.AdminPageEditor),

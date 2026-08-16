@@ -218,14 +218,14 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               </div>
               <wh-i18n-input label="Image Tag Pill" [(value)]="content.intro.image_tag" [globalLang]="globalEditingLang()" />
               <div>
-                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Monogram Stamp (e.g. WH)</label>
-                <input type="text" [(ngModel)]="content.intro.monogram" class="admin-input font-mono text-xs uppercase" />
+                <label class="admin-field-label">Monogram Stamp (e.g. WH)</label>
+                <input type="text" [(ngModel)]="content.intro.monogram" class="admin-field-input uppercase" />
               </div>
               <wh-i18n-input label="Vertical Banner Text" [(value)]="content.intro.vertical_banner" [globalLang]="globalEditingLang()" />
               <wh-i18n-input label="CTA Circular Badge Text" [(value)]="content.intro.cta_text" [globalLang]="globalEditingLang()" />
               <div class="md:col-span-2">
-                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">CTA Link / Route</label>
-                <input type="text" [(ngModel)]="content.intro.cta_link" class="admin-input font-mono text-xs" />
+                <label class="admin-field-label">CTA Link / Route</label>
+                <input type="text" [(ngModel)]="content.intro.cta_link" class="admin-field-input" />
               </div>
             </div>
 
@@ -265,8 +265,8 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <wh-i18n-input label="Section Tag" [(value)]="content.manifesto.tag" [globalLang]="globalEditingLang()" />
               <div>
-                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Stamp Center Icon (e.g. 🍇)</label>
-                <input type="text" [(ngModel)]="content.manifesto.stamp_icon" class="admin-input font-mono text-xs" />
+                <label class="admin-field-label">Stamp Center Icon (e.g. 🍇)</label>
+                <input type="text" [(ngModel)]="content.manifesto.stamp_icon" class="admin-field-input" />
               </div>
               <div class="md:col-span-2">
                 <wh-i18n-input label="Main Headline" [(value)]="content.manifesto.headline" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
@@ -317,8 +317,8 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
 
                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Number Code</label>
-                      <input type="text" [(ngModel)]="srv.num" class="admin-input font-mono text-xs" />
+                      <label class="admin-field-label">Number Code</label>
+                      <input type="text" [(ngModel)]="srv.num" class="admin-field-input" />
                     </div>
                     <div class="sm:col-span-2">
                       <wh-i18n-input label="Service Title" [(value)]="srv.title" [globalLang]="globalEditingLang()" />
@@ -327,8 +327,8 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
                       <wh-i18n-input label="Subtitle / Capabilities" [(value)]="srv.subtitle" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
                     </div>
                     <div class="sm:col-span-3">
-                      <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Target Link / Route</label>
-                      <input type="text" [(ngModel)]="srv.link" class="admin-input font-mono text-xs" />
+                      <label class="admin-field-label">Target Link / Route</label>
+                      <input type="text" [(ngModel)]="srv.link" class="admin-field-input" />
                     </div>
                   </div>
                 </div>
@@ -402,8 +402,8 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               <wh-i18n-input label="Section Tag" [(value)]="content.cellar.tag" [globalLang]="globalEditingLang()" />
               <wh-i18n-input label="Bottom Link Label" [(value)]="content.cellar.view_all_text" [globalLang]="globalEditingLang()" />
               <div>
-                <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">View All Route</label>
-                <input type="text" [(ngModel)]="content.cellar.view_all_link" class="admin-input font-mono text-xs" />
+                <label class="admin-field-label">View All Route</label>
+                <input type="text" [(ngModel)]="content.cellar.view_all_link" class="admin-field-input" />
               </div>
             </div>
 
@@ -423,19 +423,19 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                     <wh-i18n-input label="Bottle Name" [(value)]="card.name" [globalLang]="globalEditingLang()" />
                     <div>
-                      <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Card Link / Route</label>
-                      <input type="text" [(ngModel)]="card.link" class="admin-input font-mono text-xs" />
+                      <label class="admin-field-label">Card Link / Route</label>
+                      <input type="text" [(ngModel)]="card.link" class="admin-field-input" />
                     </div>
                     <div class="sm:col-span-2">
                       <wh-media-picker label="Bottle Showcase Image" [(value)]="card.img" helperText="Card cover photo" />
                     </div>
                     <div class="sm:col-span-2">
-                      <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Tags (comma separated)</label>
+                      <label class="admin-field-label">Tags (comma separated)</label>
                       <input
                         type="text"
                         [ngModel]="getCellarTagsString(card)"
                         (ngModelChange)="updateCellarTags(card, $event)"
-                        class="admin-input font-mono text-xs uppercase"
+                        class="admin-field-input uppercase"
                         placeholder="e.g. BRANDING, XINOMAVRO, 2021"
                       />
                     </div>
@@ -629,8 +629,8 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
                     <button type="button" (click)="removeAboutBenchmark($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕ Delete</button>
                   </div>
                   <div>
-                    <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Number / Metric Value (e.g. 120+, 100%, 18 yrs)</label>
-                    <input type="text" [(ngModel)]="item.num" class="admin-input font-mono text-xs" />
+                    <label class="admin-field-label">Number / Metric Value (e.g. 120+, 100%, 18 yrs)</label>
+                    <input type="text" [(ngModel)]="item.num" class="admin-field-input" />
                   </div>
                   <wh-i18n-input label="Metric Title" [(value)]="item.label" [globalLang]="globalEditingLang()" />
                   <wh-i18n-input label="Metric Subtext / Note" [(value)]="item.note" [globalLang]="globalEditingLang()" />
@@ -665,12 +665,12 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
                   </div>
                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Number (e.g. 01)</label>
-                      <input type="text" [(ngModel)]="val.num" class="admin-input font-mono text-xs" />
+                      <label class="admin-field-label">Number (e.g. 01)</label>
+                      <input type="text" [(ngModel)]="val.num" class="admin-field-input" />
                     </div>
                     <div>
-                      <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Pill Tag (e.g. / ORIGIN)</label>
-                      <input type="text" [(ngModel)]="val.tag" class="admin-input font-mono text-xs" />
+                      <label class="admin-field-label">Pill Tag (e.g. / ORIGIN)</label>
+                      <input type="text" [(ngModel)]="val.tag" class="admin-field-input" />
                     </div>
                     <div class="sm:col-span-3">
                       <wh-i18n-input label="Principle Title" [(value)]="val.title" [globalLang]="globalEditingLang()" />
@@ -708,8 +708,8 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
                   </div>
                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div>
-                      <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Protocol Key (e.g. A, B, C)</label>
-                      <input type="text" [(ngModel)]="prot.num" class="admin-input font-mono text-xs" />
+                      <label class="admin-field-label">Protocol Key (e.g. A, B, C)</label>
+                      <input type="text" [(ngModel)]="prot.num" class="admin-field-input" />
                     </div>
                     <div class="sm:col-span-2">
                       <wh-i18n-input label="Protocol Title" [(value)]="prot.title" [globalLang]="globalEditingLang()" />
@@ -795,8 +795,8 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
                     <button type="button" (click)="removeShopCategory($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕ Delete</button>
                   </div>
                   <div>
-                    <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Filter Key Code (e.g. ALL, VOLCANIC, NATURAL)</label>
-                    <input type="text" [(ngModel)]="cat.key" class="admin-input font-mono text-xs uppercase" />
+                    <label class="admin-field-label">Filter Key Code (e.g. ALL, VOLCANIC, NATURAL)</label>
+                    <input type="text" [(ngModel)]="cat.key" class="admin-field-input uppercase" />
                   </div>
                   <wh-i18n-input label="Category Display Label" [(value)]="cat.label" [globalLang]="globalEditingLang()" />
                 </div>
@@ -835,20 +835,20 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
 
                   <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
                     <div>
-                      <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Bottle Name</label>
-                      <input type="text" [(ngModel)]="bottle.name" class="admin-input font-mono text-xs uppercase" />
+                      <label class="admin-field-label">Bottle Name</label>
+                      <input type="text" [(ngModel)]="bottle.name" class="admin-field-input uppercase" />
                     </div>
                     <div>
-                      <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Vintage Year</label>
-                      <input type="text" [(ngModel)]="bottle.vintage" class="admin-input font-mono text-xs" />
+                      <label class="admin-field-label">Vintage Year</label>
+                      <input type="text" [(ngModel)]="bottle.vintage" class="admin-field-input" />
                     </div>
                     <div>
-                      <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Price</label>
-                      <input type="text" [(ngModel)]="bottle.price" class="admin-input font-mono text-xs" />
+                      <label class="admin-field-label">Price</label>
+                      <input type="text" [(ngModel)]="bottle.price" class="admin-field-input" />
                     </div>
                     <div>
-                      <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Category Match Key</label>
-                      <select [(ngModel)]="bottle.category" class="admin-input font-mono text-xs">
+                      <label class="admin-field-label">Category Match Key</label>
+                      <select [(ngModel)]="bottle.category" class="admin-field-input">
                         @for (c of shopContent.categories; track c.key) {
                           <option [value]="c.key">{{ c.key }}</option>
                         }
@@ -866,16 +866,16 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
                       <wh-i18n-input label="Status Pill Label" [(value)]="bottle.status" [globalLang]="globalEditingLang()" helperText="e.g. LIMITED ALLOCATION" />
                     </div>
                     <div class="sm:col-span-2">
-                      <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Status Badge Background CSS</label>
-                      <input type="text" [(ngModel)]="bottle.statusBg" class="admin-input font-mono text-xs" placeholder="bg-[#922e1b] or bg-[var(--color-foreground)]" />
+                      <label class="admin-field-label">Status Badge Background CSS</label>
+                      <input type="text" [(ngModel)]="bottle.statusBg" class="admin-field-input" placeholder="bg-[#922e1b] or bg-[var(--color-foreground)]" />
                     </div>
 
                     <div class="sm:col-span-2">
                       <wh-i18n-input label="Soil Composition" [(value)]="bottle.soil" [globalLang]="globalEditingLang()" />
                     </div>
                     <div class="sm:col-span-2">
-                      <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Alcohol (ABV)</label>
-                      <input type="text" [(ngModel)]="bottle.alcohol" class="admin-input font-mono text-xs" placeholder="13.5%" />
+                      <label class="admin-field-label">Alcohol (ABV)</label>
+                      <input type="text" [(ngModel)]="bottle.alcohol" class="admin-field-input" placeholder="13.5%" />
                     </div>
 
                     <div class="sm:col-span-4">
@@ -963,12 +963,12 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               @for (opt of contactContent.form.subjects; track $index) {
                 <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center gap-3">
                   <div class="w-full sm:w-1/3">
-                    <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Value (Identifier)</label>
-                    <input type="text" [(ngModel)]="opt.value" class="admin-input font-mono text-xs" />
+                    <label class="admin-field-label">Value (Identifier)</label>
+                    <input type="text" [(ngModel)]="opt.value" class="admin-field-input" />
                   </div>
                   <div class="flex-1 w-full">
-                    <label class="block text-2xs font-bold uppercase tracking-wider text-slate-600 mb-1 font-mono">Dropdown Display Text</label>
-                    <input type="text" [(ngModel)]="opt.label" class="admin-input font-mono text-xs uppercase" />
+                    <label class="admin-field-label">Dropdown Display Text</label>
+                    <input type="text" [(ngModel)]="opt.label" class="admin-field-input uppercase" />
                   </div>
                   <button type="button" (click)="removeContactSubject($index)" class="text-red-500 hover:text-red-700 p-2 text-xs font-bold cursor-pointer mt-4 sm:mt-0">✕</button>
                 </div>

@@ -394,6 +394,29 @@ export interface MaintenancePageContent {
   inquiry_prefix: I18nText;
 }
 
+export interface StoreCategory {
+  key: string;
+  label: I18nText;
+  enabled: boolean;
+}
+
+export interface StoreConfig {
+  currency_symbol: string;
+  currency_code: string;
+  currency_position: 'before' | 'after';
+  tax_rate: number;
+  tax_included: boolean;
+  store_enabled: boolean;
+  free_shipping_threshold: number;
+  shipping_fee: number;
+  order_minimum_amount: number;
+  bank_name: string;
+  bank_iban: string;
+  bank_bic: string;
+  bank_beneficiary: string;
+  categories: StoreCategory[];
+}
+
 export interface SiteSettings {
   name: string;
   tagline: string;
@@ -420,12 +443,133 @@ export interface SiteSettings {
   contact_content?: ContactPageContent;
   maintenance_content?: MaintenancePageContent;
   maintenance_mode: boolean;
+  store_config?: StoreConfig;
+}
+
+export interface Product {
+  id: number;
+  name: string;
+  slug: string;
+  vintage: string;
+  region: I18nText;
+  varietal: I18nText;
+  category: string;
+  price: number;
+  compare_at_price?: number | null;
+  stock_quantity: number;
+  is_allocated: boolean;
+  status_label: I18nText;
+  status_bg: string;
+  soil: I18nText;
+  alcohol: string;
+  tasting_note: I18nText;
+  cover_image?: string | null;
+  gallery?: string[];
+  published: boolean;
+  sort_order: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface OrderItem {
+  id?: number;
+  product_id?: number | null;
+  product_name: string;
+  vintage?: string | null;
+  price: number;
+  quantity: number;
+  subtotal: number;
+  product?: Product;
+}
+
+export interface Order {
+  id: number;
+  order_number: string;
+  customer_name: string;
+  customer_email: string;
+  customer_phone?: string | null;
+  shipping_address?: {
+    street?: string;
+    city?: string;
+    postal_code?: string;
+    country?: string;
+  } | null;
+  notes?: string | null;
+  status: 'pending' | 'confirmed' | 'allocated' | 'shipped' | 'cancelled';
+  subtotal: number;
+  tax: number;
+  shipping_cost: number;
+  total: number;
+  currency: string;
+  payment_status: 'pending_bank' | 'paid' | 'waived' | 'refunded';
+  payment_method: string;
+  created_at: string;
+  updated_at: string;
+  items?: OrderItem[];
 }
 
 @Injectable({ providedIn: 'root' })
 export class AdminApi {
   private http = inject(HttpClient);
   private base = `${API_BASE}/admin`;
+
+  // Public e-Shop endpoints
+  getPublicProducts(params?: { category?: string; search?: string }): Observable<Product[]> {
+    return this.http.get<Product[]>(`${API_BASE}/shop/products`, { params: params as any });
+  }
+  getPublicProduct(slugOrId: string): Observable<Product> {
+    return this.http.get<Product>(`${API_BASE}/shop/products/${slugOrId}`);
+  }
+  submitPublicOrder(data: {
+    customer_name: string;
+    customer_email: string;
+    customer_phone?: string;
+    shipping_address?: any;
+    notes?: string;
+    items: Array<{
+      product_id?: number | null;
+      product_name: string;
+      vintage?: string | null;
+      price: number;
+      quantity: number;
+    }>;
+  }): Observable<Order> {
+    return this.http.post<Order>(`${API_BASE}/shop/orders`, data);
+  }
+
+  // Products (Admin)
+  listProducts(params?: { category?: string; search?: string }): Observable<Product[]> {
+    return this.http.get<Product[]>(`${this.base}/products`, { params: params as any });
+  }
+  getProduct(id: number): Observable<Product> {
+    return this.http.get<Product>(`${this.base}/products/${id}`);
+  }
+  createProduct(data: Partial<Product>): Observable<Product> {
+    return this.http.post<Product>(`${this.base}/products`, data);
+  }
+  updateProduct(id: number, data: Partial<Product>): Observable<Product> {
+    return this.http.put<Product>(`${this.base}/products/${id}`, data);
+  }
+  deleteProduct(id: number): Observable<unknown> {
+    return this.http.delete(`${this.base}/products/${id}`);
+  }
+
+  // Orders (Admin)
+  listOrders(params?: { status?: string; search?: string }): Observable<Order[]> {
+    return this.http.get<Order[]>(`${this.base}/orders`, { params: params as any });
+  }
+  getOrder(id: number): Observable<Order> {
+    return this.http.get<Order>(`${this.base}/orders/${id}`);
+  }
+  updateOrderStatus(
+    id: number,
+    data: { status?: string; payment_status?: string; notes?: string }
+  ): Observable<Order> {
+    return this.http.put<Order>(`${this.base}/orders/${id}/status`, data);
+  }
+  deleteOrder(id: number): Observable<unknown> {
+    return this.http.delete(`${this.base}/orders/${id}`);
+  }
 
   // Settings
   getPublicSettings(): Observable<SiteSettings> {

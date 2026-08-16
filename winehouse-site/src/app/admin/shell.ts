@@ -26,9 +26,26 @@ import { ConfirmDialog } from './confirm-dialog';
           <span class="admin-sidebar-badge">Admin</span>
         </a>
 
+        <!-- Commerce Section -->
+        <div class="admin-sidebar-section">
+          <span class="admin-sidebar-section-label">Store &amp; Commerce</span>
+          @for (item of commerceNav; track item.path) {
+            <a
+              [routerLink]="item.path"
+              routerLinkActive="active"
+              [routerLinkActiveOptions]="{ exact: item.exact }"
+              class="admin-nav-item"
+              (click)="sidebarOpen.set(false)"
+            >
+              <span class="nav-icon" [innerHTML]="item.icon"></span>
+              <span>{{ item.label }}</span>
+            </a>
+          }
+        </div>
+
         <!-- Content Section -->
         <div class="admin-sidebar-section">
-          <span class="admin-sidebar-section-label">Content</span>
+          <span class="admin-sidebar-section-label">Content &amp; Editorial</span>
           @for (item of contentNav; track item.path) {
             <a
               [routerLink]="item.path"
@@ -45,7 +62,7 @@ import { ConfirmDialog } from './confirm-dialog';
 
         <!-- Administration Section -->
         <div class="admin-sidebar-section">
-          <span class="admin-sidebar-section-label">System & Settings</span>
+          <span class="admin-sidebar-section-label">System &amp; Settings</span>
           @for (item of adminNav; track item.path) {
             <a
               [routerLink]="item.path"
@@ -151,6 +168,33 @@ export class AdminShell {
   private icon(d: string) {
     return `<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${d}</svg>`;
   }
+
+  commerceNav = [
+    {
+      path: '/admin/products',
+      label: 'Products',
+      exact: false,
+      icon: this.icon(
+        '<path d="M8 2h8v4a4 4 0 0 1-4 4 4 4 0 0 1-4-4V2z"/><path d="M12 10v10"/><path d="M7 22h10"/>'
+      ),
+    },
+    {
+      path: '/admin/orders',
+      label: 'Orders',
+      exact: false,
+      icon: this.icon(
+        '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>'
+      ),
+    },
+    {
+      path: '/admin/store-config',
+      label: 'Store Settings',
+      exact: false,
+      icon: this.icon(
+        '<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/>'
+      ),
+    },
+  ];
 
   contentNav = [
     {

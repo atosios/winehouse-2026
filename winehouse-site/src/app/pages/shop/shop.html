@@ -56,30 +56,65 @@
           <span class="font-mono text-[11px] uppercase tracking-wider font-bold text-[var(--color-foreground)]/70">
             {{ t(bottle.region) }}
           </span>
-          <span class="tape-sticker {{ bottle.statusBg }} text-white text-[9px]">
-            {{ t(bottle.status) }}
+          <span class="tape-sticker {{ bottle.status_bg || 'bg-[#922e1b]' }} text-white text-[9px]">
+            {{ t(bottle.status_label) }}
           </span>
         </div>
 
-        <!-- Image Showcase Frame -->
-        <div class="relative h-64 sm:h-72 w-full overflow-hidden bg-[var(--color-foreground)]/5 border-b-[1.5px] border-[var(--color-foreground)]">
+        <!-- Image Showcase Frame with Gallery Switcher -->
+        <div class="relative h-64 sm:h-72 w-full overflow-hidden bg-[var(--color-foreground)]/5 border-b-[1.5px] border-[var(--color-foreground)] group/img">
           <img
-            [src]="bottle.img"
-            [alt]="bottle.name + ' ' + bottle.vintage"
-            class="w-full h-full object-cover object-center filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700"
+            [src]="getCardImage(bottle)"
+            [alt]="bottle.name + ' ' + (bottle.vintage || '')"
+            (click)="openBottleModal(bottle, $event)"
+            class="w-full h-full object-cover object-center filter grayscale group-hover:grayscale-0 group-hover:scale-105 transition-all duration-700 cursor-pointer"
             loading="lazy"
             decoding="async"
           />
-          <div class="absolute bottom-3 left-3">
-            <span class="px-2.5 py-1 bg-[var(--color-foreground)] text-white font-mono text-[10px] font-bold uppercase tracking-widest">
-              VINTAGE {{ bottle.vintage }}
-            </span>
-          </div>
-          <div class="absolute bottom-3 right-3">
-            <span class="px-2.5 py-1 bg-white text-[var(--color-foreground)] font-mono text-[10px] font-bold uppercase tracking-widest border border-[var(--color-foreground)]">
-              {{ bottle.alcohol }} ABV
-            </span>
-          </div>
+
+          @if (bottle.vintage) {
+            <div class="absolute bottom-3 left-3 pointer-events-none">
+              <span class="px-2.5 py-1 bg-[var(--color-foreground)] text-white font-mono text-[10px] font-bold uppercase tracking-widest">
+                VINTAGE {{ bottle.vintage }}
+              </span>
+            </div>
+          }
+
+          @if (bottle.alcohol) {
+            <div class="absolute bottom-3 right-3 pointer-events-none">
+              <span class="px-2.5 py-1 bg-white text-[var(--color-foreground)] font-mono text-[10px] font-bold uppercase tracking-widest border border-[var(--color-foreground)]">
+                {{ bottle.alcohol }} ABV
+              </span>
+            </div>
+          }
+
+          <!-- Multi-Image Thumbnails Bar (if product has gallery photos) -->
+          @if (getAllBottleImages(bottle).length > 1) {
+            <div class="absolute top-3 right-3 flex items-center gap-1 bg-black/60 backdrop-blur-xs p-1 rounded-md border border-white/20 z-10">
+              @for (img of getAllBottleImages(bottle); track img; let gIdx = $index) {
+                <button
+                  type="button"
+                  (click)="setCardImage(bottle.id, img, $event)"
+                  class="w-4 h-4 rounded-full border transition-all cursor-pointer overflow-hidden"
+                  [class.border-white]="getCardImage(bottle) === img"
+                  [class.scale-110]="getCardImage(bottle) === img"
+                  [class.border-white/40]="getCardImage(bottle) !== img"
+                  [title]="'View photo ' + (gIdx + 1)"
+                >
+                  <img [src]="img" class="w-full h-full object-cover" />
+                </button>
+              }
+            </div>
+          }
+
+          <!-- Quick Look Trigger Button -->
+          <button
+            type="button"
+            (click)="openBottleModal(bottle, $event)"
+            class="absolute top-3 left-3 px-2 py-1 bg-white/90 hover:bg-white text-[var(--color-foreground)] font-mono text-[9px] font-bold uppercase tracking-wider border border-[var(--color-foreground)] opacity-0 group-hover/img:opacity-100 transition-opacity cursor-pointer shadow-xs"
+          >
+            🔍 Quick View
+          </button>
         </div>
 
         <!-- Card Body Content -->
@@ -87,7 +122,10 @@
           
           <div>
             <div class="flex items-baseline justify-between gap-2 mb-2">
-              <h2 class="font-big text-3xl sm:text-4xl uppercase tracking-tight text-[var(--color-foreground)] group-hover:text-[var(--color-primary)] transition-colors">
+              <h2
+                (click)="openBottleModal(bottle, $event)"
+                class="font-big text-3xl sm:text-4xl uppercase tracking-tight text-[var(--color-foreground)] group-hover:text-[var(--color-primary)] transition-colors cursor-pointer"
+              >
                 {{ bottle.name }}
               </h2>
               <span class="font-mono text-base font-bold text-[var(--color-primary)]">
@@ -98,35 +136,197 @@
             <p class="font-mono text-xs uppercase font-bold tracking-wider text-[var(--color-foreground)]/80 mb-1">
               {{ t(bottle.varietal) }}
             </p>
-            <p class="font-mono text-[10px] uppercase text-[var(--color-foreground)]/60 mb-4">
-              Soil: {{ t(bottle.soil) }}
-            </p>
+            @if (bottle.soil) {
+              <p class="font-mono text-[10px] uppercase text-[var(--color-foreground)]/60 mb-4">
+                Soil: {{ t(bottle.soil) }}
+              </p>
+            }
 
-            <p class="font-sans text-xs leading-relaxed text-[var(--color-foreground)]/80 border-t border-[var(--color-foreground)]/10 pt-3 italic">
-              “{{ t(bottle.tastingNote) }}”
-            </p>
+            @if (bottle.tasting_note) {
+              <p class="font-sans text-xs leading-relaxed text-[var(--color-foreground)]/80 border-t border-[var(--color-foreground)]/10 pt-3 italic">
+                “{{ t(bottle.tasting_note) }}”
+              </p>
+            }
           </div>
 
-          <!-- Card Action Button -->
-          <div class="pt-2 border-t border-[var(--color-foreground)]/15">
-            <a
-              routerLink="/contact"
-              class="w-full py-2.5 px-4 bg-transparent group-hover:bg-[var(--color-foreground)] text-[var(--color-foreground)] group-hover:text-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between transition-all duration-200"
+          <!-- Card Actions: Add to Basket & Allocation Inquiry -->
+          <div class="pt-2 border-t border-[var(--color-foreground)]/15 space-y-2">
+            <button
+              type="button"
+              (click)="addToBasket(bottle, $event)"
+              class="w-full py-3 px-4 bg-[var(--color-foreground)] hover:bg-[var(--color-primary)] text-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between transition-all duration-200 cursor-pointer shadow-xs"
             >
-              <span>Inquire &amp; Allocate</span>
-              <span class="text-sm group-hover:translate-x-1 transition-transform">→</span>
-            </a>
+              <div class="flex items-center gap-2">
+                <span>+ Add to Basket</span>
+                @if (getItemQtyInCart(bottle.id) > 0) {
+                  <span class="px-1.5 py-0.5 rounded bg-white text-[var(--color-foreground)] text-[10px] font-extrabold">
+                    {{ getItemQtyInCart(bottle.id) }} in Basket
+                  </span>
+                }
+              </div>
+              <span class="text-sm">→</span>
+            </button>
           </div>
 
         </div>
 
       </article>
     }
+
+    @if (filteredItems().length === 0) {
+      <div class="col-span-full py-16 text-center border-[1.5px] border-dashed border-[var(--color-foreground)]/30 p-8">
+        <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/60 mb-3">
+          No bottles found matching this category.
+        </p>
+        <button
+          type="button"
+          (click)="setCategory('ALL')"
+          class="btn btn-outline btn-sm font-mono text-xs uppercase cursor-pointer"
+        >
+          View All Bottles
+        </button>
+      </div>
+    }
   </div>
 
 </section>
 
-<!-- ============================================================ 03: PRIVATE CELLAR ADVISORY BANNER -->
+<!-- ============================================================ 03: BOTTLE DETAILS & GALLERY MODAL -->
+@if (selectedBottle(); as b) {
+  <div
+    class="fixed inset-0 z-[150] bg-black/75 backdrop-blur-xs flex items-center justify-center p-4 sm:p-6 overflow-y-auto"
+    (click)="closeBottleModal()"
+  >
+    <div
+      class="relative w-full max-w-4xl bg-[var(--color-paper-light)] text-[var(--color-foreground)] border-[1.5px] border-[var(--color-foreground)] shadow-[8px_8px_0px_0px_var(--color-foreground)] overflow-hidden my-8 animate-in fade-in zoom-in-95 duration-200"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Modal Header Bar -->
+      <div class="p-4 sm:p-6 border-b-[1.5px] border-[var(--color-foreground)] bg-white/50 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <span class="font-mono text-xs uppercase font-bold tracking-wider text-[var(--color-foreground)]/70">Product Details</span>
+        </div>
+        <button
+          type="button"
+          (click)="closeBottleModal()"
+          class="text-[var(--color-foreground)] hover:text-[var(--color-primary)] font-mono text-lg font-bold p-1 cursor-pointer"
+        >
+          ✕
+        </button>
+      </div>
+
+      <!-- Modal Content: Split Screen Gallery & Terroir Dossier -->
+      <div class="grid grid-cols-1 md:grid-cols-2 max-h-[75vh] overflow-y-auto">
+        
+        <!-- Left: Image Gallery Viewer -->
+        <div class="p-6 sm:p-8 bg-black/5 border-b md:border-b-0 md:border-r-[1.5px] border-[var(--color-foreground)] flex flex-col justify-between gap-4">
+          
+          <!-- Main High-Res Image -->
+          <div class="relative w-full h-80 sm:h-96 rounded border-[1.5px] border-[var(--color-foreground)] bg-white overflow-hidden shadow-xs flex items-center justify-center">
+            <img
+              [src]="modalActiveImage() || b.cover_image || b.img || 'cellar_ritual.jpg'"
+              [alt]="b.name"
+              class="w-full h-full object-cover"
+            />
+            @if (b.vintage) {
+              <div class="absolute bottom-3 left-3">
+                <span class="px-2.5 py-1 bg-[var(--color-foreground)] text-white font-mono text-[10px] font-bold uppercase tracking-widest">
+                  VINTAGE {{ b.vintage }}
+                </span>
+              </div>
+            }
+          </div>
+
+          <!-- Gallery Thumbnails Carousel Strip -->
+          @if (getAllBottleImages(b).length > 1) {
+            <div class="flex items-center gap-2 overflow-x-auto pb-1">
+              @for (thumb of getAllBottleImages(b); track thumb; let tIdx = $index) {
+                <button
+                  type="button"
+                  (click)="modalActiveImage.set(thumb)"
+                  class="w-16 h-16 rounded border-[1.5px] shrink-0 overflow-hidden cursor-pointer transition-all"
+                  [class.border-[var(--color-primary)]]="modalActiveImage() === thumb"
+                  [class.scale-105]="modalActiveImage() === thumb"
+                  [class.shadow-md]="modalActiveImage() === thumb"
+                  [class.border-[var(--color-foreground)]/30]="modalActiveImage() !== thumb"
+                >
+                  <img [src]="thumb" class="w-full h-full object-cover" />
+                </button>
+              }
+            </div>
+          }
+
+        </div>
+
+        <!-- Right: Technical Dossier & Add to Basket -->
+        <div class="p-6 sm:p-8 flex flex-col justify-between gap-6">
+          
+          <div class="space-y-4">
+            <div>
+              <span class="font-mono text-xs uppercase font-bold tracking-widest text-[var(--color-primary)] block mb-1">
+                {{ t(b.region) }}
+              </span>
+              <h2 class="font-big text-4xl sm:text-5xl uppercase tracking-tight text-[var(--color-foreground)]">
+                {{ b.name }}
+              </h2>
+              <div class="font-mono text-2xl font-bold text-[var(--color-primary)] mt-1">
+                {{ b.price }}
+              </div>
+            </div>
+
+            <!-- Varietal & Soil specs -->
+            <div class="p-4 bg-white border border-[var(--color-foreground)]/20 font-mono text-xs space-y-2">
+              <div class="flex justify-between border-b border-[var(--color-foreground)]/10 pb-1.5">
+                <span class="text-[var(--color-foreground)]/60 uppercase">Varietal:</span>
+                <span class="font-bold text-right">{{ t(b.varietal) || 'Monovarietal' }}</span>
+              </div>
+              <div class="flex justify-between border-b border-[var(--color-foreground)]/10 pb-1.5">
+                <span class="text-[var(--color-foreground)]/60 uppercase">Terroir Soil:</span>
+                <span class="font-bold text-right">{{ t(b.soil) || 'Volcanic & Limestone' }}</span>
+              </div>
+              <div class="flex justify-between border-b border-[var(--color-foreground)]/10 pb-1.5">
+                <span class="text-[var(--color-foreground)]/60 uppercase">Alcohol Content:</span>
+                <span class="font-bold text-right">{{ b.alcohol || '13.5%' }} ABV</span>
+              </div>
+              <div class="flex justify-between">
+                <span class="text-[var(--color-foreground)]/60 uppercase">Status:</span>
+                <span class="font-bold text-emerald-700">Available</span>
+              </div>
+            </div>
+
+            @if (b.tasting_note) {
+              <div class="space-y-1">
+                <span class="font-mono text-[10px] uppercase font-bold tracking-wider text-[var(--color-foreground)]/60 block">
+                  Description:
+                </span>
+                <p class="font-sans text-xs sm:text-sm leading-relaxed text-[var(--color-foreground)]/80 italic bg-white/50 p-3.5 border-l-2 border-[var(--color-primary)]">
+                  “{{ t(b.tasting_note) }}”
+                </p>
+              </div>
+            }
+          </div>
+
+          <!-- Bottom Actions -->
+          <div class="pt-4 border-t border-[var(--color-foreground)]/15 space-y-3">
+            <button
+              type="button"
+              (click)="addToBasket(b, $event); closeBottleModal()"
+              class="btn btn-primary font-mono text-xs uppercase font-bold py-3.5 px-6 w-full flex items-center justify-center gap-2 cursor-pointer shadow-md"
+            >
+              <span>+ Add to Basket</span>
+              <span>→</span>
+            </button>
+          </div>
+
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+}
+
+<!-- ============================================================ 04: PRIVATE CELLAR ADVISORY BANNER -->
 <section class="shell py-20 md:py-28">
   
   <div class="terracotta-block p-8 md:p-14 border-[1.5px] border-[var(--color-foreground)] shadow-2xl reveal" whReveal>

@@ -3,10 +3,12 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { NavigationEnd, Router, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { SiteHeader } from './layout/site-header';
+import { WhCartDrawer } from './shared/cart-drawer';
+import { WhCheckoutModal } from './shared/checkout-modal';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, SiteHeader],
+  imports: [RouterOutlet, SiteHeader, WhCartDrawer, WhCheckoutModal],
   templateUrl: './app.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

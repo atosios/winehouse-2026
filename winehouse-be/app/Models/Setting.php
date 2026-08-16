@@ -52,6 +52,28 @@ class Setting extends Model
                 'terracotta' => '#c84b31',
                 'card_dark' => '#111111',
             ],
+            'store_config' => [
+                'currency_symbol' => '€',
+                'currency_code' => 'EUR',
+                'currency_position' => 'before',
+                'tax_rate' => 24,
+                'tax_included' => true,
+                'store_enabled' => true,
+                'free_shipping_threshold' => 150.00,
+                'shipping_fee' => 15.00,
+                'order_minimum_amount' => 0.00,
+                'bank_name' => 'National Bank of Greece',
+                'bank_iban' => 'GR12 0110 1250 0000 1234 5678 901',
+                'bank_bic' => 'ETHNGRAA',
+                'bank_beneficiary' => 'The Winehouse Ltd',
+                'categories' => [
+                    ['key' => 'ALL', 'label' => ['en' => 'ALL BOTTLES', 'el' => 'ΟΛΕΣ ΟΙ ΦΙΑΛΕΣ'], 'enabled' => true],
+                    ['key' => 'VOLCANIC', 'label' => ['en' => 'VOLCANIC SOIL', 'el' => 'ΗΦΑΙΣΤΕΙΑΚΟ ΕΔΑΦΟΣ'], 'enabled' => true],
+                    ['key' => 'NATURAL', 'label' => ['en' => 'NATURAL & WILD', 'el' => 'ΦΥΣΙΚΑ & ΑΓΡΙΑ'], 'enabled' => true],
+                    ['key' => 'RESERVE', 'label' => ['en' => 'CELLAR RESERVE', 'el' => 'ΠΑΛΑΙΩΣΗ & RESERVE'], 'enabled' => true],
+                    ['key' => 'INDIGENOUS', 'label' => ['en' => 'ANCIENT INDIGENOUS', 'el' => 'ΑΥΤΟΧΘΟΝΕΣ ΠΟΙΚΙΛΙΕΣ'], 'enabled' => true],
+                ],
+            ],
             'homepage_content' => [
                 'hero' => [
                     'tag' => '/ HERO',
@@ -544,6 +566,7 @@ class Setting extends Model
             'contact_content',
             'maintenance_content',
             'maintenance_mode',
+            'store_config',
         ];
 
         foreach ($data as $key => $value) {

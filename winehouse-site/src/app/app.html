@@ -5,3 +5,7 @@
   <router-outlet />
 </main>
 
+@if (!isAdmin()) {
+  <wh-cart-drawer />
+  <wh-checkout-modal />
+}

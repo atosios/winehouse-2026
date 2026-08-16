@@ -32,5 +32,8 @@ class DatabaseSeeder extends Seeder
                 Setting::set($key, $value);
             }
         }
+
+        // Seed initial wine bottles
+        $this->call(ProductSeeder::class);
     }
 }

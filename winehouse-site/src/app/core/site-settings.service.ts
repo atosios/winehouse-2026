@@ -11,7 +11,31 @@ import {
   MaintenancePageContent,
   SiteColors,
   SiteSettings,
+  StoreConfig,
 } from '../admin/api';
+
+export const DEFAULT_STORE_CONFIG: StoreConfig = {
+  currency_symbol: '€',
+  currency_code: 'EUR',
+  currency_position: 'before',
+  tax_rate: 24,
+  tax_included: true,
+  store_enabled: true,
+  free_shipping_threshold: 150.0,
+  shipping_fee: 15.0,
+  order_minimum_amount: 0.0,
+  bank_name: 'National Bank of Greece',
+  bank_iban: 'GR12 0110 1250 0000 1234 5678 901',
+  bank_bic: 'ETHNGRAA',
+  bank_beneficiary: 'The Winehouse Ltd',
+  categories: [
+    { key: 'ALL', label: { en: 'ALL BOTTLES', el: 'ΟΛΕΣ ΟΙ ΦΙΑΛΕΣ' }, enabled: true },
+    { key: 'VOLCANIC', label: { en: 'VOLCANIC SOIL', el: 'ΗΦΑΙΣΤΕΙΑΚΟ ΕΔΑΦΟΣ' }, enabled: true },
+    { key: 'NATURAL', label: { en: 'NATURAL & WILD', el: 'ΦΥΣΙΚΑ & ΑΓΡΙΑ' }, enabled: true },
+    { key: 'RESERVE', label: { en: 'CELLAR RESERVE', el: 'ΠΑΛΑΙΩΣΗ & RESERVE' }, enabled: true },
+    { key: 'INDIGENOUS', label: { en: 'ANCIENT INDIGENOUS', el: 'ΑΥΤΟΧΘΟΝΕΣ ΠΟΙΚΙΛΙΕΣ' }, enabled: true },
+  ],
+};
 
 export const DEFAULT_SITE_COLORS: SiteColors = {
   primary: '#c84b31',
@@ -522,6 +546,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   contact_content: JSON.parse(JSON.stringify(DEFAULT_CONTACT_PAGE_CONTENT)),
   maintenance_content: JSON.parse(JSON.stringify(DEFAULT_MAINTENANCE_CONTENT)),
   maintenance_mode: true,
+  store_config: JSON.parse(JSON.stringify(DEFAULT_STORE_CONFIG)),
 };
 
 @Injectable({ providedIn: 'root' })
@@ -546,6 +571,7 @@ export class SiteSettingsService {
   readonly contactPage = computed<ContactPageContent>(() => this.settings().contact_content || DEFAULT_CONTACT_PAGE_CONTENT);
   readonly maintenancePage = computed<MaintenancePageContent>(() => this.settings().maintenance_content || DEFAULT_MAINTENANCE_CONTENT);
   readonly isMaintenanceMode = computed(() => this.settings().maintenance_mode);
+  readonly storeConfig = computed<StoreConfig>(() => this.settings().store_config || DEFAULT_STORE_CONFIG);
 
   constructor() {
     this.applyTheme(DEFAULT_SITE_COLORS);
@@ -686,6 +712,7 @@ export class SiteSettingsService {
             shop_content: loaded.shop_content || DEFAULT_SHOP_CONTENT,
             contact_content: loaded.contact_content || DEFAULT_CONTACT_PAGE_CONTENT,
             maintenance_content: loaded.maintenance_content || DEFAULT_MAINTENANCE_CONTENT,
+            store_config: loaded.store_config || DEFAULT_STORE_CONFIG,
           };
 
           this.settings.set(merged);
@@ -780,6 +807,7 @@ export class SiteSettingsService {
             shop_content: updated.shop_content || data.shop_content || this.settings().shop_content || DEFAULT_SHOP_CONTENT,
             contact_content: updated.contact_content || data.contact_content || this.settings().contact_content || DEFAULT_CONTACT_PAGE_CONTENT,
             maintenance_content: updated.maintenance_content || data.maintenance_content || this.settings().maintenance_content || DEFAULT_MAINTENANCE_CONTENT,
+            store_config: updated.store_config || data.store_config || this.settings().store_config || DEFAULT_STORE_CONFIG,
           };
 
           this.settings.set(merged);
