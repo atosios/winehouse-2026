@@ -45,36 +45,54 @@ jobs:
           cd winehouse-be
           composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --ignore-platform-req=php+
 
-      # 6. Deploy Frontend to public_html via FTP/FTPS
-      - name: Deploy Frontend to public_html
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: ${{ secrets.FTP_PORT || 21 }}
-          local-dir: ./winehouse-site/dist/winehouse-site/browser/
-          server-dir: ./public_html/
-          dangerous-clean-slate: false
+      # 6. Install LFTP
+      - name: Install LFTP Deploy Tool
+        run: sudo apt-get update && sudo apt-get install -y lftp
 
-      # 7. Deploy Backend to ~/winehouse-be via FTP/FTPS
+      # 7. Deploy Frontend to public_html via LFTP
+      - name: Deploy Frontend to public_html
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_PORT: ${{ secrets.FTP_PORT || '21' }}
+        run: |
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_SERVER" << 'EOF'
+          set ftp:ssl-allow true
+          set ssl:verify-certificate no
+          set ftp:passive-mode true
+          set ftp:prefer-epsv false
+          set net:timeout 60
+          set net:max-retries 5
+          set net:reconnect-interval-base 5
+          mkdir -p public_html
+          mirror -R --verbose ./winehouse-site/dist/winehouse-site/browser/ ./public_html/
+          quit
+          EOF
+
+      # 8. Deploy Backend to ~/winehouse-be via LFTP
       - name: Deploy Backend to winehouse-be
-        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
-        with:
-          server: ${{ secrets.FTP_SERVER }}
-          username: ${{ secrets.FTP_USERNAME }}
-          password: ${{ secrets.FTP_PASSWORD }}
-          protocol: ftp
-          port: ${{ secrets.FTP_PORT || 21 }}
-          local-dir: ./winehouse-be/
-          server-dir: ./winehouse-be/
-          dangerous-clean-slate: false
-          exclude: |
-            **/.git*
-            **/.git*/**
-            **/.env*
-            **/.env
-            **/node_modules/**
-            **/tests/**
-            storage/logs/*.log
+        env:
+          FTP_SERVER: ${{ secrets.FTP_SERVER }}
+          FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
+          FTP_PASSWORD: ${{ secrets.FTP_PASSWORD }}
+          FTP_PORT: ${{ secrets.FTP_PORT || '21' }}
+        run: |
+          lftp -u "$FTP_USERNAME","$FTP_PASSWORD" -p "$FTP_PORT" "$FTP_SERVER" << 'EOF'
+          set ftp:ssl-allow true
+          set ssl:verify-certificate no
+          set ftp:passive-mode true
+          set ftp:prefer-epsv false
+          set net:timeout 60
+          set net:max-retries 5
+          set net:reconnect-interval-base 5
+          mkdir -p winehouse-be
+          mirror -R --verbose \
+            --exclude-glob .git* \
+            --exclude-glob .env* \
+            --exclude-glob tests/ \
+            --exclude-glob node_modules/ \
+            --exclude-glob storage/logs/*.log \
+            ./winehouse-be/ ./winehouse-be/
+          quit
+          EOF
