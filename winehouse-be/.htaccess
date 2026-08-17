@@ -1,0 +1,13 @@
+# =============================================================================
+# Security Lockdown for Laravel Root
+# Blocks all direct HTTP access through the main domain (e.g. winehouse.gr/winehouse-be/*)
+# Subdomain requests (api.winehouse.gr) enter directly into public/ and are unaffected.
+# =============================================================================
+
+<IfModule mod_authz_core.c>
+    Require all denied
+</IfModule>
+<IfModule !mod_authz_core.c>
+    Order deny,allow
+    Deny from all
+</IfModule>
