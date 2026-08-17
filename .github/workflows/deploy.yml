@@ -66,7 +66,7 @@ jobs:
           set net:max-retries 5
           set net:reconnect-interval-base 5
           mkdir -p public_html
-          mirror -R --only-newer --parallel=10 --verbose ./winehouse-site/dist/winehouse-site/browser/ ./public_html/
+          mirror -R --parallel=10 --verbose ./winehouse-site/dist/winehouse-site/browser/ ./public_html/
           quit
           EOF
 
@@ -87,7 +87,7 @@ jobs:
           set net:max-retries 5
           set net:reconnect-interval-base 5
           mkdir -p winehouse-be
-          mirror -R --only-newer --parallel=10 --verbose \
+          mirror -R --parallel=10 --verbose \
             --exclude-glob .git* \
             --exclude-glob .env* \
             --exclude-glob tests/ \
