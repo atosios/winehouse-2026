@@ -66,14 +66,16 @@ jobs:
           set net:max-retries 5
           set net:reconnect-interval-base 5
           mkdir -p public_html
-          mirror -R --parallel=10 --verbose ./winehouse-site/dist/winehouse-site/browser/ ./public_html/
+          mirror -R --parallel=10 --verbose \
+            --exclude-glob winehouse-be* \
+            ./winehouse-site/dist/winehouse-site/browser/ ./public_html/
           put -f -O ./public_html/ ./winehouse-site/dist/winehouse-site/browser/index.html
           put -f -O ./public_html/ ./winehouse-site/dist/winehouse-site/browser/.htaccess
           quit
           EOF
 
-      # 8. Deploy Backend to ~/winehouse-be via LFTP
-      - name: Deploy Backend to winehouse-be
+      # 8. Deploy Backend to public_html/winehouse-be via LFTP
+      - name: Deploy Backend to public_html/winehouse-be
         env:
           FTP_SERVER: ${{ secrets.FTP_SERVER }}
           FTP_USERNAME: ${{ secrets.FTP_USERNAME }}
@@ -88,13 +90,13 @@ jobs:
           set net:timeout 60
           set net:max-retries 5
           set net:reconnect-interval-base 5
-          mkdir -p winehouse-be
+          mkdir -p public_html/winehouse-be
           mirror -R --parallel=10 --verbose \
             --exclude-glob .git* \
             --exclude-glob .env* \
             --exclude-glob tests/ \
             --exclude-glob node_modules/ \
             --exclude-glob storage/logs/*.log \
-            ./winehouse-be/ ./winehouse-be/
+            ./winehouse-be/ ./public_html/winehouse-be/
           quit
           EOF
