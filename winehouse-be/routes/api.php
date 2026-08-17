@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ContactController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostController;
@@ -15,6 +16,7 @@ Route::get('/settings', [SettingController::class, 'publicIndex']);
 Route::get('/posts', [PostController::class, 'publicIndex']);
 Route::get('/posts/{slug}', [PostController::class, 'publicShow']);
 Route::get('/pages/{slug}', [PageController::class, 'publicShow']);
+Route::post('/contact', [ContactController::class, 'publicStore']);
 
 // Public e-Shop endpoints.
 Route::get('/shop/products', [ProductController::class, 'publicIndex']);
@@ -38,17 +40,27 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::apiResource('users', UserController::class);
 
     // Products & Orders
+    Route::get('/products/template-csv', [ProductController::class, 'downloadTemplateCsv']);
+    Route::post('/products/import-csv', [ProductController::class, 'importCsv']);
     Route::apiResource('products', ProductController::class);
     Route::get('/orders', [OrderController::class, 'index']);
     Route::get('/orders/{order}', [OrderController::class, 'show']);
     Route::put('/orders/{order}/status', [OrderController::class, 'updateStatus']);
     Route::delete('/orders/{order}', [OrderController::class, 'destroy']);
 
+    // Inquiries & Contact Messages
+    Route::get('/messages', [ContactController::class, 'index']);
+    Route::get('/messages/{message}', [ContactController::class, 'show']);
+    Route::put('/messages/{message}/status', [ContactController::class, 'updateStatus']);
+    Route::delete('/messages/{message}', [ContactController::class, 'destroy']);
+
     Route::get('/settings', [SettingController::class, 'index']);
     Route::put('/settings', [SettingController::class, 'update']);
+    Route::post('/settings/mail-test', [SettingController::class, 'sendTestEmail']);
 
     Route::get('/assets', [AssetController::class, 'index']);
     Route::post('/assets', [AssetController::class, 'store']);
+    Route::post('/assets/bulk-delete', [AssetController::class, 'bulkDestroy']);
     Route::delete('/assets/{asset}', [AssetController::class, 'destroy']);
 });
 

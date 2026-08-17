@@ -50,15 +50,57 @@ export class CartService {
     return this.items().reduce((acc, item) => acc + item.price * item.quantity, 0);
   });
 
-  formatPrice(amount: number): string {
+  readonly shippingFee = computed(() => {
+    const cfg = this.settingsService.storeConfig();
+    const sub = this.subtotal();
+    if (sub <= 0) return 0;
+    const threshold = Number(cfg.free_shipping_threshold ?? 150);
+    if (threshold > 0 && sub >= threshold) return 0;
+    return Number(cfg.shipping_fee ?? 15);
+  });
+
+  readonly freeShippingThreshold = computed(() => {
+    const cfg = this.settingsService.storeConfig();
+    return Number(cfg.free_shipping_threshold ?? 150);
+  });
+
+  readonly amountUntilFreeShipping = computed(() => {
+    const threshold = this.freeShippingThreshold();
+    const sub = this.subtotal();
+    if (threshold <= 0 || sub <= 0) return 0;
+    const diff = threshold - sub;
+    return diff > 0 ? diff : 0;
+  });
+
+  readonly freeShippingRemainingFormatted = computed(() => {
+    const remaining = this.amountUntilFreeShipping();
+    return this.formatPrice(remaining);
+  });
+
+  readonly shippingFeeFormatted = computed(() => {
+    const fee = this.shippingFee();
+    if (fee === 0) return 'FREE';
+    return this.formatPrice(fee);
+  });
+
+  readonly grandTotal = computed(() => {
+    return this.subtotal() + this.shippingFee();
+  });
+
+  formatPrice(amount: number | string): string {
     const cfg = this.settingsService.storeConfig();
     const sym = cfg.currency_symbol || '€';
-    const formatted = amount.toFixed(2);
+    const num = typeof amount === 'number' ? amount : parseFloat(String(amount).replace(/[^0-9.-]+/g, '')) || 0;
+    const formatted = num.toFixed(2);
     return cfg.currency_position === 'after' ? `${formatted} ${sym}` : `${sym} ${formatted}`;
   }
 
   readonly formattedSubtotal = computed(() => {
     return this.formatPrice(this.subtotal());
+  });
+
+  readonly formattedGrandTotal = computed(() => {
+    return this.formatPrice(this.grandTotal());
   });
 
   constructor() {

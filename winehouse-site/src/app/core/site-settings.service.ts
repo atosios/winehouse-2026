@@ -12,7 +12,24 @@ import {
   SiteColors,
   SiteSettings,
   StoreConfig,
+  MailConfig,
 } from '../admin/api';
+
+export const DEFAULT_MAIL_CONFIG: MailConfig = {
+  mail_driver: 'smtp',
+  mail_host: 'smtp.winehouse.gr',
+  mail_port: 587,
+  mail_encryption: 'tls',
+  mail_username: 'info@winehouse.gr',
+  mail_password: '',
+  mail_from_address: 'info@winehouse.gr',
+  mail_from_name: 'The Winehouse',
+  company_notification_email: 'info@winehouse.gr',
+  notify_on_new_order: true,
+  notify_on_new_message: true,
+  notify_on_order_status_change: true,
+  send_customer_order_confirmation: true,
+};
 
 export const DEFAULT_STORE_CONFIG: StoreConfig = {
   currency_symbol: '€',
@@ -50,10 +67,11 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
   hero: {
     tag: '/ HERO',
     video_url: 'def.mp4',
+    fallback_image_url: 'editorial_intro.jpg',
     video_alt_url: 'hero_video.mp4',
     small_prefix: 'The',
     big_title: 'Winehouse',
-    show_stain: true,
+    show_stain: false,
   },
   intro: {
     enabled: true,
@@ -547,6 +565,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   maintenance_content: JSON.parse(JSON.stringify(DEFAULT_MAINTENANCE_CONTENT)),
   maintenance_mode: true,
   store_config: JSON.parse(JSON.stringify(DEFAULT_STORE_CONFIG)),
+  mail_config: JSON.parse(JSON.stringify(DEFAULT_MAIL_CONFIG)),
 };
 
 @Injectable({ providedIn: 'root' })
@@ -705,14 +724,30 @@ export class SiteSettingsService {
             },
             hours: Array.isArray(loaded.hours) ? loaded.hours : DEFAULT_SITE_SETTINGS.hours,
             socials: Array.isArray(loaded.socials) ? loaded.socials : DEFAULT_SITE_SETTINGS.socials,
-            nav: Array.isArray(loaded.nav) ? loaded.nav : DEFAULT_SITE_SETTINGS.nav,
+            nav: Array.isArray(loaded.nav) ? this.dedupeNav(loaded.nav) : DEFAULT_SITE_SETTINGS.nav,
             colors: mergedColors,
             homepage_content: mergedHomepage,
             about_content: loaded.about_content || DEFAULT_ABOUT_CONTENT,
             shop_content: loaded.shop_content || DEFAULT_SHOP_CONTENT,
             contact_content: loaded.contact_content || DEFAULT_CONTACT_PAGE_CONTENT,
             maintenance_content: loaded.maintenance_content || DEFAULT_MAINTENANCE_CONTENT,
-            store_config: loaded.store_config || DEFAULT_STORE_CONFIG,
+            store_config: {
+              ...DEFAULT_STORE_CONFIG,
+              ...(loaded.store_config || {}),
+              tax_rate: Number((loaded.store_config as any)?.tax_rate ?? DEFAULT_STORE_CONFIG.tax_rate),
+              tax_included: Boolean((loaded.store_config as any)?.tax_included ?? DEFAULT_STORE_CONFIG.tax_included),
+              store_enabled: Boolean((loaded.store_config as any)?.store_enabled ?? DEFAULT_STORE_CONFIG.store_enabled),
+              free_shipping_threshold: Number((loaded.store_config as any)?.free_shipping_threshold ?? DEFAULT_STORE_CONFIG.free_shipping_threshold),
+              shipping_fee: Number((loaded.store_config as any)?.shipping_fee ?? DEFAULT_STORE_CONFIG.shipping_fee),
+              order_minimum_amount: Number((loaded.store_config as any)?.order_minimum_amount ?? DEFAULT_STORE_CONFIG.order_minimum_amount),
+              categories: Array.isArray((loaded.store_config as any)?.categories)
+                ? (loaded.store_config as any).categories
+                : DEFAULT_STORE_CONFIG.categories,
+            },
+            mail_config: {
+              ...DEFAULT_MAIL_CONFIG,
+              ...(loaded.mail_config || {}),
+            },
           };
 
           this.settings.set(merged);
@@ -787,6 +822,21 @@ export class SiteSettingsService {
             },
           };
 
+          const rawSc = updated.store_config || data.store_config || this.settings().store_config || DEFAULT_STORE_CONFIG;
+          const mergedStoreConfig: StoreConfig = {
+            ...DEFAULT_STORE_CONFIG,
+            ...rawSc,
+            tax_rate: Number((rawSc as any)?.tax_rate ?? DEFAULT_STORE_CONFIG.tax_rate),
+            tax_included: Boolean((rawSc as any)?.tax_included ?? DEFAULT_STORE_CONFIG.tax_included),
+            store_enabled: Boolean((rawSc as any)?.store_enabled ?? DEFAULT_STORE_CONFIG.store_enabled),
+            free_shipping_threshold: Number((rawSc as any)?.free_shipping_threshold ?? DEFAULT_STORE_CONFIG.free_shipping_threshold),
+            shipping_fee: Number((rawSc as any)?.shipping_fee ?? DEFAULT_STORE_CONFIG.shipping_fee),
+            order_minimum_amount: Number((rawSc as any)?.order_minimum_amount ?? DEFAULT_STORE_CONFIG.order_minimum_amount),
+            categories: Array.isArray((rawSc as any)?.categories)
+              ? (rawSc as any).categories
+              : DEFAULT_STORE_CONFIG.categories,
+          };
+
           const merged: SiteSettings = {
             ...this.settings(),
             ...updated,
@@ -800,14 +850,14 @@ export class SiteSettingsService {
             },
             hours: Array.isArray(updated.hours) ? updated.hours : this.settings().hours,
             socials: Array.isArray(updated.socials) ? updated.socials : this.settings().socials,
-            nav: Array.isArray(updated.nav) ? updated.nav : this.settings().nav,
+            nav: Array.isArray(updated.nav) ? this.dedupeNav(updated.nav) : this.dedupeNav(this.settings().nav),
             colors: mergedColors,
             homepage_content: mergedHomepage,
             about_content: updated.about_content || data.about_content || this.settings().about_content || DEFAULT_ABOUT_CONTENT,
             shop_content: updated.shop_content || data.shop_content || this.settings().shop_content || DEFAULT_SHOP_CONTENT,
             contact_content: updated.contact_content || data.contact_content || this.settings().contact_content || DEFAULT_CONTACT_PAGE_CONTENT,
             maintenance_content: updated.maintenance_content || data.maintenance_content || this.settings().maintenance_content || DEFAULT_MAINTENANCE_CONTENT,
-            store_config: updated.store_config || data.store_config || this.settings().store_config || DEFAULT_STORE_CONFIG,
+            store_config: mergedStoreConfig,
           };
 
           this.settings.set(merged);
@@ -815,5 +865,19 @@ export class SiteSettingsService {
         }
       })
     );
+  }
+
+  private dedupeNav(items: Array<{ label: string; path: string }>): Array<{ label: string; path: string }> {
+    if (!Array.isArray(items)) return [...DEFAULT_SITE_SETTINGS.nav];
+    const seen = new Set<string>();
+    const result: Array<{ label: string; path: string }> = [];
+    for (const item of items) {
+      if (!item || !item.path) continue;
+      if (!seen.has(item.path)) {
+        seen.add(item.path);
+        result.push(item);
+      }
+    }
+    return result.length > 0 ? result : [...DEFAULT_SITE_SETTINGS.nav];
   }
 }

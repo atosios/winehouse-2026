@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Order;
 use App\Models\OrderItem;
 use App\Models\Product;
+use App\Models\Setting;
+use App\Services\MailService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -63,6 +65,19 @@ class OrderController extends Controller
                 ];
             }
 
+            $storeConfig = Setting::get('store_config', []);
+            $freeThreshold = (float) ($storeConfig['free_shipping_threshold'] ?? 150);
+            $shippingFee = (float) ($storeConfig['shipping_fee'] ?? 15);
+            $taxRate = (float) ($storeConfig['tax_rate'] ?? 24);
+            $taxIncluded = (bool) ($storeConfig['tax_included'] ?? true);
+            $currency = (string) ($storeConfig['currency_code'] ?? 'EUR');
+
+            $shippingCost = ($subtotal >= $freeThreshold) ? 0.00 : $shippingFee;
+            $taxAmount = $taxIncluded
+                ? round($subtotal - ($subtotal / (1 + ($taxRate / 100))), 2)
+                : round($subtotal * ($taxRate / 100), 2);
+            $total = $taxIncluded ? ($subtotal + $shippingCost) : ($subtotal + $taxAmount + $shippingCost);
+
             $order = Order::create([
                 'customer_name' => $validated['customer_name'],
                 'customer_email' => $validated['customer_email'],
@@ -71,10 +86,10 @@ class OrderController extends Controller
                 'notes' => $validated['notes'] ?? null,
                 'status' => 'pending',
                 'subtotal' => $subtotal,
-                'tax' => 0.00,
-                'shipping_cost' => 0.00,
-                'total' => $subtotal,
-                'currency' => 'EUR',
+                'tax' => $taxAmount,
+                'shipping_cost' => $shippingCost,
+                'total' => $total,
+                'currency' => $currency,
                 'payment_status' => 'pending_bank',
                 'payment_method' => 'bank_transfer',
             ]);
@@ -85,6 +100,10 @@ class OrderController extends Controller
 
             return $order->load('items');
         });
+
+        // Trigger notifications: company alert & customer invoice/receipt
+        MailService::notifyCompanyNewOrder($order);
+        MailService::sendCustomerOrderReceipt($order);
 
         return response()->json($order, 201);
     }

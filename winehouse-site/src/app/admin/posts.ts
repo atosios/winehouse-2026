@@ -740,57 +740,85 @@ export class AdminPosts implements OnInit {
                   </div>
                 }
 
-                <!-- 6. WINE CARD BLOCK -->
+                <!-- 6. WINE CARD BLOCK (Live Site Tasting Highlight Frame) -->
                 @if (block.type === 'wine_card') {
-                  <div class="my-2 p-6 rounded-2xl bg-[#faf7f2] border border-[#e8ded0] space-y-3">
-                    <div class="flex items-center justify-between">
+                  <div class="my-3 p-5 sm:p-6 rounded-2xl bg-[#faf7f2] border border-[#e8ded0] space-y-3.5 shadow-2xs">
+                    <div class="flex items-center justify-between border-b border-[#e8ded0]/80 pb-2">
                       <span class="text-2xs font-bold uppercase tracking-wider text-[#701423]">🍷 Wine Tasting Highlight</span>
                       <input
-                        class="text-2xs font-bold px-2 py-0.5 bg-[#701423]/10 text-[#701423] rounded-full border-none outline-none text-right w-40"
-                        placeholder="Rating Badge..."
+                        class="text-2xs font-bold px-2.5 py-0.5 bg-[#701423]/10 text-[#701423] rounded-full border-none outline-none text-right w-44 font-mono"
+                        placeholder="Rating Badge / 95 pts..."
                         [(ngModel)]="block.sommelierRating"
                         (ngModelChange)="hasChanges = true"
                       />
                     </div>
-                    <div class="space-y-1">
-                      <div class="flex items-baseline gap-2">
+
+                    <!-- 2-Column Split: Square Bottle Photo on Left, Wine Dossier on Right -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
+                      
+                      <!-- Left Bottle Frame (Never full width) -->
+                      <div class="sm:col-span-3">
+                        <div
+                          class="relative group/wineimg rounded-xl overflow-hidden border border-[#e8ded0] bg-white aspect-square flex items-center justify-center cursor-pointer shadow-xs"
+                          (click)="openMediaPicker({ blockIdx: idx, field: 'image' })"
+                          title="Choose or change bottle image"
+                        >
+                          @if (block.imageUrl) {
+                            <img [src]="mediaUrl(block.imageUrl)" alt="" class="w-full h-full object-cover" />
+                            <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/wineimg:opacity-100 transition-opacity flex items-center justify-center text-white text-3xs font-bold uppercase tracking-wider">
+                              Change Photo
+                            </div>
+                          } @else {
+                            <div class="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
+                              <span class="text-xl mb-0.5">🍾</span>
+                              <span class="text-[10px] font-bold text-slate-500">+ Bottle Photo</span>
+                            </div>
+                          }
+                        </div>
+                      </div>
+
+                      <!-- Right Wine Specs -->
+                      <div class="sm:col-span-9 space-y-2">
+                        <div class="flex items-baseline gap-2">
+                          <input
+                            class="font-serif font-bold text-xl text-slate-900 bg-transparent border-none outline-none focus:ring-0 p-0 flex-1 placeholder:text-slate-400"
+                            placeholder="Wine Name (e.g. Kavalieros)"
+                            [(ngModel)]="block.wineName"
+                            (ngModelChange)="hasChanges = true"
+                          />
+                          <input
+                            class="text-xs text-slate-500 bg-transparent border-none outline-none focus:ring-0 p-0 w-24 text-right placeholder:text-slate-400 font-mono"
+                            placeholder="Vintage (e.g. 2022)"
+                            [(ngModel)]="block.vintage"
+                            (ngModelChange)="hasChanges = true"
+                          />
+                        </div>
+                        <div class="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                          <input
+                            class="bg-transparent border-none outline-none focus:ring-0 p-0 flex-1 placeholder:text-slate-400 text-xs"
+                            placeholder="Producer / Estate (e.g. Domaine Sigalas)"
+                            [(ngModel)]="block.winery"
+                            (ngModelChange)="hasChanges = true"
+                          />
+                          <span>·</span>
+                          <input
+                            class="bg-transparent border-none outline-none focus:ring-0 p-0 flex-1 placeholder:text-slate-400 text-xs"
+                            placeholder="Region (e.g. Santorini PDO)"
+                            [(ngModel)]="block.region"
+                            (ngModelChange)="hasChanges = true"
+                          />
+                        </div>
                         <input
-                          class="font-serif font-bold text-xl text-slate-900 bg-transparent border-none outline-none focus:ring-0 p-0 flex-1 placeholder:text-slate-400"
-                          placeholder="Wine Name (e.g. Kavalieros)"
-                          [(ngModel)]="block.wineName"
-                          (ngModelChange)="hasChanges = true"
-                        />
-                        <input
-                          class="text-xs text-slate-500 bg-transparent border-none outline-none focus:ring-0 p-0 w-24 text-right placeholder:text-slate-400"
-                          placeholder="Vintage (e.g. 2022)"
-                          [(ngModel)]="block.vintage"
+                          class="bg-transparent border-none outline-none focus:ring-0 p-0 w-full text-2xs text-slate-500 placeholder:text-slate-400 pt-0.5 font-mono"
+                          placeholder="Grape Variety (e.g. 100% Assyrtiko)"
+                          [(ngModel)]="block.grape"
                           (ngModelChange)="hasChanges = true"
                         />
                       </div>
-                      <div class="flex items-center gap-2 text-xs text-slate-600 font-medium">
-                        <input
-                          class="bg-transparent border-none outline-none focus:ring-0 p-0 flex-1 placeholder:text-slate-400 text-xs"
-                          placeholder="Producer / Estate (e.g. Domaine Sigalas)"
-                          [(ngModel)]="block.winery"
-                          (ngModelChange)="hasChanges = true"
-                        />
-                        <span>·</span>
-                        <input
-                          class="bg-transparent border-none outline-none focus:ring-0 p-0 flex-1 placeholder:text-slate-400 text-xs"
-                          placeholder="Region (e.g. Santorini PDO)"
-                          [(ngModel)]="block.region"
-                          (ngModelChange)="hasChanges = true"
-                        />
-                      </div>
-                      <input
-                        class="bg-transparent border-none outline-none focus:ring-0 p-0 w-full text-2xs text-slate-500 placeholder:text-slate-400 pt-0.5"
-                        placeholder="Grape Variety (e.g. 100% Assyrtiko)"
-                        [(ngModel)]="block.grape"
-                        (ngModelChange)="hasChanges = true"
-                      />
+
                     </div>
 
-                    <div class="relative group/input border-t border-[#e8ded0] pt-2">
+                    <div class="relative group/input border-t border-[#e8ded0] pt-2.5">
                       <textarea
                         class="w-full text-xs text-slate-700 italic bg-transparent border-none outline-none focus:ring-0 p-0 placeholder:text-slate-400 resize-none min-h-12 pr-8"
                         placeholder="Tasting Notes (Nose, Palate, Texture, Finish)..."

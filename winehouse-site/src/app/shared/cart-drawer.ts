@@ -143,9 +143,20 @@ import { resolveMediaUrl } from '../core/media.utils';
                 <span class="uppercase">Subtotal</span>
                 <span>{{ cart.formattedSubtotal() }}</span>
               </div>
+              <div class="flex items-center justify-between text-[var(--color-foreground)]/70">
+                <span class="uppercase">Shipping</span>
+                <div class="text-right flex items-baseline gap-1.5 flex-wrap justify-end">
+                  <span [class.text-green-700]="cart.shippingFee() === 0" [class.font-bold]="cart.shippingFee() === 0">{{ cart.shippingFeeFormatted() }}</span>
+                  @if (cart.amountUntilFreeShipping() > 0) {
+                    <span class="text-[10px] text-[var(--color-foreground)]/60 font-normal">
+                      (add {{ cart.freeShippingRemainingFormatted() }} for free delivery)
+                    </span>
+                  }
+                </div>
+              </div>
               <div class="flex items-center justify-between text-base font-bold text-[var(--color-foreground)] pt-2 border-t border-[var(--color-foreground)]/15">
                 <span class="uppercase">Total</span>
-                <span class="text-[var(--color-primary)] font-mono text-lg">{{ cart.formattedSubtotal() }}</span>
+                <span class="text-[var(--color-primary)] font-mono text-lg">{{ cart.formattedGrandTotal() }}</span>
               </div>
             </div>
 

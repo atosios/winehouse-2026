@@ -62,4 +62,24 @@ class AssetController extends Controller
         $asset->delete();
         return response()->json(['ok' => true]);
     }
+
+    public function bulkDestroy(Request $request)
+    {
+        $request->validate([
+            'ids' => ['required', 'array'],
+            'ids.*' => ['integer'],
+        ]);
+
+        $ids = $request->input('ids');
+        $assets = Asset::whereIn('id', $ids)->get();
+        $count = 0;
+
+        foreach ($assets as $asset) {
+            Storage::disk('public')->delete($asset->path);
+            $asset->delete();
+            $count++;
+        }
+
+        return response()->json(['ok' => true, 'deleted_count' => $count]);
+    }
 }

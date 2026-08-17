@@ -23,12 +23,18 @@ export class Shop implements OnInit {
   readonly productsLoaded = signal<boolean>(false);
   readonly activeCategory = signal<string>('ALL');
 
+  // Search & Filtering
+  readonly searchQuery = signal<string>('');
+  readonly selectedSort = signal<string>('default');
+  readonly gridLayout = signal<'3-col' | '4-col'>('3-col');
+
   // Interactive gallery switcher for individual bottle cards
   readonly activeCardImage = signal<Record<string | number, string>>({});
-  
-  // Detailed modal inspector for viewing all bottle gallery photos
+
+  // Detailed modal inspector
   readonly selectedBottle = signal<CartItemProduct | null>(null);
   readonly modalActiveImage = signal<string>('');
+  readonly modalQty = signal<number>(1);
 
   readonly page = computed(() => this.settingsService.shop());
   readonly storeConfig = computed(() => this.settingsService.storeConfig());
@@ -55,17 +61,25 @@ export class Shop implements OnInit {
   }
 
   readonly categories = computed<StoreCategory[]>(() => {
-    const cats = this.storeConfig().categories;
-    if (cats && cats.length > 0) {
-      return cats.filter((c) => c.enabled !== false);
+    const rawCats = this.storeConfig().categories;
+    const cats = Array.isArray(rawCats) ? rawCats.filter((c) => c && c.enabled !== false) : [];
+    if (cats.length === 0) {
+      return [
+        { key: 'ALL', label: { en: 'ALL BOTTLES', el: 'ΟΛΕΣ ΟΙ ΦΙΑΛΕΣ' }, enabled: true },
+        { key: 'VOLCANIC', label: { en: 'VOLCANIC SOIL', el: 'ΗΦΑΙΣΤΕΙΑΚΟ ΕΔΑΦΟΣ' }, enabled: true },
+        { key: 'NATURAL', label: { en: 'NATURAL & WILD', el: 'ΦΥΣΙΚΑ & ΑΓΡΙΑ' }, enabled: true },
+        { key: 'RESERVE', label: { en: 'CELLAR RESERVE', el: 'ΠΑΛΑΙΩΣΗ & RESERVE' }, enabled: true },
+        { key: 'INDIGENOUS', label: { en: 'ANCIENT INDIGENOUS', el: 'ΑΥΤΟΧΘΟΝΕΣ ΠΟΙΚΙΛΙΕΣ' }, enabled: true },
+      ];
     }
-    return [
-      { key: 'ALL', label: { en: 'ALL BOTTLES', el: 'ΟΛΕΣ ΟΙ ΦΙΑΛΕΣ' }, enabled: true },
-      { key: 'VOLCANIC', label: { en: 'VOLCANIC SOIL', el: 'ΗΦΑΙΣΤΕΙΑΚΟ ΕΔΑΦΟΣ' }, enabled: true },
-      { key: 'NATURAL', label: { en: 'NATURAL & WILD', el: 'ΦΥΣΙΚΑ & ΑΓΡΙΑ' }, enabled: true },
-      { key: 'RESERVE', label: { en: 'CELLAR RESERVE', el: 'ΠΑΛΑΙΩΣΗ & RESERVE' }, enabled: true },
-      { key: 'INDIGENOUS', label: { en: 'ANCIENT INDIGENOUS', el: 'ΑΥΤΟΧΘΟΝΕΣ ΠΟΙΚΙΛΙΕΣ' }, enabled: true },
-    ];
+    const hasAll = cats.some((c) => c.key?.toUpperCase() === 'ALL');
+    if (!hasAll) {
+      return [
+        { key: 'ALL', label: { en: 'ALL BOTTLES', el: 'ΟΛΕΣ ΟΙ ΦΙΑΛΕΣ' }, enabled: true },
+        ...cats,
+      ];
+    }
+    return cats;
   });
 
   /**
@@ -93,17 +107,112 @@ export class Shop implements OnInit {
     }));
   });
 
-  readonly filteredItems = computed<CartItemProduct[]>(() => {
-    const cat = this.activeCategory();
-    const bottles = this.allBottles();
-    if (cat === 'ALL') {
-      return bottles;
+  /**
+   * Numeric price lookup for reliable numerical sorting
+   */
+  readonly rawPriceMap = computed<Record<string | number, number>>(() => {
+    const map: Record<string | number, number> = {};
+    for (const p of this.dynamicProducts()) {
+      map[p.id] = Number(p.price) || 0;
     }
-    return bottles.filter((item) => item.category === cat);
+    return map;
+  });
+
+  /**
+   * Count of bottles per category key for displaying live count chips
+   */
+  readonly categoryCounts = computed<Record<string, number>>(() => {
+    const bottles = this.allBottles();
+    const map: Record<string, number> = { ALL: bottles.length };
+    bottles.forEach((b) => {
+      const c = (b.category || '').trim().toUpperCase();
+      if (c) {
+        map[c] = (map[c] || 0) + 1;
+      }
+    });
+    return map;
+  });
+
+  /**
+   * Filtered & sorted products based on category, search query, and sort mode
+   */
+  readonly filteredItems = computed<CartItemProduct[]>(() => {
+    const cat = (this.activeCategory() || 'ALL').trim().toUpperCase();
+    const query = this.searchQuery().trim().toLowerCase();
+    const sort = this.selectedSort();
+    let list = this.allBottles();
+
+    // 1. Category Filter
+    if (cat !== 'ALL') {
+      list = list.filter((item) => (item.category || '').trim().toUpperCase() === cat);
+    }
+
+    // 2. Text Search
+    if (query) {
+      list = list.filter((b) => {
+        const name = (b.name || '').toLowerCase();
+        const vintage = (b.vintage || '').toLowerCase();
+        const varietal = this.t(b.varietal).toLowerCase();
+        const region = this.t(b.region).toLowerCase();
+        const soil = this.t(b.soil).toLowerCase();
+        const note = this.t(b.tasting_note).toLowerCase();
+        return (
+          name.includes(query) ||
+          vintage.includes(query) ||
+          varietal.includes(query) ||
+          region.includes(query) ||
+          soil.includes(query) ||
+          note.includes(query)
+        );
+      });
+    }
+
+    // 3. Sorting
+    if (sort === 'price-asc') {
+      list = [...list].sort((a, b) => (this.rawPriceMap()[a.id] ?? 0) - (this.rawPriceMap()[b.id] ?? 0));
+    } else if (sort === 'price-desc') {
+      list = [...list].sort((a, b) => (this.rawPriceMap()[b.id] ?? 0) - (this.rawPriceMap()[a.id] ?? 0));
+    } else if (sort === 'vintage-desc') {
+      list = [...list].sort((a, b) => (parseInt(b.vintage || '0', 10) || 0) - (parseInt(a.vintage || '0', 10) || 0));
+    } else if (sort === 'name-asc') {
+      list = [...list].sort((a, b) => (a.name || '').localeCompare(b.name || ''));
+    }
+
+    return list;
   });
 
   setCategory(key: string): void {
     this.activeCategory.set(key);
+  }
+
+  setSearchQuery(event: Event): void {
+    const val = (event.target as HTMLInputElement)?.value ?? '';
+    this.searchQuery.set(val);
+  }
+
+  clearSearch(): void {
+    this.searchQuery.set('');
+  }
+
+  setSort(event: Event): void {
+    const val = (event.target as HTMLSelectElement)?.value ?? 'default';
+    this.selectedSort.set(val);
+  }
+
+  setGridLayout(layout: '3-col' | '4-col'): void {
+    this.gridLayout.set(layout);
+  }
+
+  clearAllFilters(): void {
+    this.activeCategory.set('ALL');
+    this.searchQuery.set('');
+    this.selectedSort.set('default');
+  }
+
+  hasStatusLabel(label?: I18nText | string | null): boolean {
+    if (!label) return false;
+    const text = this.t(label);
+    return !!text && text.trim().length > 0;
   }
 
   getCardImage(bottle: CartItemProduct): string {
@@ -145,12 +254,25 @@ export class Shop implements OnInit {
       event.preventDefault();
       event.stopPropagation();
     }
+    this.modalQty.set(1);
     this.selectedBottle.set(bottle);
     this.modalActiveImage.set(resolveMediaUrl(bottle.cover_image || bottle.img || 'cellar_ritual.jpg'));
   }
 
   closeBottleModal(): void {
     this.selectedBottle.set(null);
+  }
+
+  setModalQty(delta: number): void {
+    const current = this.modalQty();
+    const updated = Math.max(1, current + delta);
+    this.modalQty.set(updated);
+  }
+
+  addModalBottleToBasket(bottle: CartItemProduct): void {
+    const qty = this.modalQty() || 1;
+    this.cart.addItem(bottle, qty, true);
+    this.closeBottleModal();
   }
 
   getItemQtyInCart(bottleId: number | string): number {
@@ -165,4 +287,18 @@ export class Shop implements OnInit {
     }
     this.cart.addItem(bottle, 1, true);
   }
+
+  updateCardQuantity(bottle: CartItemProduct, delta: number, event?: Event): void {
+    if (event) {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+    const item = this.cart.items().find((i) => String(i.id) === String(bottle.id));
+    if (item) {
+      this.cart.updateQuantity(item.id, delta);
+    } else if (delta > 0) {
+      this.cart.addItem(bottle, delta, false);
+    }
+  }
 }
+

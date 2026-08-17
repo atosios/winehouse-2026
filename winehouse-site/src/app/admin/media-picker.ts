@@ -16,23 +16,23 @@ import { resolveMediaUrl } from '../core/media.utils';
   selector: 'wh-media-picker',
   imports: [FormsModule],
   template: `
-    <div class="wh-media-picker-wrap">
+    <div class="wh-media-picker-wrap max-w-md">
       @if (label) {
         <label class="admin-field-label flex items-center justify-between">
           <span>{{ label }}</span>
           @if (value) {
-            <span class="text-2xs font-normal text-slate-400 font-mono truncate max-w-[200px]" [title]="value">
+            <span class="text-2xs font-normal text-slate-400 font-mono truncate max-w-[180px]" [title]="value">
               {{ formatFilename(value) }}
             </span>
           }
         </label>
       }
 
-      <!-- Current Selection / Preview Card -->
+      <!-- Current Selection / Square-Friendly Preview Card (Never full width) -->
       @if (value) {
-        <div class="relative group rounded-xl border border-slate-200 bg-slate-900 overflow-hidden shadow-xs">
+        <div class="relative group rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs max-w-sm">
           <!-- Live Preview -->
-          <div class="relative w-full overflow-hidden flex items-center justify-center bg-black/40" [class]="previewHeight">
+          <div class="relative w-full overflow-hidden flex items-center justify-center bg-slate-950" [class]="previewHeight">
             @if (isVideo(value)) {
               <video
                 [src]="resolveUrl(value)"
@@ -58,15 +58,15 @@ import { resolveMediaUrl } from '../core/media.utils';
           </div>
 
           <!-- Bottom Action Strip -->
-          <div class="p-2.5 bg-slate-900 border-t border-slate-800 flex items-center justify-between gap-2">
+          <div class="p-2.5 bg-slate-50 border-t border-slate-100 flex items-center justify-between gap-2">
             <div class="min-w-0 flex-1">
-              <p class="text-xs font-semibold text-white truncate font-mono">{{ formatFilename(value) }}</p>
+              <p class="text-xs font-semibold text-slate-800 truncate font-mono">{{ formatFilename(value) }}</p>
             </div>
 
             <div class="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
-                class="btn btn-secondary btn-xs !bg-slate-800 !text-slate-200 !border-slate-700 hover:!bg-slate-700"
+                class="btn btn-secondary btn-xs !py-1"
                 (click)="openModal()"
                 title="Change or select another media file"
               >
@@ -75,7 +75,7 @@ import { resolveMediaUrl } from '../core/media.utils';
               </button>
               <button
                 type="button"
-                class="btn btn-secondary btn-xs !bg-slate-800 !text-red-400 !border-slate-700 hover:!bg-red-950/40"
+                class="btn btn-secondary btn-xs !text-red-500 hover:!bg-red-50 !py-1"
                 (click)="clear()"
                 title="Remove selection"
               >
@@ -85,16 +85,16 @@ import { resolveMediaUrl } from '../core/media.utils';
           </div>
         </div>
       } @else {
-        <!-- Empty State Drop/Select Area -->
+        <!-- Empty State Drop/Select Area (Compact, constrained width) -->
         <div
-          class="p-4 sm:p-5 rounded-xl border-2 border-dashed border-slate-200 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-50 transition-all flex flex-col items-center justify-center text-center gap-3 cursor-pointer group"
+          class="p-4 rounded-2xl border-2 border-dashed border-slate-200 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-50 transition-all flex flex-col items-center justify-center text-center gap-2.5 cursor-pointer group max-w-sm"
           (click)="openModal()"
         >
-          <div class="w-10 h-10 rounded-full bg-white border border-slate-200 shadow-xs flex items-center justify-center text-slate-500 group-hover:scale-110 transition-transform">
+          <div class="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-2xs flex items-center justify-center text-slate-500 group-hover:scale-110 transition-transform">
             @if (accept === 'video') {
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
             } @else {
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
             }
           </div>
 
@@ -103,20 +103,20 @@ import { resolveMediaUrl } from '../core/media.utils';
               Select or upload {{ accept === 'video' ? 'video' : accept === 'image' ? 'image' : 'media' }}
             </p>
             <p class="text-2xs text-slate-400 mt-0.5">
-              {{ accept === 'video' ? 'MP4, WEBM, MOV' : accept === 'image' ? 'JPG, PNG, WEBP, GIF, SVG' : 'Images or videos up to 50 MB' }}
+              {{ accept === 'video' ? 'MP4, WEBM, MOV' : accept === 'image' ? 'JPG, PNG, WEBP, GIF' : 'Images or videos up to 50 MB' }}
             </p>
           </div>
 
-          <div class="flex items-center gap-2" (click)="$event.stopPropagation()">
+          <div class="flex items-center gap-1.5" (click)="$event.stopPropagation()">
             <button
               type="button"
-              class="btn btn-secondary btn-xs"
+              class="btn btn-secondary btn-xs !py-1"
               (click)="openModal()"
             >
-              📁 Browse Library
+              📁 Browse
             </button>
-            <label class="btn btn-primary btn-xs cursor-pointer">
-              <span>⬆ Upload File</span>
+            <label class="btn btn-primary btn-xs cursor-pointer !py-1">
+              <span>⬆ Upload</span>
               <input
                 type="file"
                 class="hidden"

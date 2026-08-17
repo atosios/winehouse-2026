@@ -33,7 +33,7 @@ import {
   DEFAULT_CONTACT_PAGE_CONTENT,
   DEFAULT_MAINTENANCE_CONTENT,
 } from '../core/site-settings.service';
-import { Language, I18nText, normalizeI18n } from '../core/i18n.service';
+import { I18nService, Language, I18nText, normalizeI18n } from '../core/i18n.service';
 
 export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenance';
 
@@ -52,15 +52,32 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
       </div>
 
       <div class="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
-        <!-- Global Language Flag Toggle (Toggles all inputs) -->
-        <button
-          type="button"
-          class="p-1.5 text-lg leading-none rounded-xl border border-slate-200 bg-white hover:bg-slate-50 shadow-2xs cursor-pointer select-none transition-transform hover:scale-110"
-          (click)="toggleGlobalLang()"
-          [title]="globalEditingLang() === 'en' ? 'Global: English (🇬🇧) — Click to switch all inputs to Greek (🇬🇷)' : 'Global: Greek (🇬🇷) — Click to switch all inputs to English (🇬🇧)'"
+        <!-- Minimalist Editorial Language Switcher (Homepage Style) -->
+        <div
+          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-2xs font-mono font-bold tracking-widest uppercase transition-all duration-300 border border-slate-200/80 bg-white shadow-2xs select-none text-slate-700"
         >
-          {{ globalEditingLang() === 'en' ? '🇬🇧' : '🇬🇷' }}
-        </button>
+          <button
+            type="button"
+            (click)="i18n.setLang('en')"
+            class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
+            [class.opacity-100]="i18n.currentLang() === 'en'"
+            [class.opacity-35]="i18n.currentLang() !== 'en'"
+            title="English"
+          >
+            EN
+          </button>
+          <span class="opacity-25 text-[10px] font-normal">/</span>
+          <button
+            type="button"
+            (click)="i18n.setLang('el')"
+            class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
+            [class.opacity-100]="i18n.currentLang() === 'el'"
+            [class.opacity-35]="i18n.currentLang() !== 'el'"
+            title="Ελληνικά"
+          >
+            GR
+          </button>
+        </div>
 
         <a
           [routerLink]="activePreviewPath"
@@ -164,29 +181,26 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <wh-i18n-input label="Section Tag / Breadcrumb" [(value)]="content.hero.tag" [globalLang]="globalEditingLang()" helperText="e.g. / HERO or / ATELIER" />
               <wh-i18n-input label="Small Prefix" [(value)]="content.hero.small_prefix" [globalLang]="globalEditingLang()" helperText="Upper serif script, e.g. The" />
-              <wh-i18n-input label="Main Big Title" [(value)]="content.hero.big_title" [globalLang]="globalEditingLang()" helperText="Giant editorial display title, e.g. Winehouse" />
-              
-              <div class="flex items-center gap-3 pt-6">
-                <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer select-none">
-                  <input type="checkbox" [(ngModel)]="content.hero.show_stain" class="rounded border-slate-300 text-wine-600 focus:ring-wine-500" />
-                  <span>Show Wine Stain Accent Mark</span>
-                </label>
+              <div class="md:col-span-2">
+                <wh-i18n-input label="Main Big Title" [(value)]="content.hero.big_title" [globalLang]="globalEditingLang()" helperText="Giant editorial display title, e.g. Winehouse" />
               </div>
 
-              <div class="md:col-span-2">
-                <wh-media-picker
-                  label="Primary Hero Video (MP4 / WebM)"
-                  [(value)]="content.hero.video_url"
-                  helperText="Primary background ambient loop video (e.g. def.mp4 or hero_video.mp4)"
-                />
-              </div>
-
-              <div class="md:col-span-2">
-                <wh-media-picker
-                  label="Fallback / Alternative Video"
-                  [(value)]="content.hero.video_alt_url"
-                  helperText="Fallback video if primary stream fails to load"
-                />
+              <!-- 2-Column Hero Media (Video + Fallback Poster Image) -->
+              <div class="md:col-span-2 pt-3 border-t border-slate-100">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+                  <wh-media-picker
+                    label="Primary Hero Video (MP4 / WebM)"
+                    [(value)]="content.hero.video_url"
+                    helperText="Primary background ambient loop video"
+                    accept="video"
+                  />
+                  <wh-media-picker
+                    label="Fallback / Poster Image"
+                    [(value)]="content.hero.fallback_image_url"
+                    helperText="Fallback image loaded behind until the video is rendered"
+                    accept="image"
+                  />
+                </div>
               </div>
             </div>
           </div>
@@ -205,28 +219,49 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               </label>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <wh-i18n-input label="Section Tag" [(value)]="content.intro.tag" [globalLang]="globalEditingLang()" />
-              <wh-i18n-input label="Tape Sticker Label" [(value)]="content.intro.tape_sticker" [globalLang]="globalEditingLang()" />
-              <wh-i18n-input label="Heading Line 1" [(value)]="content.intro.heading_line1" [globalLang]="globalEditingLang()" />
-              <wh-i18n-input label="Heading Line 2" [(value)]="content.intro.heading_line2" [globalLang]="globalEditingLang()" />
-              <wh-i18n-input label="Philosophy Label" [(value)]="content.intro.philosophy_label" [globalLang]="globalEditingLang()" />
-              <wh-i18n-input label="Philosophy Quote" [(value)]="content.intro.philosophy_quote" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
+            <!-- 2-Column Live Site Layout: Media on Left, Editorial Headings on Right -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
               
-              <div class="md:col-span-2">
-                <wh-media-picker label="Intro Showcase Image" [(value)]="content.intro.image_url" helperText="Editorial fashion portrait" />
+              <!-- Left Column: Portrait Showcase Frame -->
+              <div class="lg:col-span-5 flex flex-col gap-3.5">
+                <div class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3.5">
+                  <span class="admin-field-label !mb-0 font-bold text-slate-900 flex items-center gap-1.5">
+                    <span>🖼️</span> Intro Showcase Portrait
+                  </span>
+                  <wh-media-picker label="Showcase Photo" [(value)]="content.intro.image_url" helperText="Editorial fashion &amp; ritual portrait" accept="image" />
+                  <wh-i18n-input label="Image Tag Pill" [(value)]="content.intro.image_tag" [globalLang]="globalEditingLang()" helperText="e.g. / CELLAR RITUAL" />
+                  <div>
+                    <label class="admin-field-label">Monogram Stamp (e.g. WH)</label>
+                    <input type="text" [(ngModel)]="content.intro.monogram" class="admin-field-input uppercase font-mono font-bold text-wine-800" />
+                  </div>
+                  <wh-i18n-input label="Vertical Banner Text" [(value)]="content.intro.vertical_banner" [globalLang]="globalEditingLang()" />
+                </div>
               </div>
-              <wh-i18n-input label="Image Tag Pill" [(value)]="content.intro.image_tag" [globalLang]="globalEditingLang()" />
-              <div>
-                <label class="admin-field-label">Monogram Stamp (e.g. WH)</label>
-                <input type="text" [(ngModel)]="content.intro.monogram" class="admin-field-input uppercase" />
+
+              <!-- Right Column: Editorial Copy & Philosophy -->
+              <div class="lg:col-span-7 space-y-4">
+                <div class="p-4 bg-slate-50/50 rounded-2xl border border-slate-200/80 space-y-3.5">
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <wh-i18n-input label="Section Tag" [(value)]="content.intro.tag" [globalLang]="globalEditingLang()" />
+                    <wh-i18n-input label="Tape Sticker Label" [(value)]="content.intro.tape_sticker" [globalLang]="globalEditingLang()" />
+                  </div>
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                    <wh-i18n-input label="Heading Line 1" [(value)]="content.intro.heading_line1" [globalLang]="globalEditingLang()" />
+                    <wh-i18n-input label="Heading Line 2" [(value)]="content.intro.heading_line2" [globalLang]="globalEditingLang()" />
+                  </div>
+                  <wh-i18n-input label="Philosophy Label" [(value)]="content.intro.philosophy_label" [globalLang]="globalEditingLang()" />
+                  <wh-i18n-input label="Philosophy Quote" [(value)]="content.intro.philosophy_quote" [isTextarea]="true" [rows]="3" [globalLang]="globalEditingLang()" />
+                  
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5 pt-2 border-t border-slate-200/60">
+                    <wh-i18n-input label="CTA Circular Badge Text" [(value)]="content.intro.cta_text" [globalLang]="globalEditingLang()" />
+                    <div>
+                      <label class="admin-field-label">CTA Link / Route</label>
+                      <input type="text" [(ngModel)]="content.intro.cta_link" class="admin-field-input font-mono" />
+                    </div>
+                  </div>
+                </div>
               </div>
-              <wh-i18n-input label="Vertical Banner Text" [(value)]="content.intro.vertical_banner" [globalLang]="globalEditingLang()" />
-              <wh-i18n-input label="CTA Circular Badge Text" [(value)]="content.intro.cta_text" [globalLang]="globalEditingLang()" />
-              <div class="md:col-span-2">
-                <label class="admin-field-label">CTA Link / Route</label>
-                <input type="text" [(ngModel)]="content.intro.cta_link" class="admin-field-input" />
-              </div>
+
             </div>
 
             <!-- Bullet Points -->
@@ -407,12 +442,12 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               </div>
             </div>
 
-            <!-- Bottle Cards -->
+            <!-- Bottle Cards (2-Column Live Site Card Layout) -->
             <div class="space-y-5">
               @for (card of content.cellar.items; track $index) {
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-4">
-                  <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
-                    <span class="font-mono text-xs font-bold text-wine-700">Bottle Showcase #{{ $index + 1 }}</span>
+                <div class="bg-slate-50/80 p-5 rounded-2xl border border-slate-200/80 space-y-4">
+                  <div class="flex items-center justify-between border-b border-slate-200/60 pb-2.5">
+                    <span class="font-mono text-xs font-bold text-wine-700">Bottle Showcase Card #{{ $index + 1 }}</span>
                     <div class="flex items-center gap-1.5">
                       <button type="button" (click)="moveCellarUp($index)" [disabled]="$index === 0" class="btn btn-secondary btn-xs">↑</button>
                       <button type="button" (click)="moveCellarDown($index)" [disabled]="$index === content.cellar.items.length - 1" class="btn btn-secondary btn-xs">↓</button>
@@ -420,24 +455,28 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
                     </div>
                   </div>
 
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <wh-i18n-input label="Bottle Name" [(value)]="card.name" [globalLang]="globalEditingLang()" />
-                    <div>
-                      <label class="admin-field-label">Card Link / Route</label>
-                      <input type="text" [(ngModel)]="card.link" class="admin-field-input" />
+                  <!-- 2-Column Split: Image on Left (Never full width), Details on Right -->
+                  <div class="grid grid-cols-1 sm:grid-cols-12 gap-5 items-start">
+                    <div class="sm:col-span-4">
+                      <wh-media-picker label="Bottle Cover Image" [(value)]="card.img" helperText="Square bottle image" accept="image" />
                     </div>
-                    <div class="sm:col-span-2">
-                      <wh-media-picker label="Bottle Showcase Image" [(value)]="card.img" helperText="Card cover photo" />
-                    </div>
-                    <div class="sm:col-span-2">
-                      <label class="admin-field-label">Tags (comma separated)</label>
-                      <input
-                        type="text"
-                        [ngModel]="getCellarTagsString(card)"
-                        (ngModelChange)="updateCellarTags(card, $event)"
-                        class="admin-field-input uppercase"
-                        placeholder="e.g. BRANDING, XINOMAVRO, 2021"
-                      />
+
+                    <div class="sm:col-span-8 space-y-3.5">
+                      <wh-i18n-input label="Bottle Name" [(value)]="card.name" [globalLang]="globalEditingLang()" />
+                      <div>
+                        <label class="admin-field-label">Target Link / Route</label>
+                        <input type="text" [(ngModel)]="card.link" class="admin-field-input font-mono" placeholder="/shop or /contact" />
+                      </div>
+                      <div>
+                        <label class="admin-field-label">Tags (comma separated)</label>
+                        <input
+                          type="text"
+                          [ngModel]="getCellarTagsString(card)"
+                          (ngModelChange)="updateCellarTags(card, $event)"
+                          class="admin-field-input uppercase font-mono"
+                          placeholder="e.g. BRANDING, XINOMAVRO, 2021"
+                        />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -484,25 +523,27 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               </div>
             </div>
 
-            <!-- Partner Logos -->
+            <!-- Partner Logos (Side-by-side Image & Name) -->
             <div class="pt-6 border-t border-slate-100">
               <div class="flex items-center justify-between mb-3">
                 <div>
                   <span class="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono block">Partner Logos &amp; Press Outlets</span>
-                  <span class="text-2xs text-slate-500">Provide an image logo or fallback text name. Grid wraps uniformly.</span>
+                  <span class="text-2xs text-slate-500">Provide a square/compact logo image or fallback text name.</span>
                 </div>
                 <button type="button" class="btn btn-secondary btn-xs" (click)="addPressLogo()">+ Add Logo</button>
               </div>
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 @for (item of content.press.logos; track $index) {
-                  <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 space-y-3">
-                    <div class="flex items-center justify-between">
+                  <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
                       <span class="font-mono text-xs font-bold text-slate-600">Logo #{{ $index + 1 }}</span>
                       <button type="button" (click)="removePressLogo($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕</button>
                     </div>
-                    <wh-i18n-input label="Outlet Name (Text Fallback)" [value]="getLogoNameValue($index)" (valueChange)="setLogoNameValue($index, $event)" [globalLang]="globalEditingLang()" />
-                    <wh-media-picker label="Logo Image (Optional)" [value]="getLogoImgValue($index)" (valueChange)="setLogoImgValue($index, $event)" />
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 items-start">
+                      <wh-media-picker label="Logo Image" [value]="getLogoImgValue($index)" (valueChange)="setLogoImgValue($index, $event)" accept="image" />
+                      <wh-i18n-input label="Outlet Name (Text Fallback)" [value]="getLogoNameValue($index)" (valueChange)="setLogoNameValue($index, $event)" [globalLang]="globalEditingLang()" />
+                    </div>
                   </div>
                 }
               </div>
@@ -833,58 +874,67 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
                     </div>
                   </div>
 
-                  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-                    <div>
-                      <label class="admin-field-label">Bottle Name</label>
-                      <input type="text" [(ngModel)]="bottle.name" class="admin-field-input uppercase" />
-                    </div>
-                    <div>
-                      <label class="admin-field-label">Vintage Year</label>
-                      <input type="text" [(ngModel)]="bottle.vintage" class="admin-field-input" />
-                    </div>
-                    <div>
-                      <label class="admin-field-label">Price</label>
-                      <input type="text" [(ngModel)]="bottle.price" class="admin-field-input" />
-                    </div>
-                    <div>
-                      <label class="admin-field-label">Category Match Key</label>
-                      <select [(ngModel)]="bottle.category" class="admin-field-input">
-                        @for (c of shopContent.categories; track c.key) {
-                          <option [value]="c.key">{{ c.key }}</option>
-                        }
-                      </select>
+                  <!-- 2-Column Split: Image on Left (Never full width), Details on Right -->
+                  <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
+                    
+                    <!-- Left: Bottle Media Frame & Specs -->
+                    <div class="lg:col-span-4 space-y-3.5">
+                      <wh-media-picker label="Bottle Photo" [(value)]="bottle.img" helperText="Card bottle photo" accept="image" />
+                      
+                      <div class="grid grid-cols-2 gap-2.5">
+                        <div>
+                          <label class="admin-field-label">Vintage</label>
+                          <input type="text" [(ngModel)]="bottle.vintage" class="admin-field-input font-mono" placeholder="2024" />
+                        </div>
+                        <div>
+                          <label class="admin-field-label">Alcohol (ABV)</label>
+                          <input type="text" [(ngModel)]="bottle.alcohol" class="admin-field-input font-mono" placeholder="13.5%" />
+                        </div>
+                      </div>
+
+                      <div class="space-y-2">
+                        <wh-i18n-input label="Status Pill Label" [(value)]="bottle.status" [globalLang]="globalEditingLang()" helperText="e.g. LIMITED ALLOCATION" />
+                        <div>
+                          <label class="admin-field-label">Badge Color CSS</label>
+                          <input type="text" [(ngModel)]="bottle.statusBg" class="admin-field-input font-mono text-2xs" placeholder="bg-[#922e1b]" />
+                        </div>
+                      </div>
                     </div>
 
-                    <div class="sm:col-span-2">
-                      <wh-i18n-input label="Region / Origin" [(value)]="bottle.region" [globalLang]="globalEditingLang()" />
-                    </div>
-                    <div class="sm:col-span-2">
-                      <wh-i18n-input label="Grape Varietal" [(value)]="bottle.varietal" [globalLang]="globalEditingLang()" />
-                    </div>
+                    <!-- Right: Commercial & Terroir Dossier -->
+                    <div class="lg:col-span-8 space-y-3.5">
+                      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div class="sm:col-span-2">
+                          <label class="admin-field-label">Bottle Name</label>
+                          <input type="text" [(ngModel)]="bottle.name" class="admin-field-input uppercase font-bold" />
+                        </div>
+                        <div>
+                          <label class="admin-field-label">Price (Formatted)</label>
+                          <input type="text" [(ngModel)]="bottle.price" class="admin-field-input font-mono font-bold text-wine-800" placeholder="€45.00" />
+                        </div>
+                      </div>
 
-                    <div class="sm:col-span-2">
-                      <wh-i18n-input label="Status Pill Label" [(value)]="bottle.status" [globalLang]="globalEditingLang()" helperText="e.g. LIMITED ALLOCATION" />
-                    </div>
-                    <div class="sm:col-span-2">
-                      <label class="admin-field-label">Status Badge Background CSS</label>
-                      <input type="text" [(ngModel)]="bottle.statusBg" class="admin-field-input" placeholder="bg-[#922e1b] or bg-[var(--color-foreground)]" />
-                    </div>
+                      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                        <div>
+                          <label class="admin-field-label">Category Match</label>
+                          <select [(ngModel)]="bottle.category" class="admin-field-input font-semibold">
+                            @for (c of shopContent.categories; track c.key) {
+                              <option [value]="c.key">{{ c.key }}</option>
+                            }
+                          </select>
+                        </div>
+                        <div>
+                          <wh-i18n-input label="Region / Origin" [(value)]="bottle.region" [globalLang]="globalEditingLang()" />
+                        </div>
+                        <div>
+                          <wh-i18n-input label="Grape Varietal" [(value)]="bottle.varietal" [globalLang]="globalEditingLang()" />
+                        </div>
+                      </div>
 
-                    <div class="sm:col-span-2">
-                      <wh-i18n-input label="Soil Composition" [(value)]="bottle.soil" [globalLang]="globalEditingLang()" />
-                    </div>
-                    <div class="sm:col-span-2">
-                      <label class="admin-field-label">Alcohol (ABV)</label>
-                      <input type="text" [(ngModel)]="bottle.alcohol" class="admin-field-input" placeholder="13.5%" />
-                    </div>
-
-                    <div class="sm:col-span-4">
+                      <wh-i18n-input label="Terroir Soil Composition" [(value)]="bottle.soil" [globalLang]="globalEditingLang()" />
                       <wh-i18n-input label="Sommelier Tasting Notes" [(value)]="bottle.tastingNote" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
                     </div>
 
-                    <div class="sm:col-span-4">
-                      <wh-media-picker label="Bottle Image" [(value)]="bottle.img" helperText="Card showcase bottle photo" />
-                    </div>
                   </div>
                 </div>
               }
@@ -1045,9 +1095,10 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
 })
 export class AdminHomepageEditor implements OnInit {
   private settingsService = inject(SiteSettingsService);
+  readonly i18n = inject(I18nService);
 
   readonly activePage = signal<EditablePageKey>('home');
-  readonly globalEditingLang = signal<Language>('en');
+  readonly globalEditingLang = this.i18n.currentLang;
   readonly saving = signal(false);
   readonly savedMessage = signal('');
   readonly error = signal('');
@@ -1118,6 +1169,11 @@ export class AdminHomepageEditor implements OnInit {
     const s = this.settingsService.settings();
     if (s.homepage_content) {
       this.content = JSON.parse(JSON.stringify(s.homepage_content));
+      if (this.content?.hero) {
+        if (!this.content.hero.fallback_image_url && this.content.hero.video_alt_url) {
+          this.content.hero.fallback_image_url = this.content.hero.video_alt_url;
+        }
+      }
     }
     if (s.about_content) {
       this.aboutContent = JSON.parse(JSON.stringify(s.about_content));
@@ -1160,7 +1216,7 @@ export class AdminHomepageEditor implements OnInit {
   }
 
   toggleGlobalLang(): void {
-    this.globalEditingLang.update((l) => (l === 'en' ? 'el' : 'en'));
+    this.i18n.toggleLang();
   }
 
   getHomeSectionTag(id: string): string {

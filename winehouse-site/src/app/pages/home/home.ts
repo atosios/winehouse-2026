@@ -5,6 +5,7 @@ import { SiteSettingsService } from '../../core/site-settings.service';
 import { I18nService, I18nText, isExternalUrl } from '../../core/i18n.service';
 import { WhReveal } from '../../shared/reveal';
 import { resolveMediaUrl } from '../../core/media.utils';
+import { AdminApi } from '../../admin/api';
 
 @Component({
   selector: 'wh-home',
@@ -15,8 +16,15 @@ import { resolveMediaUrl } from '../../core/media.utils';
 export class Home implements AfterViewInit {
   private settingsService = inject(SiteSettingsService);
   private i18n = inject(I18nService);
+  private api = inject(AdminApi);
 
   readonly hp = computed(() => this.settingsService.homepage());
+  readonly videoReady = signal(false);
+
+  readonly heroFallbackImage = computed(() => {
+    const hero = this.hp().hero;
+    return hero.fallback_image_url || hero.video_alt_url || '';
+  });
 
   mediaUrl(url: string | null | undefined): string {
     return resolveMediaUrl(url);
@@ -77,8 +85,21 @@ export class Home implements AfterViewInit {
     const video = this.heroVideoRef?.nativeElement;
     if (video) {
       video.muted = true;
-      video.play().catch(() => {});
+      if (video.readyState >= 2) {
+        this.videoReady.set(true);
+      }
+      video.play().then(() => {
+        this.videoReady.set(true);
+      }).catch(() => {});
     }
+  }
+
+  onVideoLoaded(): void {
+    this.videoReady.set(true);
+  }
+
+  onVideoPlaying(): void {
+    this.videoReady.set(true);
   }
 
   setQuoteIndex(index: number) {
@@ -112,7 +133,27 @@ export class Home implements AfterViewInit {
   }
 
   submitContact() {
-    this.formSubmitted.set(true);
+    if (!this.contactData.name?.trim() || !this.contactData.email?.trim() || !this.contactData.message?.trim()) {
+      return;
+    }
+
+    this.api
+      .submitContactMessage({
+        name: this.contactData.name.trim(),
+        email: this.contactData.email.trim(),
+        subject: this.contactData.projectType,
+        project_type: this.contactData.projectType,
+        message: this.contactData.message.trim(),
+      })
+      .subscribe({
+        next: () => {
+          this.formSubmitted.set(true);
+        },
+        error: (err) => {
+          console.warn('Backend message submission warning:', err);
+          this.formSubmitted.set(true);
+        },
+      });
   }
 }
 

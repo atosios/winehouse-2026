@@ -2,20 +2,36 @@
 <section class="paper-dark relative">
   <!-- Sticky Video Background — stays locked in the background while content scrolls over -->
   <div class="hero-sticky-media">
-    <video #heroVideo class="hero-video" autoplay muted loop playsinline disablePictureInPicture>
+    @if (heroFallbackImage()) {
+    <img
+      [src]="mediaUrl(heroFallbackImage())"
+      alt="Hero background"
+      class="hero-fallback-img"
+      fetchpriority="high"
+      loading="eager"
+    />
+    }
+    @if (hp().hero.video_url) {
+    <video
+      #heroVideo
+      class="hero-video"
+      [class.is-ready]="videoReady() || !heroFallbackImage()"
+      [poster]="heroFallbackImage() ? mediaUrl(heroFallbackImage()) : ''"
+      autoplay
+      muted
+      loop
+      playsinline
+      disablePictureInPicture
+      (playing)="onVideoPlaying()"
+      (loadeddata)="onVideoLoaded()"
+      (canplay)="onVideoLoaded()"
+    >
       <source [src]="mediaUrl(hp().hero.video_url)" type="video/mp4" />
-      @if (hp().hero.video_alt_url) {
-      <source [src]="mediaUrl(hp().hero.video_alt_url)" type="video/mp4" />
-      }
     </video>
+    }
     <!-- Subtle uniform dark tint -->
     <div class="hero-video-tint"></div>
   </div>
-
-  @if (hp().hero.show_stain) {
-  <div class="wine-stain h-64 w-64 -top-20 -right-20 pointer-events-none"
-    style="border-color: color-mix(in srgb, var(--color-gold-500) 12%, transparent)"></div>
-  }
 
   <!-- Giant headline — scrolls upwards OVER the sticky background video -->
   <div class="hero-headline-wrap relative z-10 flex items-end justify-center">

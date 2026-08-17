@@ -81,13 +81,13 @@
   <div class="border-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] overflow-hidden">
     <div class="grid grid-cols-2 lg:grid-cols-4 -mr-[1.5px] -mb-[1.5px]">
       @for (stat of page().benchmarks.items; track $index) {
-        <div class="p-6 sm:p-8 md:p-10 border-r-[1.5px] border-b-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] flex flex-col justify-between min-h-[190px] sm:min-h-[220px] gap-6 reveal" whReveal [revealDelay]="$index * 80">
-          <span class="font-big text-4xl sm:text-5xl lg:text-6xl text-[var(--color-primary)] tracking-tight">{{ stat.num }}</span>
-          <div class="space-y-2.5 sm:space-y-3 pt-2">
-            <span class="font-mono text-xs sm:text-[13px] uppercase font-bold tracking-wider text-[var(--color-foreground)] block leading-snug">
+        <div class="p-5 sm:p-6 md:p-7 border-r-[1.5px] border-b-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] flex flex-col justify-between min-h-[170px] sm:min-h-[195px] gap-4 reveal" whReveal [revealDelay]="$index * 80">
+          <span class="font-big text-2xl sm:text-3xl lg:text-4xl text-[var(--color-primary)] tracking-tight leading-none truncate block">{{ stat.num }}</span>
+          <div class="space-y-1.5 sm:space-y-2 pt-1">
+            <span class="font-mono text-[11px] sm:text-xs uppercase font-bold tracking-wider text-[var(--color-foreground)] block leading-snug">
               {{ t(stat.label) }}
             </span>
-            <span class="font-mono text-[11px] sm:text-xs text-[var(--color-foreground)]/65 block leading-relaxed">
+            <span class="font-mono text-[10px] sm:text-[11px] text-[var(--color-foreground)]/65 block leading-relaxed">
               {{ t(stat.note) }}
             </span>
           </div>

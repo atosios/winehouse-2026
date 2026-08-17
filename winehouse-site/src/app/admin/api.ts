@@ -107,6 +107,7 @@ export interface SiteColors {
 export interface HeroSectionContent {
   tag?: I18nText;
   video_url: string;
+  fallback_image_url?: string;
   video_alt_url?: string;
   small_prefix: I18nText;
   big_title: I18nText;
@@ -417,6 +418,22 @@ export interface StoreConfig {
   categories: StoreCategory[];
 }
 
+export interface MailConfig {
+  mail_driver: string; // 'smtp' | 'log' | 'sendmail'
+  mail_host: string;
+  mail_port: number;
+  mail_encryption: string; // 'tls' | 'ssl' | 'none'
+  mail_username: string;
+  mail_password?: string;
+  mail_from_address: string;
+  mail_from_name: string;
+  company_notification_email: string;
+  notify_on_new_order: boolean;
+  notify_on_new_message: boolean;
+  notify_on_order_status_change?: boolean;
+  send_customer_order_confirmation: boolean;
+}
+
 export interface SiteSettings {
   name: string;
   tagline: string;
@@ -444,6 +461,7 @@ export interface SiteSettings {
   maintenance_content?: MaintenancePageContent;
   maintenance_mode: boolean;
   store_config?: StoreConfig;
+  mail_config?: MailConfig;
 }
 
 export interface Product {
@@ -508,10 +526,43 @@ export interface Order {
   items?: OrderItem[];
 }
 
+export interface ContactMessage {
+  id: number;
+  name: string;
+  email: string;
+  phone?: string | null;
+  subject?: string | null;
+  project_type?: string | null;
+  message: string;
+  is_read: boolean;
+  status: 'new' | 'read' | 'archived' | 'replied';
+  ip_address?: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface MessagesResponse {
+  messages: ContactMessage[];
+  unread_count: number;
+  total_count: number;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AdminApi {
   private http = inject(HttpClient);
   private base = `${API_BASE}/admin`;
+
+  // Public Contact submission
+  submitContactMessage(data: {
+    name: string;
+    email: string;
+    phone?: string;
+    subject?: string;
+    project_type?: string;
+    message: string;
+  }): Observable<{ success: boolean; message: string; id: number }> {
+    return this.http.post<{ success: boolean; message: string; id: number }>(`${API_BASE}/contact`, data);
+  }
 
   // Public e-Shop endpoints
   getPublicProducts(params?: { category?: string; search?: string }): Observable<Product[]> {
@@ -537,6 +588,20 @@ export class AdminApi {
     return this.http.post<Order>(`${API_BASE}/shop/orders`, data);
   }
 
+  // Contact Messages (Admin)
+  listMessages(params?: { status?: string; search?: string }): Observable<MessagesResponse> {
+    return this.http.get<MessagesResponse>(`${this.base}/messages`, { params: params as any });
+  }
+  getMessage(id: number): Observable<ContactMessage> {
+    return this.http.get<ContactMessage>(`${this.base}/messages/${id}`);
+  }
+  updateMessageStatus(id: number, data: { is_read?: boolean; status?: string }): Observable<ContactMessage> {
+    return this.http.put<ContactMessage>(`${this.base}/messages/${id}/status`, data);
+  }
+  deleteMessage(id: number): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.base}/messages/${id}`);
+  }
+
   // Products (Admin)
   listProducts(params?: { category?: string; search?: string }): Observable<Product[]> {
     return this.http.get<Product[]>(`${this.base}/products`, { params: params as any });
@@ -552,6 +617,20 @@ export class AdminApi {
   }
   deleteProduct(id: number): Observable<unknown> {
     return this.http.delete(`${this.base}/products/${id}`);
+  }
+  downloadProductCsvTemplate(): Observable<Blob> {
+    return this.http.get(`${this.base}/products/template-csv`, { responseType: 'blob' });
+  }
+  importProductsCsv(file: File): Observable<{
+    success: boolean;
+    count: number;
+    message?: string;
+    errors?: string[];
+    imported?: any[];
+  }> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http.post<any>(`${this.base}/products/import-csv`, form);
   }
 
   // Orders (Admin)
@@ -639,6 +718,9 @@ export class AdminApi {
   deleteAsset(id: number): Observable<unknown> {
     return this.http.delete(`${this.base}/assets/${id}`);
   }
+  bulkDeleteAssets(ids: number[]): Observable<{ ok: boolean; deleted_count: number }> {
+    return this.http.post<{ ok: boolean; deleted_count: number }>(`${this.base}/assets/bulk-delete`, { ids });
+  }
 
   // Users
   listUsers(): Observable<AdminUser[]> {
@@ -677,5 +759,16 @@ export class AdminApi {
     password_confirmation: string;
   }): Observable<unknown> {
     return this.http.put(`${this.base}/password`, data);
+  }
+
+  // Mail & SMTP Testing
+  sendTestEmail(data: {
+    recipient_email: string;
+    mail_config?: Partial<MailConfig>;
+  }): Observable<{ success: boolean; message?: string; error?: string }> {
+    return this.http.post<{ success: boolean; message?: string; error?: string }>(
+      `${this.base}/settings/mail-test`,
+      data
+    );
   }
 }

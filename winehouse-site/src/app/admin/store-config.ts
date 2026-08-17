@@ -38,6 +38,15 @@ import { WhI18nInput } from './i18n-input';
       </div>
     }
 
+    @if (error()) {
+      <div class="p-3.5 mb-6 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold flex items-center justify-between shadow-2xs">
+        <span class="flex items-center gap-1.5">
+          <span>⚠️</span> {{ error() }}
+        </span>
+        <button type="button" class="text-2xs text-red-900 underline font-normal cursor-pointer" (click)="error.set('')">Dismiss</button>
+      </div>
+    }
+
     <!-- Segmented Navigation Tabs -->
     <div class="admin-tabs mb-6">
       <button type="button" class="admin-tab" [class.active]="activeTab() === 'general'" (click)="activeTab.set('general')">Currency &amp; General</button>
@@ -49,38 +58,71 @@ import { WhI18nInput } from './i18n-input';
     <!-- TAB 1: Currency & General -->
     @if (activeTab() === 'general') {
       <div class="space-y-6">
-        <div class="admin-card space-y-4">
-          <h2 class="text-sm font-bold text-slate-900 border-b border-slate-100 pb-3">Currency Display &amp; Locale</h2>
+        <div class="admin-card space-y-5">
+          <div>
+            <h2 class="text-sm font-bold text-slate-900">Currency Display &amp; Price Formatting</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Configure the currency symbol, currency code, and display position across the whole e-Shop.</p>
+          </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-2 border-t border-slate-100">
             <div>
-              <label class="admin-field-label">Store Currency *</label>
+              <label class="admin-field-label">Quick Currency Preset</label>
               <select
                 [ngModel]="selectedCurrencyKey"
-                (ngModelChange)="onCurrencyChange($event)"
+                (ngModelChange)="onCurrencyPresetChange($event)"
                 class="admin-field-input"
               >
                 <option value="EUR">Euros (€ - EUR)</option>
                 <option value="USD">US Dollars ($ - USD)</option>
+                <option value="GBP">British Pounds (£ - GBP)</option>
+                <option value="CHF">Swiss Francs (CHF - CHF)</option>
+                <option value="AUD">Australian Dollars (A$ - AUD)</option>
+                <option value="CAD">Canadian Dollars (C$ - CAD)</option>
+                <option value="JPY">Japanese Yen (¥ - JPY)</option>
+                <option value="CUSTOM">Custom Currency…</option>
               </select>
             </div>
 
             <div>
-              <label class="admin-field-label">Symbol Position</label>
-              <select [(ngModel)]="config.currency_position" class="admin-field-input">
-                <option value="before">Before Amount (e.g. {{ config.currency_symbol }} 45.00)</option>
-                <option value="after">After Amount (e.g. 45.00 {{ config.currency_symbol }})</option>
-              </select>
+              <label class="admin-field-label">Currency Code (ISO)</label>
+              <input
+                type="text"
+                [(ngModel)]="config.currency_code"
+                class="admin-field-input uppercase font-mono font-bold"
+                placeholder="EUR"
+              />
+            </div>
+
+            <div>
+              <label class="admin-field-label">Currency Symbol</label>
+              <input
+                type="text"
+                [(ngModel)]="config.currency_symbol"
+                class="admin-field-input font-bold"
+                placeholder="€"
+              />
             </div>
           </div>
 
-          <!-- Live Currency Preview -->
-          <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-lg flex items-center justify-between">
-            <span class="text-xs text-slate-500">Live Price Formatting:</span>
-            <span class="text-xs font-bold text-slate-900">
-              {{ config.currency_position === 'before' ? config.currency_symbol + ' 45.00' : '45.00 ' + config.currency_symbol }}
-              <span class="text-[11px] text-slate-400 font-normal ml-1">({{ config.currency_code }})</span>
-            </span>
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label class="admin-field-label">Symbol Position</label>
+              <select [(ngModel)]="config.currency_position" class="admin-field-input font-medium">
+                <option value="before">Before Amount (e.g. {{ config.currency_symbol || '€' }} 45.00)</option>
+                <option value="after">After Amount (e.g. 45.00 {{ config.currency_symbol || '€' }})</option>
+              </select>
+            </div>
+
+            <!-- Live Currency & Price Format Preview -->
+            <div>
+              <label class="admin-field-label">Live Price Formatting Preview</label>
+              <div class="p-2.5 bg-slate-50 border border-slate-200/80 rounded-xl flex items-center justify-between">
+                <span class="text-xs text-slate-500">Bottle &amp; Cart Display:</span>
+                <span class="text-sm font-mono font-bold text-wine-800">
+                  {{ formatPreview(45) }}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
 
@@ -296,39 +338,94 @@ export class AdminStoreConfig implements OnInit {
   readonly activeTab = signal<'general' | 'categories' | 'shipping' | 'banking'>('general');
   readonly saving = signal(false);
   readonly savedMessage = signal('');
+  readonly error = signal('');
+  readonly isLoaded = signal(false);
 
-  config: StoreConfig = JSON.parse(JSON.stringify(DEFAULT_STORE_CONFIG));
+  config: StoreConfig = {
+    ...DEFAULT_STORE_CONFIG,
+    categories: [],
+  };
+
+  readonly currencyPresets: Record<string, { code: string; symbol: string }> = {
+    EUR: { code: 'EUR', symbol: '€' },
+    USD: { code: 'USD', symbol: '$' },
+    GBP: { code: 'GBP', symbol: '£' },
+    CHF: { code: 'CHF', symbol: 'CHF' },
+    AUD: { code: 'AUD', symbol: 'A$' },
+    CAD: { code: 'CAD', symbol: 'C$' },
+    JPY: { code: 'JPY', symbol: '¥' },
+  };
 
   get selectedCurrencyKey(): string {
-    return this.config.currency_code === 'USD' ? 'USD' : 'EUR';
+    const code = (this.config.currency_code || '').toUpperCase();
+    if (this.currencyPresets[code]) {
+      return code;
+    }
+    return 'CUSTOM';
   }
 
-  onCurrencyChange(key: string): void {
-    if (key === 'USD') {
-      this.config.currency_code = 'USD';
-      this.config.currency_symbol = '$';
-    } else {
-      this.config.currency_code = 'EUR';
-      this.config.currency_symbol = '€';
+  onCurrencyPresetChange(key: string): void {
+    if (key === 'CUSTOM') return;
+    const preset = this.currencyPresets[key];
+    if (preset) {
+      this.config.currency_code = preset.code;
+      this.config.currency_symbol = preset.symbol;
     }
   }
 
+  formatPreview(amount: number): string {
+    const sym = this.config.currency_symbol || '€';
+    const formatted = amount.toFixed(2);
+    return this.config.currency_position === 'after' ? `${formatted} ${sym}` : `${sym} ${formatted}`;
+  }
+
   ngOnInit(): void {
+    // 1. If settings service has already loaded, initialize from reactive state
+    if (this.settingsService.isLoaded()) {
+      const current = this.settingsService.settings();
+      if (current && current.store_config) {
+        this.applyStoreConfig(current.store_config);
+      }
+    }
+
+    // 2. Fetch fresh from API to ensure database parity
     this.loadConfig();
+  }
+
+  private applyStoreConfig(sc: Partial<StoreConfig>): void {
+    if (!sc) return;
+    this.config = {
+      ...DEFAULT_STORE_CONFIG,
+      ...sc,
+      currency_code: sc.currency_code || DEFAULT_STORE_CONFIG.currency_code,
+      currency_symbol: sc.currency_symbol || DEFAULT_STORE_CONFIG.currency_symbol,
+      currency_position: sc.currency_position || DEFAULT_STORE_CONFIG.currency_position,
+      tax_rate: Number(sc.tax_rate ?? DEFAULT_STORE_CONFIG.tax_rate),
+      tax_included: Boolean(sc.tax_included ?? DEFAULT_STORE_CONFIG.tax_included),
+      store_enabled: Boolean(sc.store_enabled ?? DEFAULT_STORE_CONFIG.store_enabled),
+      free_shipping_threshold: Number(sc.free_shipping_threshold ?? DEFAULT_STORE_CONFIG.free_shipping_threshold),
+      shipping_fee: Number(sc.shipping_fee ?? DEFAULT_STORE_CONFIG.shipping_fee),
+      order_minimum_amount: Number(sc.order_minimum_amount ?? DEFAULT_STORE_CONFIG.order_minimum_amount),
+      bank_beneficiary: sc.bank_beneficiary || '',
+      bank_name: sc.bank_name || '',
+      bank_iban: sc.bank_iban || '',
+      bank_bic: sc.bank_bic || '',
+      categories: Array.isArray(sc.categories)
+        ? JSON.parse(JSON.stringify(sc.categories))
+        : JSON.parse(JSON.stringify(DEFAULT_STORE_CONFIG.categories)),
+    };
+    this.isLoaded.set(true);
   }
 
   loadConfig(): void {
     this.api.getSettings().subscribe({
       next: (settings) => {
-        if (settings.store_config) {
-          this.config = {
-            ...DEFAULT_STORE_CONFIG,
-            ...settings.store_config,
-            categories: Array.isArray(settings.store_config.categories)
-              ? settings.store_config.categories
-              : DEFAULT_STORE_CONFIG.categories,
-          };
+        if (settings && settings.store_config) {
+          this.applyStoreConfig(settings.store_config);
         }
+      },
+      error: (err) => {
+        this.error.set(err.error?.message || 'Could not load store configuration from database.');
       },
     });
   }
@@ -359,18 +456,42 @@ export class AdminStoreConfig implements OnInit {
 
   saveConfig(): void {
     this.saving.set(true);
-    this.api
-      .updateSettings({
-        store_config: this.config,
+    this.error.set('');
+    this.savedMessage.set('');
+
+    const payload: StoreConfig = {
+      currency_code: this.config.currency_code || 'EUR',
+      currency_symbol: this.config.currency_symbol || '€',
+      currency_position: this.config.currency_position || 'before',
+      tax_rate: Number(this.config.tax_rate) || 0,
+      tax_included: Boolean(this.config.tax_included),
+      store_enabled: Boolean(this.config.store_enabled),
+      free_shipping_threshold: Number(this.config.free_shipping_threshold) || 0,
+      shipping_fee: Number(this.config.shipping_fee) || 0,
+      order_minimum_amount: Number(this.config.order_minimum_amount) || 0,
+      bank_beneficiary: this.config.bank_beneficiary || '',
+      bank_name: this.config.bank_name || '',
+      bank_iban: this.config.bank_iban || '',
+      bank_bic: this.config.bank_bic || '',
+      categories: this.config.categories || [],
+    };
+
+    this.settingsService
+      .update({
+        store_config: payload,
       })
       .subscribe({
-        next: () => {
+        next: (saved) => {
           this.saving.set(false);
-          this.savedMessage.set('Store configuration saved successfully.');
+          this.savedMessage.set('Store configuration saved to database successfully ✓');
+          if (saved && saved.store_config) {
+            this.applyStoreConfig(saved.store_config);
+          }
           setTimeout(() => this.savedMessage.set(''), 4000);
         },
-        error: () => {
+        error: (err) => {
           this.saving.set(false);
+          this.error.set(err.error?.message || 'Could not save store configuration to database.');
         },
       });
   }

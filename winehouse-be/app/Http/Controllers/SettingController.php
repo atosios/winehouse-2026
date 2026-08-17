@@ -64,10 +64,46 @@ class SettingController extends Controller
             'contact_content' => ['nullable', 'array'],
             'maintenance_content' => ['nullable', 'array'],
             'maintenance_mode' => ['nullable', 'boolean'],
+            'store_config' => ['nullable', 'array'],
+            'mail_config' => ['nullable', 'array'],
+            'mail_config.mail_driver' => ['nullable', 'string', 'max:50'],
+            'mail_config.mail_host' => ['nullable', 'string', 'max:255'],
+            'mail_config.mail_port' => ['nullable', 'integer'],
+            'mail_config.mail_encryption' => ['nullable', 'string', 'max:20'],
+            'mail_config.mail_username' => ['nullable', 'string', 'max:255'],
+            'mail_config.mail_password' => ['nullable', 'string', 'max:255'],
+            'mail_config.mail_from_address' => ['nullable', 'string', 'max:255'],
+            'mail_config.mail_from_name' => ['nullable', 'string', 'max:255'],
+            'mail_config.company_notification_email' => ['nullable', 'string', 'max:255'],
+            'mail_config.notify_on_new_order' => ['nullable', 'boolean'],
+            'mail_config.notify_on_new_message' => ['nullable', 'boolean'],
+            'mail_config.send_customer_order_confirmation' => ['nullable', 'boolean'],
         ]);
 
         $updated = Setting::updateSettings($validated);
 
         return response()->json($updated);
+    }
+
+    /**
+     * Admin endpoint: send test email using configured or provided SMTP parameters.
+     */
+    public function sendTestEmail(Request $request)
+    {
+        $validated = $request->validate([
+            'recipient_email' => ['required', 'email'],
+            'mail_config' => ['nullable', 'array'],
+        ]);
+
+        $result = \App\Services\MailService::sendTestEmail(
+            $validated['recipient_email'],
+            $validated['mail_config'] ?? null
+        );
+
+        if ($result['success']) {
+            return response()->json($result);
+        }
+
+        return response()->json($result, 422);
     }
 }

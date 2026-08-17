@@ -504,6 +504,18 @@
     overflow: hidden;
     z-index: 0;
     pointer-events: none;
+    background-color: var(--color-paper-dark, #111111);
+  }
+
+  .hero-fallback-img {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    pointer-events: none;
+    z-index: 0;
   }
 
   .hero-video {
@@ -516,6 +528,13 @@
     pointer-events: none;
     box-shadow: none;
     filter: none;
+    z-index: 0;
+    opacity: 0;
+    transition: opacity 0.75s ease-in-out;
+  }
+
+  .hero-video.is-ready {
+    opacity: 1;
   }
 
   /* Subtle uniform dark overlay across entire video */
@@ -2628,5 +2647,256 @@
     transform: scale(1.1) rotate(6deg);
     background-color: var(--color-primary, #c84b31);
   }
+
+  /* =============================================================================
+     Modern Minimalist & Artistic E-Shop Product Showcase (Atelier / Gallery)
+     ============================================================================= */
+
+  /* Product Card Container */
+  .shop-card-modern {
+    background: #ffffff;
+    border: 1.5px solid var(--color-foreground, #1c1714);
+    border-radius: 4px;
+    box-shadow: 3px 3px 0px 0px var(--color-foreground, #1c1714);
+    transition: transform 240ms cubic-bezier(0.16, 1, 0.3, 1),
+                box-shadow 240ms cubic-bezier(0.16, 1, 0.3, 1),
+                border-color 180ms ease;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .shop-card-modern:hover {
+    transform: translateY(-4px);
+    box-shadow: 6px 6px 0px 0px var(--color-foreground, #1c1714);
+  }
+
+  /* Minimalist Studio Bottle Showcase Podium */
+  .bottle-podium {
+    position: relative;
+    width: 100%;
+    background: radial-gradient(ellipse at 50% 60%, #fbf9f5 0%, #f2ece1 70%, #e8decb 100%);
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-bottom: 1.5px solid var(--color-foreground, #1c1714);
+  }
+
+  .bottle-podium::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 15%;
+    right: 15%;
+    height: 10px;
+    background: radial-gradient(ellipse at center, rgba(28, 23, 20, 0.18) 0%, transparent 70%);
+    pointer-events: none;
+    filter: blur(3px);
+  }
+
+  .bottle-img-interactive {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+    transition: transform 500ms cubic-bezier(0.16, 1, 0.3, 1), filter 300ms ease;
+  }
+
+  .shop-card-modern:hover .bottle-img-interactive {
+    transform: scale(1.04);
+  }
+
+  /* Minimalist Vintage Stamp */
+  .shop-vintage-stamp {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    background: var(--color-foreground, #1c1714);
+    color: #ffffff;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    border-radius: 2px;
+  }
+
+  /* Minimalist ABV Tag */
+  .shop-abv-tag {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.2rem 0.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    color: var(--color-foreground, #1c1714);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    border: 1px solid var(--color-foreground, #1c1714);
+    border-radius: 2px;
+  }
+
+  /* Minimalist Architectural Filter Pill */
+  .shop-filter-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.45rem;
+    padding: 0.45rem 0.85rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    border: 1.5px solid var(--color-foreground, #1c1714);
+    border-radius: 2px;
+    background: #ffffff;
+    color: var(--color-foreground, #1c1714);
+    cursor: pointer;
+    transition: all 160ms ease;
+    user-select: none;
+  }
+
+  .shop-filter-pill:hover {
+    background: var(--color-paper-light, #ece7e1);
+    transform: translateY(-1px);
+  }
+
+  .shop-filter-pill.is-active {
+    background: var(--color-foreground, #1c1714);
+    color: #ffffff;
+    box-shadow: 2px 2px 0px 0px var(--color-primary, #6e1423);
+  }
+
+  .shop-pill-count {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    padding: 0.05rem 0.35rem;
+    border-radius: 2px;
+    background: rgba(0, 0, 0, 0.08);
+    color: inherit;
+  }
+
+  .shop-filter-pill.is-active .shop-pill-count {
+    background: rgba(255, 255, 255, 0.22);
+    color: #ffffff;
+  }
+
+  /* Minimalist Precision Stepper Control */
+  .shop-stepper {
+    display: inline-flex;
+    align-items: center;
+    border: 1.5px solid var(--color-foreground, #1c1714);
+    background: #ffffff;
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: 2px 2px 0px 0px var(--color-foreground, #1c1714);
+  }
+
+  .shop-stepper-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2rem;
+    height: 2.15rem;
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--color-foreground, #1c1714);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background-color 140ms ease, color 140ms ease;
+  }
+
+  .shop-stepper-btn:hover {
+    background: var(--color-foreground, #1c1714);
+    color: #ffffff;
+  }
+
+  .shop-stepper-val {
+    padding: 0 0.6rem;
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 800;
+    color: var(--color-foreground, #1c1714);
+    min-width: 1.75rem;
+    text-align: center;
+    user-select: none;
+  }
+
+  /* Minimalist Spec Chip */
+  .shop-spec-chip {
+    display: inline-flex;
+    align-items: center;
+    font-family: var(--font-mono);
+    font-size: 0.65rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 0.2rem 0.45rem;
+    border-radius: 2px;
+    background: rgba(28, 23, 20, 0.04);
+    border: 1px solid rgba(28, 23, 20, 0.12);
+    color: var(--color-foreground, #1c1714);
+  }
+
+  /* Minimalist Quick View Button */
+  .shop-quickview-btn {
+    position: absolute;
+    top: 0.75rem;
+    left: 0.75rem;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.35rem;
+    padding: 0.35rem 0.65rem;
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(8px);
+    border: 1.2px solid var(--color-foreground, #1c1714);
+    border-radius: 2px;
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--color-foreground, #1c1714);
+    opacity: 0;
+    transform: translateY(3px);
+    transition: opacity 180ms ease, transform 180ms ease, background-color 150ms ease, color 150ms ease;
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+    z-index: 10;
+  }
+
+  .shop-card-modern:hover .shop-quickview-btn {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .shop-quickview-btn:hover {
+    background: var(--color-primary, #6e1423);
+    color: #ffffff;
+    border-color: var(--color-primary, #6e1423);
+  }
+
+  /* Loading skeleton pulse */
+  @keyframes shop-shimmer {
+    0% { background-position: -200% 0; }
+    100% { background-position: 200% 0; }
+  }
+
+  .shop-skeleton {
+    background: linear-gradient(90deg, #ece7e1 25%, #f5efe8 50%, #ece7e1 75%);
+    background-size: 200% 100%;
+    animation: shop-shimmer 1.6s infinite ease-in-out;
+  }
 }
+
 

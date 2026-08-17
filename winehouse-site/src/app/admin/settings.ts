@@ -1,7 +1,12 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AdminApi, SiteSettings } from './api';
-import { SiteSettingsService, DEFAULT_SITE_SETTINGS, DEFAULT_SITE_COLORS } from '../core/site-settings.service';
+import { AdminApi, SiteSettings, MailConfig } from './api';
+import {
+  SiteSettingsService,
+  DEFAULT_SITE_SETTINGS,
+  DEFAULT_SITE_COLORS,
+  DEFAULT_MAIL_CONFIG,
+} from '../core/site-settings.service';
 
 @Component({
   selector: 'wh-admin-settings',
@@ -28,8 +33,9 @@ import { SiteSettingsService, DEFAULT_SITE_SETTINGS, DEFAULT_SITE_COLORS } from 
     <!-- Apple-style Segmented Navigation Tabs -->
     <div class="admin-tabs mb-8">
       <button type="button" class="admin-tab" [class.active]="activeTab() === 'general'" (click)="activeTab.set('general')">General</button>
-      <button type="button" class="admin-tab" [class.active]="activeTab() === 'contact'" (click)="activeTab.set('contact')">Contact & Hours</button>
-      <button type="button" class="admin-tab" [class.active]="activeTab() === 'appearance'" (click)="activeTab.set('appearance')">Mode & Aesthetics</button>
+      <button type="button" class="admin-tab" [class.active]="activeTab() === 'contact'" (click)="activeTab.set('contact')">Contact &amp; Hours</button>
+      <button type="button" class="admin-tab" [class.active]="activeTab() === 'email'" (click)="activeTab.set('email')">Mail &amp; Alerts</button>
+      <button type="button" class="admin-tab" [class.active]="activeTab() === 'appearance'" (click)="activeTab.set('appearance')">Mode &amp; Aesthetics</button>
       <button type="button" class="admin-tab" [class.active]="activeTab() === 'security'" (click)="activeTab.set('security')">Security</button>
     </div>
 
@@ -204,6 +210,250 @@ import { SiteSettingsService, DEFAULT_SITE_SETTINGS, DEFAULT_SITE_COLORS } from 
             {{ saving() ? 'Saving…' : 'Save Contact & Hours' }}
           </button>
         </div>
+      </div>
+    }
+
+    <!-- Tab: Mail & Alerts -->
+    @if (activeTab() === 'email') {
+      <div class="w-full space-y-6">
+        
+        <!-- Company Email Alerts Configuration -->
+        <div class="admin-card space-y-5">
+          <div>
+            <h2 class="text-base font-bold text-slate-900 tracking-tight mb-1">Company Ingestion &amp; Notifications</h2>
+            <p class="text-xs text-slate-500">
+              Configure which company inbox receives live alerts whenever guest inquiries or customer orders arrive.
+            </p>
+          </div>
+
+          <div>
+            <label class="admin-field-label" for="company-notify-email">Company Notification Email Address</label>
+            <input
+              id="company-notify-email"
+              class="admin-field-input font-mono"
+              type="email"
+              placeholder="info@thewinehouse.gr"
+              [(ngModel)]="ensureMailConfig().company_notification_email"
+            />
+            <span class="text-2xs text-slate-400 mt-1 block">
+              Direct destination for all cellar orders and website inquiries.
+            </span>
+          </div>
+
+          <div class="space-y-3 pt-2">
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer">
+              <input
+                type="checkbox"
+                class="mt-0.5 rounded border-slate-300 text-wine-700 focus:ring-wine-500"
+                [(ngModel)]="ensureMailConfig().notify_on_new_message"
+              />
+              <div>
+                <span class="text-xs font-bold text-slate-900 block">Contact &amp; Tasting Inquiries Alert</span>
+                <span class="text-2xs text-slate-500">
+                  Immediately forward all website contact form submissions and sommelier booking requests to the company inbox.
+                </span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer">
+              <input
+                type="checkbox"
+                class="mt-0.5 rounded border-slate-300 text-wine-700 focus:ring-wine-500"
+                [(ngModel)]="ensureMailConfig().notify_on_new_order"
+              />
+              <div>
+                <span class="text-xs font-bold text-slate-900 block">New Order &amp; Cellar Allocation Alert</span>
+                <span class="text-2xs text-slate-500">
+                  Receive an automated itemized breakdown whenever a customer completes an online order.
+                </span>
+              </div>
+            </label>
+
+            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer">
+              <input
+                type="checkbox"
+                class="mt-0.5 rounded border-slate-300 text-wine-700 focus:ring-wine-500"
+                [(ngModel)]="ensureMailConfig().send_customer_order_confirmation"
+              />
+              <div>
+                <span class="text-xs font-bold text-slate-900 block">Send Customer Order Receipts &amp; Bank Settlement Details</span>
+                <span class="text-2xs text-slate-500">
+                  Automatically email an official cellar confirmation and wire transfer instructions (IBAN/BIC) to the customer.
+                </span>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Mail Server & SMTP Configuration -->
+        <div class="admin-card space-y-5">
+          <div>
+            <h2 class="text-base font-bold text-slate-900 tracking-tight mb-1">Mail Server &amp; SMTP Hosting Credentials</h2>
+            <p class="text-xs text-slate-500">
+              Configure your hosting provider's outgoing SMTP server to dispatch authentic branded emails.
+            </p>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="admin-field-label" for="mail-driver">Mail Delivery Driver</label>
+              <select
+                id="mail-driver"
+                class="admin-field-input"
+                [(ngModel)]="ensureMailConfig().mail_driver"
+              >
+                <option value="smtp">SMTP (Dedicated Mail Server / Hosting Provider)</option>
+                <option value="log">Log File (Development Mode — write to disk)</option>
+                <option value="sendmail">Sendmail (Host Server Binary)</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="admin-field-label" for="mail-encryption">Encryption Protocol</label>
+              <select
+                id="mail-encryption"
+                class="admin-field-input"
+                [(ngModel)]="ensureMailConfig().mail_encryption"
+              >
+                <option value="tls">TLS (STARTTLS — Recommended on Port 587)</option>
+                <option value="ssl">SSL (Port 465)</option>
+                <option value="none">None / Plain (Port 25 or 587)</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-3">
+            <div class="sm:col-span-2">
+              <label class="admin-field-label" for="mail-host">SMTP Host Server</label>
+              <input
+                id="mail-host"
+                class="admin-field-input font-mono"
+                type="text"
+                placeholder="mail.winehouse.gr or smtp.yourhost.com"
+                [(ngModel)]="ensureMailConfig().mail_host"
+              />
+            </div>
+            <div>
+              <label class="admin-field-label" for="mail-port">SMTP Port</label>
+              <input
+                id="mail-port"
+                class="admin-field-input font-mono"
+                type="number"
+                placeholder="587"
+                [(ngModel)]="ensureMailConfig().mail_port"
+              />
+            </div>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="admin-field-label" for="mail-user">SMTP Username / Account</label>
+              <input
+                id="mail-user"
+                class="admin-field-input font-mono"
+                type="text"
+                placeholder="info@thewinehouse.gr"
+                [(ngModel)]="ensureMailConfig().mail_username"
+              />
+            </div>
+            <div>
+              <div class="flex items-center justify-between">
+                <label class="admin-field-label" for="mail-pass">SMTP Password</label>
+                <button
+                  type="button"
+                  (click)="showMailPassword.update(v => !v)"
+                  class="text-2xs text-slate-500 hover:text-slate-800 underline cursor-pointer mb-1"
+                >
+                  {{ showMailPassword() ? 'Hide' : 'Show' }}
+                </button>
+              </div>
+              <input
+                id="mail-pass"
+                class="admin-field-input font-mono"
+                [type]="showMailPassword() ? 'text' : 'password'"
+                placeholder="••••••••••••"
+                [(ngModel)]="ensureMailConfig().mail_password"
+              />
+            </div>
+          </div>
+
+          <div class="grid gap-4 sm:grid-cols-2">
+            <div>
+              <label class="admin-field-label" for="mail-from-email">Sender "From" Email</label>
+              <input
+                id="mail-from-email"
+                class="admin-field-input font-mono"
+                type="email"
+                placeholder="info@thewinehouse.gr"
+                [(ngModel)]="ensureMailConfig().mail_from_address"
+              />
+            </div>
+            <div>
+              <label class="admin-field-label" for="mail-from-name">Sender "From" Name</label>
+              <input
+                id="mail-from-name"
+                class="admin-field-input"
+                type="text"
+                placeholder="The Winehouse Atelier"
+                [(ngModel)]="ensureMailConfig().mail_from_name"
+              />
+            </div>
+          </div>
+        </div>
+
+        <!-- Live SMTP Diagnostic / Test Dispatcher -->
+        <div class="admin-card space-y-4">
+          <div>
+            <h2 class="text-base font-bold text-slate-900 tracking-tight mb-1">Test Mail Server Connectivity</h2>
+            <p class="text-xs text-slate-500">
+              Send a test diagnostic message to verify authentication and SMTP delivery with your mailhost before saving.
+            </p>
+          </div>
+
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+            <input
+              class="admin-field-input font-mono flex-1"
+              type="email"
+              placeholder="Enter destination email (e.g. your personal email)"
+              [(ngModel)]="testEmailRecipient"
+            />
+            <button
+              type="button"
+              class="btn btn-secondary shrink-0 cursor-pointer flex items-center justify-center gap-1.5"
+              [disabled]="testingEmail()"
+              (click)="sendTestEmail()"
+            >
+              @if (testingEmail()) {
+                <span class="w-3.5 h-3.5 border-2 border-slate-500 border-t-transparent rounded-full animate-spin"></span>
+                <span>Testing Connection…</span>
+              } @else {
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                <span>Send Test Email</span>
+              }
+            </button>
+          </div>
+
+          @if (testEmailResult(); as res) {
+            @if (res.success) {
+              <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+                <span>✓</span>
+                <span>{{ res.message || 'Test email successfully dispatched!' }}</span>
+              </div>
+            } @else {
+              <div class="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs space-y-1">
+                <p class="font-bold">✕ SMTP Diagnostic Failed</p>
+                <p class="font-mono text-2xs whitespace-pre-wrap">{{ res.error }}</p>
+              </div>
+            }
+          }
+        </div>
+
+        <div class="flex items-center gap-3 pt-2">
+          <button type="button" class="btn btn-primary btn-sm" [disabled]="saving()" (click)="saveSettings()">
+            {{ saving() ? 'Saving…' : 'Save Mail & Notification Settings' }}
+          </button>
+        </div>
+
       </div>
     }
 
@@ -555,16 +805,22 @@ export class AdminSettings implements OnInit {
   private api = inject(AdminApi);
   private settingsService = inject(SiteSettingsService);
 
-  activeTab = signal<'general' | 'contact' | 'appearance' | 'security'>('general');
+  activeTab = signal<'general' | 'contact' | 'email' | 'appearance' | 'security'>('general');
 
   model: SiteSettings = {
     ...JSON.parse(JSON.stringify(DEFAULT_SITE_SETTINGS)),
     colors: { ...DEFAULT_SITE_COLORS },
+    mail_config: { ...DEFAULT_MAIL_CONFIG },
   };
 
   saving = signal(false);
   savedMessage = signal('');
   error = signal('');
+
+  testEmailRecipient = '';
+  testingEmail = signal(false);
+  testEmailResult = signal<{ success: boolean; message?: string; error?: string } | null>(null);
+  showMailPassword = signal(false);
 
   currentPassword = '';
   newPassword = '';
@@ -572,6 +828,55 @@ export class AdminSettings implements OnInit {
   savingPassword = signal(false);
   passwordSaved = signal(false);
   passwordError = signal('');
+
+  ensureMailConfig(): MailConfig {
+    if (!this.model.mail_config) {
+      this.model.mail_config = { ...DEFAULT_MAIL_CONFIG };
+    }
+    return this.model.mail_config;
+  }
+
+  sendTestEmail(): void {
+    const config = this.ensureMailConfig();
+    const recipient =
+      this.testEmailRecipient.trim() ||
+      config.company_notification_email ||
+      this.model.contact.email;
+
+    if (!recipient) {
+      this.testEmailResult.set({
+        success: false,
+        error: 'Please enter a destination email address to receive the test message.',
+      });
+      return;
+    }
+
+    this.testingEmail.set(true);
+    this.testEmailResult.set(null);
+
+    this.api
+      .sendTestEmail({
+        recipient_email: recipient,
+        mail_config: config,
+      })
+      .subscribe({
+        next: (res) => {
+          this.testingEmail.set(false);
+          this.testEmailResult.set(res);
+        },
+        error: (err) => {
+          this.testingEmail.set(false);
+          this.testEmailResult.set({
+            success: false,
+            error:
+              err.error?.error ||
+              err.error?.message ||
+              err.message ||
+              'SMTP connection failed. Check host, port, username and password.',
+          });
+        },
+      });
+  }
 
   readonly colorPresets = [
     {
@@ -681,6 +986,10 @@ export class AdminSettings implements OnInit {
             colors: {
               ...DEFAULT_SITE_COLORS,
               ...(data.colors || {}),
+            },
+            mail_config: {
+              ...DEFAULT_MAIL_CONFIG,
+              ...(data.mail_config || {}),
             },
           };
           this.settingsService.settings.set(this.model);

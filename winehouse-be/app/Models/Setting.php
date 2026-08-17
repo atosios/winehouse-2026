@@ -74,14 +74,30 @@ class Setting extends Model
                     ['key' => 'INDIGENOUS', 'label' => ['en' => 'ANCIENT INDIGENOUS', 'el' => 'ΑΥΤΟΧΘΟΝΕΣ ΠΟΙΚΙΛΙΕΣ'], 'enabled' => true],
                 ],
             ],
+            'mail_config' => [
+                'mail_driver' => 'smtp',
+                'mail_host' => 'smtp.winehouse.gr',
+                'mail_port' => 587,
+                'mail_encryption' => 'tls',
+                'mail_username' => 'info@winehouse.gr',
+                'mail_password' => '',
+                'mail_from_address' => 'info@winehouse.gr',
+                'mail_from_name' => 'The Winehouse',
+                'company_notification_email' => 'info@winehouse.gr',
+                'notify_on_new_order' => true,
+                'notify_on_new_message' => true,
+                'notify_on_order_status_change' => true,
+                'send_customer_order_confirmation' => true,
+            ],
             'homepage_content' => [
                 'hero' => [
                     'tag' => '/ HERO',
                     'video_url' => 'def.mp4',
+                    'fallback_image_url' => 'editorial_intro.jpg',
                     'video_alt_url' => 'hero_video.mp4',
                     'small_prefix' => 'The',
                     'big_title' => 'Winehouse',
-                    'show_stain' => true,
+                    'show_stain' => false,
                 ],
                 'intro' => [
                     'enabled' => true,
@@ -501,6 +517,36 @@ class Setting extends Model
     }
 
     /**
+     * Recursively merge stored settings with defaults.
+     * Associative dictionaries are merged by key to provide defaults for missing fields.
+     * Sequential/indexed lists (e.g. categories, nav items, bullet points, etc.)
+     * are taken entirely from $stored to allow full addition, reordering, and deletion.
+     */
+    public static function mergeWithDefaults($default, $stored)
+    {
+        if (!is_array($default) || !is_array($stored)) {
+            return $stored !== null ? $stored : $default;
+        }
+
+        // If either is a sequential list (indexed array [0, 1, 2, ...]), use the stored list as-is
+        if (array_is_list($default) || array_is_list($stored)) {
+            return $stored;
+        }
+
+        // Associative dictionary: merge keys
+        $result = $default;
+        foreach ($stored as $k => $v) {
+            if (array_key_exists($k, $default)) {
+                $result[$k] = self::mergeWithDefaults($default[$k], $v);
+            } else {
+                $result[$k] = $v;
+            }
+        }
+
+        return $result;
+    }
+
+    /**
      * Retrieve all settings merged with defaults.
      */
     public static function allSettings(): array
@@ -511,9 +557,30 @@ class Setting extends Model
         $result = $defaults;
         foreach ($stored as $key => $rawVal) {
             $decoded = json_decode($rawVal, true);
-            $result[$key] = ($decoded !== null || $rawVal === 'null' || $rawVal === 'true' || $rawVal === 'false' || is_numeric($rawVal))
+            $val = ($decoded !== null || $rawVal === 'null' || $rawVal === 'true' || $rawVal === 'false' || is_numeric($rawVal))
                 ? $decoded
                 : $rawVal;
+
+            if (isset($defaults[$key])) {
+                $result[$key] = self::mergeWithDefaults($defaults[$key], $val);
+            } else {
+                $result[$key] = $val;
+            }
+        }
+
+        if (isset($result['nav']) && is_array($result['nav'])) {
+            $seenPaths = [];
+            $dedupedNav = [];
+            foreach ($result['nav'] as $item) {
+                $p = $item['path'] ?? '';
+                if ($p && !isset($seenPaths[$p])) {
+                    $seenPaths[$p] = true;
+                    $dedupedNav[] = $item;
+                }
+            }
+            if (!empty($dedupedNav)) {
+                $result['nav'] = $dedupedNav;
+            }
         }
 
         return $result;
@@ -525,15 +592,23 @@ class Setting extends Model
     public static function get(string $key, $default = null)
     {
         $setting = self::where('key', $key)->first();
+        $defaults = self::defaults();
+        $defaultVal = $defaults[$key] ?? $default;
+
         if (! $setting) {
-            $defaults = self::defaults();
-            return $defaults[$key] ?? $default;
+            return $defaultVal;
         }
 
         $decoded = json_decode($setting->value, true);
-        return ($decoded !== null || $setting->value === 'null' || $setting->value === 'true' || $setting->value === 'false' || is_numeric($setting->value))
+        $val = ($decoded !== null || $setting->value === 'null' || $setting->value === 'true' || $setting->value === 'false' || is_numeric($setting->value))
             ? $decoded
             : $setting->value;
+
+        if ($defaultVal !== null && is_array($defaultVal)) {
+            return self::mergeWithDefaults($defaultVal, $val);
+        }
+
+        return $val;
     }
 
     /**

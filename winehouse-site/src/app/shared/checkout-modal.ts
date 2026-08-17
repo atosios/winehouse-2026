@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, HostListener, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { CartService } from '../core/cart.service';
 import { AdminApi, Order } from '../admin/api';
 import { I18nService, I18nText } from '../core/i18n.service';
+import { SiteSettingsService } from '../core/site-settings.service';
 
 @Component({
   selector: 'wh-checkout-modal',
@@ -63,9 +64,26 @@ import { I18nService, I18nText } from '../core/i18n.service';
                     }
                   </div>
 
-                  <div class="pt-2 border-t border-[var(--color-foreground)]/15 flex items-center justify-between font-mono text-sm font-bold">
-                    <span>Total</span>
-                    <span class="text-[var(--color-primary)] text-base">{{ cart.formattedSubtotal() }}</span>
+                  <div class="pt-2 border-t border-[var(--color-foreground)]/15 space-y-1.5 font-mono text-xs">
+                    <div class="flex items-center justify-between text-[var(--color-foreground)]/70">
+                      <span>Subtotal</span>
+                      <span>{{ cart.formattedSubtotal() }}</span>
+                    </div>
+                    <div class="flex items-center justify-between text-[var(--color-foreground)]/70">
+                      <span>Shipping</span>
+                      <div class="text-right flex items-baseline gap-1.5 flex-wrap justify-end">
+                        <span [class.text-green-700]="cart.shippingFee() === 0" [class.font-bold]="cart.shippingFee() === 0">{{ cart.shippingFeeFormatted() }}</span>
+                        @if (cart.amountUntilFreeShipping() > 0) {
+                          <span class="text-[10px] text-[var(--color-foreground)]/60 font-normal">
+                            (add {{ cart.freeShippingRemainingFormatted() }} for free delivery)
+                          </span>
+                        }
+                      </div>
+                    </div>
+                    <div class="flex items-center justify-between pt-1.5 border-t border-[var(--color-foreground)]/10 font-bold text-sm">
+                      <span>Total</span>
+                      <span class="text-[var(--color-primary)] text-base">{{ cart.formattedGrandTotal() }}</span>
+                    </div>
                   </div>
                 </div>
 
@@ -243,6 +261,16 @@ import { I18nService, I18nText } from '../core/i18n.service';
                     <span class="font-bold">{{ placedOrder()?.customer_email }}</span>
                   </div>
                   <div class="flex justify-between border-b border-[var(--color-foreground)]/10 pb-1">
+                    <span class="text-slate-500 uppercase">Subtotal:</span>
+                    <span class="font-bold">{{ cart.formatPrice(placedOrder()?.subtotal || 0) }}</span>
+                  </div>
+                  @if (placedOrder()?.shipping_cost) {
+                    <div class="flex justify-between border-b border-[var(--color-foreground)]/10 pb-1">
+                      <span class="text-slate-500 uppercase">Shipping:</span>
+                      <span class="font-bold">{{ cart.formatPrice(placedOrder()?.shipping_cost || 0) }}</span>
+                    </div>
+                  }
+                  <div class="flex justify-between border-b border-[var(--color-foreground)]/10 pb-1">
                     <span class="text-slate-500 uppercase">Total Amount:</span>
                     <span class="font-bold text-[var(--color-primary)]">{{ cart.formatPrice(placedOrder()?.total || 0) }}</span>
                   </div>
@@ -251,6 +279,40 @@ import { I18nService, I18nText } from '../core/i18n.service';
                     <span class="font-bold text-slate-800">Bank Wire Transfer</span>
                   </div>
                 </div>
+
+                @if (storeConfig().bank_iban) {
+                  <div class="p-4 border border-dashed border-[var(--color-primary)] bg-[var(--color-primary)]/5 text-left font-mono text-xs space-y-1.5">
+                    <p class="font-bold text-[var(--color-primary)] uppercase text-2xs tracking-wider mb-1">
+                      Direct Wire Transfer Instructions:
+                    </p>
+                    @if (storeConfig().bank_name) {
+                      <div class="flex justify-between">
+                        <span class="text-slate-500">Bank:</span>
+                        <span class="font-bold">{{ storeConfig().bank_name }}</span>
+                      </div>
+                    }
+                    <div class="flex justify-between">
+                      <span class="text-slate-500">IBAN:</span>
+                      <span class="font-bold text-slate-900">{{ storeConfig().bank_iban }}</span>
+                    </div>
+                    @if (storeConfig().bank_bic) {
+                      <div class="flex justify-between">
+                        <span class="text-slate-500">BIC / SWIFT:</span>
+                        <span class="font-bold">{{ storeConfig().bank_bic }}</span>
+                      </div>
+                    }
+                    @if (storeConfig().bank_beneficiary) {
+                      <div class="flex justify-between">
+                        <span class="text-slate-500">Beneficiary:</span>
+                        <span class="font-bold">{{ storeConfig().bank_beneficiary }}</span>
+                      </div>
+                    }
+                    <div class="flex justify-between pt-1 border-t border-[var(--color-primary)]/10">
+                      <span class="text-slate-500">Payment Reference:</span>
+                      <span class="font-bold text-[var(--color-primary)]">{{ placedOrder()?.order_number }}</span>
+                    </div>
+                  </div>
+                }
 
                 <p class="font-sans text-xs text-[var(--color-foreground)]/80 leading-relaxed max-w-md mx-auto">
                   Thank you for your order. We have sent a confirmation email with your order summary and payment instructions.
@@ -278,6 +340,9 @@ export class WhCheckoutModal {
   cart = inject(CartService);
   private api = inject(AdminApi);
   private i18n = inject(I18nService);
+  private settingsService = inject(SiteSettingsService);
+
+  readonly storeConfig = computed(() => this.settingsService.storeConfig());
 
   customerName = '';
   customerEmail = '';

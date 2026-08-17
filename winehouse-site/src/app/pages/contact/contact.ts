@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { SiteSettingsService } from '../../core/site-settings.service';
 import { I18nService, I18nText } from '../../core/i18n.service';
 import { WhReveal } from '../../shared/reveal';
+import { AdminApi } from '../../admin/api';
 
 @Component({
   selector: 'wh-contact',
@@ -13,6 +14,7 @@ import { WhReveal } from '../../shared/reveal';
 export class Contact {
   private settingsService = inject(SiteSettingsService);
   private i18n = inject(I18nService);
+  private api = inject(AdminApi);
 
   readonly page = computed(() => this.settingsService.contactPage());
 
@@ -30,6 +32,7 @@ export class Contact {
   projectType = 'Private Tasting';
   message = '';
   readonly sent = signal(false);
+  readonly sending = signal(false);
   readonly dropdownOpen = signal(false);
 
   readonly subjectOptions = computed(() => {
@@ -76,11 +79,31 @@ export class Contact {
   }
 
   send(): void {
-    const subject = encodeURIComponent(`[${this.projectType}] Ingestion from ${this.name || 'Website'}`);
-    const body = encodeURIComponent(
-      `Subject: ${this.projectType}\nName: ${this.name}\nEmail: ${this.email}\nPhone: ${this.phone}\n\nMessage:\n${this.message}`
-    );
-    window.location.href = `mailto:${this.site.contact.email}?subject=${subject}&body=${body}`;
-    this.sent.set(true);
+    if (!this.name?.trim() || !this.email?.trim() || !this.message?.trim()) {
+      return;
+    }
+
+    this.sending.set(true);
+
+    this.api
+      .submitContactMessage({
+        name: this.name.trim(),
+        email: this.email.trim(),
+        phone: this.phone?.trim() || undefined,
+        subject: this.projectType,
+        project_type: this.projectType,
+        message: this.message.trim(),
+      })
+      .subscribe({
+        next: () => {
+          this.sending.set(false);
+          this.sent.set(true);
+        },
+        error: (err) => {
+          console.warn('Backend message submission warning:', err);
+          this.sending.set(false);
+          this.sent.set(true);
+        },
+      });
   }
 }

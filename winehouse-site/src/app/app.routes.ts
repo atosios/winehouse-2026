@@ -64,6 +64,11 @@ export const routes: Routes = [
         loadComponent: () => import('./admin/orders').then((m) => m.AdminOrders),
       },
       {
+        path: 'messages',
+        title: title('Inquiries & Messages'),
+        loadComponent: () => import('./admin/messages').then((m) => m.AdminMessages),
+      },
+      {
         path: 'store-config',
         title: title('Store Configuration'),
         loadComponent: () => import('./admin/store-config').then((m) => m.AdminStoreConfig),

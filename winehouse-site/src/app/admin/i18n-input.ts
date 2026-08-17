@@ -6,10 +6,10 @@ import {
   OnInit,
   Output,
   SimpleChanges,
-  signal,
+  inject,
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { I18nText, Language, normalizeI18n } from '../core/i18n.service';
+import { I18nService, I18nText, Language, normalizeI18n } from '../core/i18n.service';
 
 @Component({
   selector: 'wh-i18n-input',
@@ -23,44 +23,26 @@ import { I18nText, Language, normalizeI18n } from '../core/i18n.service';
         </label>
       }
 
-      <!-- Input Element with Flag Icon at its end -->
-      <div class="relative flex items-center">
+      <!-- Input Element without internal switcher -->
+      <div>
         @if (isTextarea) {
           <textarea
             [rows]="rows"
-            class="admin-field-input !pr-10 {{ inputClass }}"
+            class="admin-field-input {{ inputClass }}"
             [ngModel]="currentText()"
             (ngModelChange)="onTextChange($event)"
             [placeholder]="computedPlaceholder()"
             [attr.maxlength]="maxlength || null"
           ></textarea>
-          <!-- Flag Icon Button on Textarea Top-Right -->
-          <button
-            type="button"
-            class="absolute right-2.5 top-2.5 z-10 text-base leading-none cursor-pointer select-none transition-transform duration-150 hover:scale-125 focus:outline-none p-0.5"
-            (click)="toggleLang()"
-            [title]="activeLang() === 'en' ? 'English (Click to switch to Greek)' : 'Greek (Click to switch to English)'"
-          >
-            {{ activeLang() === 'en' ? '🇬🇧' : '🇬🇷' }}
-          </button>
         } @else {
           <input
             type="text"
-            class="admin-field-input !pr-10 {{ inputClass }}"
+            class="admin-field-input {{ inputClass }}"
             [ngModel]="currentText()"
             (ngModelChange)="onTextChange($event)"
             [placeholder]="computedPlaceholder()"
             [attr.maxlength]="maxlength || null"
           />
-          <!-- Flag Icon Button on Single-line Input Right End -->
-          <button
-            type="button"
-            class="absolute right-2.5 top-1/2 -translate-y-1/2 z-10 text-base leading-none cursor-pointer select-none transition-transform duration-150 hover:scale-125 focus:outline-none p-0.5"
-            (click)="toggleLang()"
-            [title]="activeLang() === 'en' ? 'English (Click to switch to Greek)' : 'Greek (Click to switch to English)'"
-          >
-            {{ activeLang() === 'en' ? '🇬🇧' : '🇬🇷' }}
-          </button>
         }
       </div>
 
@@ -72,6 +54,8 @@ import { I18nText, Language, normalizeI18n } from '../core/i18n.service';
   `,
 })
 export class WhI18nInput implements OnInit, OnChanges {
+  private i18n = inject(I18nService);
+
   @Input() value: I18nText = '';
   @Output() valueChange = new EventEmitter<{ en: string; el: string }>();
 
@@ -84,23 +68,19 @@ export class WhI18nInput implements OnInit, OnChanges {
   @Input() maxlength?: number;
   @Input() globalLang?: Language;
 
-  activeLang = signal<Language>('en');
-
   data: { en: string; el: string } = { en: '', el: '' };
+
+  get effectiveLang(): Language {
+    return this.globalLang || this.i18n.currentLang();
+  }
 
   ngOnInit(): void {
     this.syncDataFromValue();
-    if (this.globalLang) {
-      this.activeLang.set(this.globalLang);
-    }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['value'] && !changes['value'].firstChange) {
       this.syncDataFromValue();
-    }
-    if (changes['globalLang'] && this.globalLang) {
-      this.activeLang.set(this.globalLang);
     }
   }
 
@@ -109,16 +89,11 @@ export class WhI18nInput implements OnInit, OnChanges {
   }
 
   currentText(): string {
-    return this.activeLang() === 'en' ? this.data.en : this.data.el;
-  }
-
-  toggleLang(): void {
-    const next = this.activeLang() === 'en' ? 'el' : 'en';
-    this.activeLang.set(next);
+    return this.effectiveLang === 'en' ? this.data.en : this.data.el;
   }
 
   onTextChange(text: string): void {
-    if (this.activeLang() === 'en') {
+    if (this.effectiveLang === 'en') {
       this.data.en = text;
     } else {
       this.data.el = text;
@@ -127,7 +102,7 @@ export class WhI18nInput implements OnInit, OnChanges {
   }
 
   computedPlaceholder(): string {
-    if (this.activeLang() === 'el') {
+    if (this.effectiveLang === 'el') {
       if (this.data.en) {
         return `[ΕΛ] Fallback: "${this.previewEn()}"`;
       }

@@ -2,6 +2,8 @@ import { Component, inject, signal } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { AdminAuth } from './auth';
 import { ConfirmDialog } from './confirm-dialog';
+import { I18nService } from '../core/i18n.service';
+import { AdminApi } from './api';
 
 @Component({
   selector: 'wh-admin-shell',
@@ -34,11 +36,18 @@ import { ConfirmDialog } from './confirm-dialog';
               [routerLink]="item.path"
               routerLinkActive="active"
               [routerLinkActiveOptions]="{ exact: item.exact }"
-              class="admin-nav-item"
+              class="admin-nav-item flex items-center justify-between"
               (click)="sidebarOpen.set(false)"
             >
-              <span class="nav-icon" [innerHTML]="item.icon"></span>
-              <span>{{ item.label }}</span>
+              <div class="flex items-center gap-2.5 min-w-0">
+                <span class="nav-icon" [innerHTML]="item.icon"></span>
+                <span class="truncate">{{ item.label }}</span>
+              </div>
+              @if (item.path === '/admin/messages' && unreadMessagesCount() > 0) {
+                <span class="px-1.5 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500 text-white">
+                  {{ unreadMessagesCount() }}
+                </span>
+              }
             </a>
           }
         </div>
@@ -123,6 +132,33 @@ import { ConfirmDialog } from './confirm-dialog';
           </div>
 
           <div class="admin-header-actions">
+            <!-- Minimalist Editorial Language Switcher (Homepage Style) -->
+            <div
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-2xs font-mono font-bold tracking-widest uppercase transition-all duration-300 border border-slate-200/80 bg-white shadow-2xs select-none text-slate-700"
+            >
+              <button
+                type="button"
+                (click)="i18n.setLang('en')"
+                class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
+                [class.opacity-100]="i18n.currentLang() === 'en'"
+                [class.opacity-35]="i18n.currentLang() !== 'en'"
+                title="English"
+              >
+                EN
+              </button>
+              <span class="opacity-25 text-[10px] font-normal">/</span>
+              <button
+                type="button"
+                (click)="i18n.setLang('el')"
+                class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
+                [class.opacity-100]="i18n.currentLang() === 'el'"
+                [class.opacity-35]="i18n.currentLang() !== 'el'"
+                title="Ελληνικά"
+              >
+                GR
+              </button>
+            </div>
+
             <a
               routerLink="/"
               target="_blank"
@@ -153,7 +189,24 @@ import { ConfirmDialog } from './confirm-dialog';
 })
 export class AdminShell {
   auth = inject(AdminAuth);
+  i18n = inject(I18nService);
+  private api = inject(AdminApi);
   sidebarOpen = signal(false);
+  readonly unreadMessagesCount = signal(0);
+
+  constructor() {
+    this.checkUnreadMessages();
+  }
+
+  checkUnreadMessages(): void {
+    this.api.listMessages().subscribe({
+      next: (res) => {
+        const count = typeof res === 'object' && res && 'unread_count' in res ? res.unread_count : 0;
+        this.unreadMessagesCount.set(count);
+      },
+      error: () => {},
+    });
+  }
 
   get initials(): string {
     const name = this.auth.user()?.name || 'A';
@@ -184,6 +237,14 @@ export class AdminShell {
       exact: false,
       icon: this.icon(
         '<path d="M6 2 3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>'
+      ),
+    },
+    {
+      path: '/admin/messages',
+      label: 'Messages',
+      exact: false,
+      icon: this.icon(
+        '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>'
       ),
     },
     {
