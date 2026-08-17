@@ -43,7 +43,7 @@ jobs:
       - name: Install Backend Composer Dependencies
         run: |
           cd winehouse-be
-          composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+          composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist --ignore-platform-req=php+
 
       # 6. Deploy Frontend to public_html via FTP/FTPS
       - name: Deploy Frontend to public_html
