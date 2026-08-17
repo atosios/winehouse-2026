@@ -16,7 +16,7 @@ export const SITE = {
 
   /* Contact details ---------------------------------------------------------- */
   contact: {
-    email: 'contact@winehouse.gr',
+    email: 'hello@thewinehouse.gr',
     phone: '+30 210 000 0000',
     address: {
       street: 'Independent Wine Atelier',

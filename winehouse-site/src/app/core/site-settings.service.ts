@@ -232,7 +232,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     card_cellar_label: 'Cellar',
     card_cellar_text: "INDEPENDENT ATELIER\nSHIPPING WORLDWIDE",
     card_direct_label: 'Direct',
-    card_email: 'contact@winehouse.gr',
+    card_email: 'hello@thewinehouse.gr',
     card_phone: '+30 210 123 4567',
     card_socials: [
       { label: 'INSTAGRAM', url: 'https://instagram.com' },

@@ -19,7 +19,7 @@ class Setting extends Model
             'description' => 'Curated wines from small vineyards, tales from the cellar, tastings and tours. Poured with care, told with love.',
             'legalName' => 'The Winehouse',
             'contact' => [
-                'email' => 'contact@winehouse.gr',
+                'email' => 'hello@thewinehouse.gr',
                 'phone' => '+30 210 000 0000',
                 'address' => [
                     'street' => 'Independent Wine Atelier',
@@ -258,7 +258,7 @@ class Setting extends Model
                     'card_cellar_label' => 'Cellar',
                     'card_cellar_text' => "INDEPENDENT ATELIER\nSHIPPING WORLDWIDE",
                     'card_direct_label' => 'Direct',
-                    'card_email' => 'contact@winehouse.gr',
+                    'card_email' => 'hello@thewinehouse.gr',
                     'card_phone' => '+30 210 123 4567',
                     'card_socials' => [
                         ['label' => 'INSTAGRAM', 'url' => 'https://instagram.com'],
