@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { SiteSettingsService } from '../../core/site-settings.service';
 import { I18nService, I18nText, isExternalUrl } from '../../core/i18n.service';
 import { WhReveal } from '../../shared/reveal';
+import { resolveMediaUrl } from '../../core/media.utils';
 
 @Component({
   selector: 'wh-home',
@@ -17,6 +18,10 @@ export class Home implements AfterViewInit {
 
   readonly hp = computed(() => this.settingsService.homepage());
 
+  mediaUrl(url: string | null | undefined): string {
+    return resolveMediaUrl(url);
+  }
+
   t(val: I18nText): string {
     return this.i18n.t(val);
   }
@@ -27,7 +32,7 @@ export class Home implements AfterViewInit {
 
   getLogoImg(logo: any): string {
     if (logo && typeof logo === 'object' && 'image_url' in logo && logo.image_url) {
-      return logo.image_url;
+      return resolveMediaUrl(logo.image_url);
     }
     return '';
   }

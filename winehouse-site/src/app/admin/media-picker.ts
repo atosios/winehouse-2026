@@ -10,6 +10,7 @@ import {
 } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi, Asset } from './api';
+import { resolveMediaUrl } from '../core/media.utils';
 
 @Component({
   selector: 'wh-media-picker',
@@ -233,7 +234,7 @@ import { AdminApi, Asset } from './api';
                       <div class="aspect-square relative flex items-center justify-center overflow-hidden bg-black/40">
                         @if (isImageAsset(asset)) {
                           <img
-                            [src]="asset.url"
+                            [src]="resolveUrl(asset.url || asset.path)"
                             [alt]="asset.name"
                             class="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
                             loading="lazy"
@@ -515,11 +516,7 @@ export class WhMediaPicker implements OnInit {
 
   /* Format & URL Helpers */
   resolveUrl(val: string): string {
-    if (!val) return '';
-    if (val.startsWith('http://') || val.startsWith('https://') || val.startsWith('/')) {
-      return val;
-    }
-    return val;
+    return resolveMediaUrl(val);
   }
 
   formatFilename(val: string): string {

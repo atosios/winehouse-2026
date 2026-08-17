@@ -3,6 +3,7 @@ import { RouterLink } from '@angular/router';
 import { SiteSettingsService } from '../../core/site-settings.service';
 import { I18nService, I18nText } from '../../core/i18n.service';
 import { WhLogo } from '../../shared/brand-logo';
+import { resolveMediaUrl } from '../../core/media.utils';
 
 /** Fullscreen "under maintenance" holding page (covers header/footer too). */
 @Component({
@@ -39,7 +40,7 @@ import { WhLogo } from '../../shared/brand-logo';
         <div class="relative w-full border-[1.5px] border-white/20 bg-black/40 overflow-hidden shadow-2xl">
           <video
             class="w-full max-h-[380px] object-cover object-center filter contrast-105"
-            [src]="page().video_url || 'maintenance.mp4'"
+            [src]="mediaUrl(page().video_url || 'maintenance.mp4')"
             autoplay
             loop
             muted
@@ -91,5 +92,9 @@ export class Maintenance {
 
   t(val: I18nText | string): string {
     return this.i18n.t(val as I18nText);
+  }
+
+  mediaUrl(url: string | null | undefined): string {
+    return resolveMediaUrl(url);
   }
 }

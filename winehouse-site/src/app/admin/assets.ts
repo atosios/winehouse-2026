@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi, Asset } from './api';
 import { AdminConfirm } from './confirm-dialog';
+import { resolveMediaUrl } from '../core/media.utils';
 
 @Component({
   selector: 'wh-admin-assets',
@@ -48,10 +49,10 @@ import { AdminConfirm } from './confirm-dialog';
       <p class="text-sm font-semibold text-slate-800 mb-1">
         {{ uploading() ? 'Uploading media…' : 'Drag videos, images or files here, or browse' }}
       </p>
-      <p class="text-xs text-slate-400">Supports MP4, WEBM, MOV, JPG, PNG, WEBP, GIF, SVG, PDF up to 50 MB</p>
+      <p class="text-xs text-slate-400">Supports MP4, WEBM, MOV, JPG, PNG, WEBP, GIF, SVG, PDF up to 64 MB</p>
       <input
         type="file"
-        accept=".jpg,.jpeg,.png,.webp,.gif,.svg,.pdf,.mp4,.webm,.mov,.ogg,.m4v"
+        accept=".jpg,.jpeg,.png,.webp,.gif,.svg,.pdf,.mp4,.webm,.mov,.ogg,.m4v,.avif,.heic,.heif"
         multiple
         (change)="uploadFromInput($event)"
         [disabled]="uploading()"
@@ -97,12 +98,12 @@ import { AdminConfirm } from './confirm-dialog';
             <li class="admin-card !p-3 flex flex-col gap-2.5 group hover:border-slate-300 transition-all">
               @if (isImage(asset)) {
                 <div class="cursor-pointer overflow-hidden rounded-lg bg-slate-100 relative aspect-video" (click)="openLightbox(asset)">
-                  <img [src]="asset.url" [alt]="asset.name" class="h-full w-full object-cover rounded-lg transition-transform duration-200 group-hover:scale-105" loading="lazy" />
+                  <img [src]="mediaUrl(asset.url || asset.path)" [alt]="asset.name" class="h-full w-full object-cover rounded-lg transition-transform duration-200 group-hover:scale-105" loading="lazy" />
                   <div class="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
                 </div>
               } @else if (isVideo(asset)) {
                 <div class="cursor-pointer overflow-hidden rounded-lg bg-slate-900 relative aspect-video flex items-center justify-center group/vid" (click)="openLightbox(asset)">
-                  <video [src]="asset.url" class="h-full w-full object-cover rounded-lg opacity-80" muted preload="metadata"></video>
+                  <video [src]="mediaUrl(asset.url || asset.path)" class="h-full w-full object-cover rounded-lg opacity-80" muted preload="metadata"></video>
                   <div class="absolute w-10 h-10 rounded-full bg-white/90 text-slate-900 flex items-center justify-center shadow-lg transition-transform group-hover/vid:scale-110">
                     <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                   </div>
@@ -159,7 +160,7 @@ import { AdminConfirm } from './confirm-dialog';
                   <td>
                     <div class="flex items-center gap-3">
                       @if (isImage(asset)) {
-                        <img [src]="asset.url" [alt]="asset.name" class="w-9 h-9 rounded-lg object-cover cursor-pointer border border-slate-200" (click)="openLightbox(asset)" />
+                        <img [src]="mediaUrl(asset.url || asset.path)" [alt]="asset.name" class="w-9 h-9 rounded-lg object-cover cursor-pointer border border-slate-200" (click)="openLightbox(asset)" />
                       } @else if (isVideo(asset)) {
                         <div class="w-9 h-9 rounded-lg bg-slate-900 flex items-center justify-center text-white text-xs cursor-pointer" (click)="openLightbox(asset)">
                           ▶
@@ -199,9 +200,9 @@ import { AdminConfirm } from './confirm-dialog';
       <div class="admin-lightbox" (click)="lightboxAsset.set(null)">
         <div class="relative max-w-4xl max-h-[85vh] p-2" (click)="$event.stopPropagation()">
           @if (isImage(lightboxAsset()!)) {
-            <img [src]="lightboxAsset()!.url" [alt]="lightboxAsset()!.name" class="max-w-full max-h-[80vh] rounded-2xl shadow-2xl object-contain mx-auto" />
+            <img [src]="mediaUrl(lightboxAsset()!.url || lightboxAsset()!.path)" [alt]="lightboxAsset()!.name" class="max-w-full max-h-[80vh] rounded-2xl shadow-2xl object-contain mx-auto" />
           } @else if (isVideo(lightboxAsset()!)) {
-            <video [src]="lightboxAsset()!.url" class="max-w-full max-h-[80vh] rounded-2xl shadow-2xl mx-auto" controls autoplay></video>
+            <video [src]="mediaUrl(lightboxAsset()!.url || lightboxAsset()!.path)" class="max-w-full max-h-[80vh] rounded-2xl shadow-2xl mx-auto" controls autoplay></video>
           }
           <div class="text-center mt-3 text-white text-xs font-medium bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full inline-block">
             {{ lightboxAsset()!.name }} · {{ formatSize(lightboxAsset()!.size) }}
@@ -310,8 +311,13 @@ export class AdminAssets implements OnInit {
     }
   }
 
+  mediaUrl(url: string | null | undefined): string {
+    return resolveMediaUrl(url);
+  }
+
   copy(asset: Asset) {
-    navigator.clipboard.writeText(asset.url).then(() => {
+    const url = this.mediaUrl(asset.url || asset.path);
+    navigator.clipboard.writeText(url).then(() => {
       this.copiedId.set(asset.id);
       setTimeout(() => this.copiedId.set(null), 1500);
     });

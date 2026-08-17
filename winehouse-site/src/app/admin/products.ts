@@ -4,6 +4,7 @@ import { AdminApi, Product, Asset } from './api';
 import { WhI18nInput } from './i18n-input';
 import { I18nText } from '../core/i18n.service';
 import { SiteSettingsService } from '../core/site-settings.service';
+import { resolveMediaUrl } from '../core/media.utils';
 
 @Component({
   selector: 'wh-admin-products',
@@ -98,7 +99,7 @@ import { SiteSettingsService } from '../core/site-settings.service';
                   <td>
                     <div class="relative w-10 h-12 bg-slate-100 rounded border border-slate-200 overflow-hidden shrink-0">
                       <img
-                        [src]="item.cover_image || 'cellar_ritual.jpg'"
+                        [src]="mediaUrl(item.cover_image || 'cellar_ritual.jpg')"
                         [alt]="item.name"
                         class="w-full h-full object-cover"
                       />
@@ -386,7 +387,7 @@ import { SiteSettingsService } from '../core/site-settings.service';
                       [class.border-slate-200]="mainCoverImage() !== img"
                       [class.hover:border-slate-400]="mainCoverImage() !== img"
                     >
-                      <img [src]="img" class="w-full h-full object-cover" [alt]="'Product photo ' + (i + 1)" />
+                      <img [src]="mediaUrl(img)" class="w-full h-full object-cover" [alt]="'Product photo ' + (i + 1)" />
 
                       <!-- Main Cover Badge -->
                       @if (mainCoverImage() === img) {
@@ -535,7 +536,7 @@ import { SiteSettingsService } from '../core/site-settings.service';
                     [class.ring-wine-600/30]="isAssetSelected(asset.url)"
                     [class.border-slate-200]="!isAssetSelected(asset.url)"
                   >
-                    <img [src]="asset.url" [alt]="asset.name" class="w-full h-full object-cover" />
+                    <img [src]="mediaUrl(asset.url || asset.path)" [alt]="asset.name" class="w-full h-full object-cover" />
                     
                     <!-- Selection Indicator -->
                     @if (isAssetSelected(asset.url)) {
@@ -620,6 +621,10 @@ export class AdminProducts implements OnInit {
   });
 
   formProduct: Partial<Product> = this.getEmptyProduct();
+
+  mediaUrl(url: string | null | undefined): string {
+    return resolveMediaUrl(url);
+  }
 
   ngOnInit(): void {
     this.loadProducts();

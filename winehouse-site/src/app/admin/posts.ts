@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AdminApi, Post, Asset, PostMetaData } from './api';
 import { AdminConfirm } from './confirm-dialog';
+import { resolveMediaUrl } from '../core/media.utils';
 
 export type EditorBlockType =
   | 'heading'
@@ -150,7 +151,7 @@ export interface EditorBlock {
                 <td>
                   <div class="flex items-center gap-3">
                     @if (post.cover_image) {
-                      <img [src]="post.cover_image" alt="" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0" />
+                      <img [src]="mediaUrl(post.cover_image)" alt="" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0" />
                     } @else {
                       <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-sm shrink-0">
                         📖
@@ -257,6 +258,10 @@ export class AdminPosts implements OnInit {
       this.sortField.set(field);
       this.sortDir.set(field === 'title' ? 'asc' : 'desc');
     }
+  }
+
+  mediaUrl(url: string | null | undefined): string {
+    return resolveMediaUrl(url);
   }
 
   async remove(post: Post) {
@@ -654,7 +659,7 @@ export class AdminPosts implements OnInit {
                       (click)="openMediaPicker({ blockIdx: idx, field: 'image' })"
                     >
                       @if (block.imageUrl) {
-                        <img [src]="block.imageUrl" alt="" class="w-full object-cover max-h-96" />
+                        <img [src]="mediaUrl(block.imageUrl)" alt="" class="w-full object-cover max-h-96" />
                       } @else {
                         <div class="h-44 flex flex-col items-center justify-center text-slate-400 text-xs">
                           <span class="text-3xl mb-1">🖼️</span>
@@ -681,7 +686,7 @@ export class AdminPosts implements OnInit {
                       class="relative group/vid rounded-2xl overflow-hidden border border-slate-900 bg-slate-950 cursor-pointer max-h-96"
                     >
                       @if (block.videoUrl) {
-                        <video [src]="block.videoUrl" controls class="w-full max-h-96" preload="metadata"></video>
+                        <video [src]="mediaUrl(block.videoUrl)" controls class="w-full max-h-96" preload="metadata"></video>
                       } @else {
                         <div
                           class="h-44 flex flex-col items-center justify-center text-slate-400 text-xs"
@@ -983,7 +988,7 @@ export class AdminPosts implements OnInit {
 
             @if (model.cover_image) {
               <div class="relative group/cover rounded-xl overflow-hidden border border-slate-200 bg-slate-100 mb-1.5">
-                <img [src]="model.cover_image" alt="" class="w-full h-24 object-cover" />
+                <img [src]="mediaUrl(model.cover_image)" alt="" class="w-full h-24 object-cover" />
                 <div
                   class="absolute inset-0 bg-black/50 opacity-0 group-hover/cover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer text-white text-xs font-semibold"
                   (click)="openMediaPicker('cover')"
@@ -1670,6 +1675,10 @@ export class AdminPostEdit implements OnInit {
   draggedBlockIdx: number | null = null;
   draggedPaletteType: EditorBlockType | null = null;
   dragOverIdx: number | null = null;
+
+  mediaUrl(url: string | null | undefined): string {
+    return resolveMediaUrl(url);
+  }
 
   showTitle = true;
   showExcerpt = true;

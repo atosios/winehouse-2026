@@ -2,6 +2,7 @@ import { ChangeDetectionStrategy, Component, HostListener, inject } from '@angul
 import { RouterLink } from '@angular/router';
 import { CartService } from '../core/cart.service';
 import { I18nService, I18nText } from '../core/i18n.service';
+import { resolveMediaUrl } from '../core/media.utils';
 
 @Component({
   selector: 'wh-cart-drawer',
@@ -49,7 +50,7 @@ import { I18nService, I18nText } from '../core/i18n.service';
                 <!-- Thumbnail -->
                 <div class="w-16 h-20 bg-slate-100 border border-[var(--color-foreground)]/20 overflow-hidden shrink-0">
                   <img
-                    [src]="item.product.cover_image || item.product.img || 'cellar_ritual.jpg'"
+                    [src]="mediaUrl(item.product.cover_image || item.product.img || 'cellar_ritual.jpg')"
                     [alt]="item.product.name"
                     class="w-full h-full object-cover"
                   />
@@ -180,6 +181,10 @@ export class WhCartDrawer {
   t(val?: I18nText | string | null): string {
     if (!val) return '';
     return this.i18n.t(val as I18nText);
+  }
+
+  mediaUrl(url: string | null | undefined): string {
+    return resolveMediaUrl(url);
   }
 
   @HostListener('document:keydown.escape')

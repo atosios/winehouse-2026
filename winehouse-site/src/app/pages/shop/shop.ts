@@ -5,6 +5,7 @@ import { I18nService, I18nText } from '../../core/i18n.service';
 import { CartService, CartItemProduct } from '../../core/cart.service';
 import { WhReveal } from '../../shared/reveal';
 import { AdminApi, Product, StoreCategory } from '../../admin/api';
+import { resolveMediaUrl } from '../../core/media.utils';
 
 @Component({
   selector: 'wh-shop',
@@ -107,8 +108,8 @@ export class Shop implements OnInit {
 
   getCardImage(bottle: CartItemProduct): string {
     const custom = this.activeCardImage()[bottle.id];
-    if (custom) return custom;
-    return bottle.cover_image || bottle.img || 'cellar_ritual.jpg';
+    if (custom) return resolveMediaUrl(custom);
+    return resolveMediaUrl(bottle.cover_image || bottle.img || 'cellar_ritual.jpg');
   }
 
   setCardImage(bottleId: number | string, imgUrl: string, event?: Event): void {
@@ -125,11 +126,14 @@ export class Shop implements OnInit {
   getAllBottleImages(bottle: CartItemProduct): string[] {
     const list: string[] = [];
     const main = bottle.cover_image || bottle.img;
-    if (main) list.push(main);
+    if (main) list.push(resolveMediaUrl(main));
     if (bottle.gallery && Array.isArray(bottle.gallery)) {
       bottle.gallery.forEach((g) => {
-        if (g && !list.includes(g)) {
-          list.push(g);
+        if (g) {
+          const resolved = resolveMediaUrl(g);
+          if (!list.includes(resolved)) {
+            list.push(resolved);
+          }
         }
       });
     }
@@ -142,7 +146,7 @@ export class Shop implements OnInit {
       event.stopPropagation();
     }
     this.selectedBottle.set(bottle);
-    this.modalActiveImage.set(bottle.cover_image || bottle.img || 'cellar_ritual.jpg');
+    this.modalActiveImage.set(resolveMediaUrl(bottle.cover_image || bottle.img || 'cellar_ritual.jpg'));
   }
 
   closeBottleModal(): void {

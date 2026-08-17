@@ -1,0 +1,34 @@
+---
+deployment:
+  tasks:
+    # Set deployment target directories
+    - export ROOTPATH=/home/sites/10b/f/ff484050c9
+    - export FEPATH=$ROOTPATH/public_html/
+    - export BEPATH=$ROOTPATH/winehouse-be/
+
+    # 1. Deploy Backend (Laravel)
+    - /bin/mkdir -p $BEPATH
+    - /bin/cp -R winehouse-be/app $BEPATH/
+    - /bin/cp -R winehouse-be/bootstrap $BEPATH/
+    - /bin/cp -R winehouse-be/config $BEPATH/
+    - /bin/cp -R winehouse-be/database $BEPATH/
+    - /bin/cp -R winehouse-be/public $BEPATH/
+    - /bin/cp -R winehouse-be/resources $BEPATH/
+    - /bin/cp -R winehouse-be/routes $BEPATH/
+    - /bin/cp winehouse-be/artisan $BEPATH/
+    - /bin/cp winehouse-be/composer.json $BEPATH/
+    - /bin/cp winehouse-be/composer.lock $BEPATH/
+
+    # Ensure required Laravel storage directories exist with correct permissions
+    - /bin/mkdir -p $BEPATH/storage/framework/cache/data
+    - /bin/mkdir -p $BEPATH/storage/framework/sessions
+    - /bin/mkdir -p $BEPATH/storage/framework/views
+    - /bin/mkdir -p $BEPATH/storage/logs
+    - /bin/mkdir -p $BEPATH/storage/app/public/uploads
+    - /bin/mkdir -p $BEPATH/bootstrap/cache
+    - /bin/chmod -R 775 $BEPATH/storage $BEPATH/bootstrap/cache
+
+    # 2. Deploy Frontend
+    - /bin/mkdir -p $FEPATH
+    - if [ -d "winehouse-site/dist/winehouse-site/browser" ]; then /bin/cp -R winehouse-site/dist/winehouse-site/browser/* $FEPATH/; fi
+    - if [ -d "dist-publish/winehouse-fe" ]; then /bin/cp -R dist-publish/winehouse-fe/* $FEPATH/; fi
