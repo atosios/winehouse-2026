@@ -110,7 +110,20 @@ Upload **the contents of** `dist/winehouse-site/browser/` into `public_html/`
 
 ## 8. Updating later
 
-- **Frontend change:** `npm run build`, re-upload `dist/winehouse-site/browser/`.
+### Option A: Fully Automated GitHub Actions CI/CD (Recommended)
+Every `git push origin main` triggers `.github/workflows/deploy.yml`:
+1. Compiles Angular (`npm run build`).
+2. Installs production Laravel dependencies (`composer install --no-dev`).
+3. Deploys updated frontend to `public_html/` and backend to `winehouse-be/` via FTP.
+
+**Required GitHub Secrets (Repo Settings → Secrets and variables → Actions):**
+- `FTP_SERVER`: Your server FTP hostname or IP
+- `FTP_USERNAME`: Your FTP username
+- `FTP_PASSWORD`: Your FTP password
+- `FTP_PORT`: `21` (optional, defaults to 21)
+
+### Option B: Manual / Host Git Deployment
+- **Frontend change:** `npm run build`, re-upload `dist/winehouse-site/browser/` or run `./build-packages.ps1`.
 - **Backend change:** `git pull` (or re-upload), then
   `php artisan migrate --force && php artisan config:cache && php artisan route:cache`.
 - **Content (posts/pages/images):** no deploy needed — done in the dashboard.
@@ -124,3 +137,4 @@ Upload **the contents of** `dist/winehouse-site/browser/` into `public_html/`
 | Images upload but don't display | re-run `php artisan storage:link`; verify the subdomain document root points at `winehouse-be/public` |
 | Dashboard says "Could not reach the server" | the `api.` subdomain isn't set up / has no SSL, or `/api/posts` errors — test it directly in the browser |
 | Changed `.env` but nothing happens | `php artisan config:cache` again (config is cached in production) |
+

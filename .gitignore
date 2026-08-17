@@ -1,0 +1,16 @@
+# Build & packaging artifacts
+dist-publish/
+
+# Design & brainstorming notes
+brainstorming/
+
+# SSH / Private keys
+key
+key.pub
+
+# System & IDE files
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+*.log

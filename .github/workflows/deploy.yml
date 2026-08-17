@@ -1,0 +1,80 @@
+name: Build & Deploy to Live Server
+
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch: # Allows manual trigger from GitHub Actions tab
+
+jobs:
+  build-and-deploy:
+    name: Build & Deploy (Angular + Laravel)
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout repository
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      # 2. Setup Node.js for Angular
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: 'npm'
+          cache-dependency-path: winehouse-site/package-lock.json
+
+      # 3. Build Frontend (Angular)
+      - name: Install & Build Frontend
+        run: |
+          cd winehouse-site
+          npm ci
+          npm run build
+
+      # 4. Setup PHP for Laravel
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring, xml, ctype, iconv, intl, pdo, pdo_mysql, bcmath, json
+          tools: composer:v2
+
+      # 5. Install Backend Dependencies
+      - name: Install Backend Composer Dependencies
+        run: |
+          cd winehouse-be
+          composer install --no-dev --optimize-autoloader --no-interaction --prefer-dist
+
+      # 6. Deploy Frontend to public_html via FTP/FTPS
+      - name: Deploy Frontend to public_html
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: ${{ secrets.FTP_PORT || 21 }}
+          local-dir: ./winehouse-site/dist/winehouse-site/browser/
+          server-dir: ./public_html/
+          dangerous-clean-slate: false
+
+      # 7. Deploy Backend to ~/winehouse-be via FTP/FTPS
+      - name: Deploy Backend to winehouse-be
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          protocol: ftp
+          port: ${{ secrets.FTP_PORT || 21 }}
+          local-dir: ./winehouse-be/
+          server-dir: ./winehouse-be/
+          dangerous-clean-slate: false
+          exclude: |
+            **/.git*
+            **/.git*/**
+            **/.env*
+            **/.env
+            **/node_modules/**
+            **/tests/**
+            storage/logs/*.log
