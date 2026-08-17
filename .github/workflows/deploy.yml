@@ -69,8 +69,6 @@ jobs:
           mirror -R --parallel=10 --verbose \
             --exclude-glob winehouse-be* \
             ./winehouse-site/dist/winehouse-site/browser/ ./public_html/
-          put -f -O ./public_html/ ./winehouse-site/dist/winehouse-site/browser/index.html
-          put -f -O ./public_html/ ./winehouse-site/dist/winehouse-site/browser/.htaccess
           quit
           EOF
 
