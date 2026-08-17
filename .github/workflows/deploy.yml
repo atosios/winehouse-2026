@@ -67,6 +67,8 @@ jobs:
           set net:reconnect-interval-base 5
           mkdir -p public_html
           mirror -R --parallel=10 --verbose ./winehouse-site/dist/winehouse-site/browser/ ./public_html/
+          put -f -O ./public_html/ ./winehouse-site/dist/winehouse-site/browser/index.html
+          put -f -O ./public_html/ ./winehouse-site/dist/winehouse-site/browser/.htaccess
           quit
           EOF
 
