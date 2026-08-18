@@ -103,6 +103,21 @@ export class SeoService {
     // Canonical & Hreflang links
     this.setCanonicalUrl(url);
     this.setHreflangLinks(url);
+
+    // Matomo SPA Tracking (Client Browser)
+    if (this.isBrowser && typeof window !== 'undefined') {
+      try {
+        const paq = (window as any)._paq;
+        if (paq) {
+          paq.push(['setCustomUrl', url]);
+          paq.push(['setDocumentTitle', title]);
+          paq.push(['trackPageView']);
+          paq.push(['enableLinkTracking']);
+        }
+      } catch {
+        // Safe fallback
+      }
+    }
   }
 
   /**
