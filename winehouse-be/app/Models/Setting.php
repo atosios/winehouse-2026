@@ -89,6 +89,62 @@ class Setting extends Model
                 'notify_on_order_status_change' => true,
                 'send_customer_order_confirmation' => true,
             ],
+            'seo_config' => [
+                'meta_title' => 'The Winehouse — Artisanal Wines, Terroir & Tasting Atelier',
+                'meta_description' => 'Curated artisanal wines from independent Mediterranean vineyards, stories from the cellar, tastings and private tours. Poured with care, told with love.',
+                'meta_keywords' => 'wine atelier, natural wine, greek wine, santorini assyrtiko, xinomavro, biodynamic wine, private wine tasting, sommelier curation, cellar archive',
+                'og_image' => 'hero_cellar.png',
+                'google_verification' => '',
+                'bing_verification' => '',
+                'pinterest_verification' => '',
+                'yandex_verification' => '',
+                'google_analytics_id' => '',
+                'google_tag_manager_id' => '',
+                'meta_pixel_id' => '',
+                'indexing_enabled' => true,
+                'page_seo' => [
+                    'home' => [
+                        'title' => [
+                            'en' => 'The Winehouse — Artisanal Wines, Terroir & Tasting Atelier',
+                            'el' => 'The Winehouse — Εκλεκτά Χειροποίητα Κρασιά, Terroir & Γευσιγνωσίες',
+                        ],
+                        'description' => [
+                            'en' => 'Curated natural and ancestral Mediterranean wines, small-batch independent growers, guided sommelier flights and cellar consulting.',
+                            'el' => 'Επιλεγμένα φυσικά και παραδοσιακά μεσογειακά κρασιά, μικροί ανεξάρτητοι παραγωγοί, καθοδηγούμενες γευσιγνωσίες και συμβουλευτική κάβας.',
+                        ],
+                    ],
+                    'shop' => [
+                        'title' => [
+                            'en' => 'Curated Bottlings & Cellar Vault | The Winehouse',
+                            'el' => 'Επιλεγμένες Φιάλες & Σπάνιες Εσοδείες | The Winehouse',
+                        ],
+                        'description' => [
+                            'en' => 'Browse small-batch natural wines, ungrafted volcanic Assyrtiko, old-vine Xinomavro, and allocated cellar reserves.',
+                            'el' => 'Ανακαλύψτε φυσικά κρασιά μικρής παραγωγής, αυτόριζα ηφαιστειακά Ασύρτικα, Ξινόμαυρα παλαιών κλημάτων και σπάνιες αρχειακές φιάλες.',
+                        ],
+                    ],
+                    'about' => [
+                        'title' => [
+                            'en' => 'Our Philosophy & Cellar Roots | The Winehouse',
+                            'el' => 'Η Φιλοσοφία & οι Ρίζες της Κάβας μας | The Winehouse',
+                        ],
+                        'description' => [
+                            'en' => 'Discover our slow-living philosophy, passionate small-batch vignerons, and sustainable Mediterranean terroir preservation.',
+                            'el' => 'Ανακαλύψτε τη φιλοσοφία του αργού χρόνου, τους αφοσιωμένους μικρούς παραγωγούς και τη διατήρηση του μεσογειακού terroir.',
+                        ],
+                    ],
+                    'contact' => [
+                        'title' => [
+                            'en' => 'Cellar Atelier, Tastings & Inquiries | The Winehouse',
+                            'el' => 'Επικοινωνία, Γευσιγνωσίες & Ερωτήσεις | The Winehouse',
+                        ],
+                        'description' => [
+                            'en' => 'Book private sommelier tastings, inquire about bespoke cellar consulting, or visit our central Athens atelier.',
+                            'el' => 'Κλείστε ιδιωτικές γευσιγνωσίες sommelier, ζητήστε προσωποποιημένη συμβουλευτική κάβας ή επισκεφθείτε τον χώρο μας.',
+                        ],
+                    ],
+                ],
+            ],
             'homepage_content' => [
                 'hero' => [
                     'tag' => '/ HERO',
@@ -642,6 +698,8 @@ class Setting extends Model
             'maintenance_content',
             'maintenance_mode',
             'store_config',
+            'mail_config',
+            'seo_config',
         ];
 
         foreach ($data as $key => $value) {

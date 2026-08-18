@@ -3,6 +3,7 @@
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\LlmsTxtController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostController;
@@ -14,6 +15,8 @@ use Illuminate\Support\Facades\Route;
 
 // Public content & e-Shop endpoints.
 Route::get('/sitemap.xml', [SitemapController::class, 'index']);
+Route::get('/llms.txt', [LlmsTxtController::class, 'index']);
+Route::get('/llms-full.txt', [LlmsTxtController::class, 'full']);
 Route::get('/settings', [SettingController::class, 'publicIndex']);
 Route::get('/posts', [PostController::class, 'publicIndex']);
 Route::get('/posts/{slug}', [PostController::class, 'publicShow']);

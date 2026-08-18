@@ -14,7 +14,67 @@ import {
   SiteSettings,
   StoreConfig,
   MailConfig,
+  SeoConfigSettings,
 } from '../admin/api';
+
+export const DEFAULT_SEO_CONFIG: SeoConfigSettings = {
+  meta_title: 'The Winehouse — Artisanal Wines, Terroir & Tasting Atelier',
+  meta_description:
+    'Curated artisanal wines from independent Mediterranean vineyards, stories from the cellar, tastings and private tours. Poured with care, told with love.',
+  meta_keywords:
+    'wine atelier, natural wine, greek wine, santorini assyrtiko, xinomavro, biodynamic wine, private wine tasting, sommelier curation, cellar archive',
+  og_image: 'hero_cellar.png',
+  google_verification: '',
+  bing_verification: '',
+  pinterest_verification: '',
+  yandex_verification: '',
+  google_analytics_id: '',
+  google_tag_manager_id: '',
+  meta_pixel_id: '',
+  indexing_enabled: true,
+  page_seo: {
+    home: {
+      title: {
+        en: 'The Winehouse — Artisanal Wines, Terroir & Tasting Atelier',
+        el: 'The Winehouse — Εκλεκτά Χειροποίητα Κρασιά, Terroir & Γευσιγνωσίες',
+      },
+      description: {
+        en: 'Curated natural and ancestral Mediterranean wines, small-batch independent growers, guided sommelier flights and cellar consulting.',
+        el: 'Επιλεγμένα φυσικά και παραδοσιακά μεσογειακά κρασιά, μικροί ανεξάρτητοι παραγωγοί, καθοδηγούμενες γευσιγνωσίες και συμβουλευτική κάβας.',
+      },
+    },
+    shop: {
+      title: {
+        en: 'Curated Bottlings & Cellar Vault | The Winehouse',
+        el: 'Επιλεγμένες Φιάλες & Σπάνιες Εσοδείες | The Winehouse',
+      },
+      description: {
+        en: 'Browse small-batch natural wines, ungrafted volcanic Assyrtiko, old-vine Xinomavro, and allocated cellar reserves.',
+        el: 'Ανακαλύψτε φυσικά κρασιά μικρής παραγωγής, αυτόριζα ηφαιστειακά Ασύρτικα, Ξινόμαυρα παλαιών κλημάτων και σπάνιες αρχειακές φιάλες.',
+      },
+    },
+    about: {
+      title: {
+        en: 'Our Philosophy & Cellar Roots | The Winehouse',
+        el: 'Η Φιλοσοφία & οι Ρίζες της Κάβας μας | The Winehouse',
+      },
+      description: {
+        en: 'Discover our slow-living philosophy, passionate small-batch vignerons, and sustainable Mediterranean terroir preservation.',
+        el: 'Ανακαλύψτε τη φιλοσοφία του αργού χρόνου, τους αφοσιωμένους μικρούς παραγωγούς και τη διατήρηση του μεσογειακού terroir.',
+      },
+    },
+    contact: {
+      title: {
+        en: 'Cellar Atelier, Tastings & Inquiries | The Winehouse',
+        el: 'Επικοινωνία, Γευσιγνωσίες & Ερωτήσεις | The Winehouse',
+      },
+      description: {
+        en: 'Book private sommelier tastings, inquire about bespoke cellar consulting, or visit our central Athens atelier.',
+        el: 'Κλείστε ιδιωτικές γευσιγνωσίες sommelier, ζητήστε προσωποποιημένη συμβουλευτική κάβας ή επισκεφθείτε τον χώρο μας.',
+      },
+    },
+  },
+};
 
 export const DEFAULT_MAIL_CONFIG: MailConfig = {
   mail_driver: 'smtp',
@@ -568,6 +628,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   maintenance_mode: false,
   store_config: JSON.parse(JSON.stringify(DEFAULT_STORE_CONFIG)),
   mail_config: JSON.parse(JSON.stringify(DEFAULT_MAIL_CONFIG)),
+  seo_config: JSON.parse(JSON.stringify(DEFAULT_SEO_CONFIG)),
 };
 
 @Injectable({ providedIn: 'root' })
@@ -594,6 +655,7 @@ export class SiteSettingsService {
   readonly maintenancePage = computed<MaintenancePageContent>(() => this.settings().maintenance_content || DEFAULT_MAINTENANCE_CONTENT);
   readonly isMaintenanceMode = computed(() => this.settings().maintenance_mode);
   readonly storeConfig = computed<StoreConfig>(() => this.settings().store_config || DEFAULT_STORE_CONFIG);
+  readonly seoConfig = computed<SeoConfigSettings>(() => this.settings().seo_config || DEFAULT_SEO_CONFIG);
 
   constructor() {
     this.applyTheme(DEFAULT_SITE_COLORS);
@@ -755,6 +817,32 @@ export class SiteSettingsService {
               ...DEFAULT_MAIL_CONFIG,
               ...(loaded.mail_config || {}),
             },
+            seo_config: {
+              ...DEFAULT_SEO_CONFIG,
+              ...(loaded.seo_config || {}),
+              indexing_enabled:
+                loaded.seo_config?.indexing_enabled !== undefined
+                  ? Boolean(loaded.seo_config.indexing_enabled)
+                  : DEFAULT_SEO_CONFIG.indexing_enabled,
+              page_seo: {
+                home: {
+                  ...DEFAULT_SEO_CONFIG.page_seo?.home,
+                  ...(loaded.seo_config?.page_seo?.home || {}),
+                },
+                shop: {
+                  ...DEFAULT_SEO_CONFIG.page_seo?.shop,
+                  ...(loaded.seo_config?.page_seo?.shop || {}),
+                },
+                about: {
+                  ...DEFAULT_SEO_CONFIG.page_seo?.about,
+                  ...(loaded.seo_config?.page_seo?.about || {}),
+                },
+                contact: {
+                  ...DEFAULT_SEO_CONFIG.page_seo?.contact,
+                  ...(loaded.seo_config?.page_seo?.contact || {}),
+                },
+              },
+            },
           };
 
           this.settings.set(merged);
@@ -844,6 +932,34 @@ export class SiteSettingsService {
               : DEFAULT_STORE_CONFIG.categories,
           };
 
+          const rawSeo = updated.seo_config || data.seo_config || this.settings().seo_config || DEFAULT_SEO_CONFIG;
+          const mergedSeoConfig: SeoConfigSettings = {
+            ...DEFAULT_SEO_CONFIG,
+            ...rawSeo,
+            indexing_enabled:
+              rawSeo.indexing_enabled !== undefined
+                ? Boolean(rawSeo.indexing_enabled)
+                : DEFAULT_SEO_CONFIG.indexing_enabled,
+            page_seo: {
+              home: {
+                ...DEFAULT_SEO_CONFIG.page_seo?.home,
+                ...(rawSeo.page_seo?.home || {}),
+              },
+              shop: {
+                ...DEFAULT_SEO_CONFIG.page_seo?.shop,
+                ...(rawSeo.page_seo?.shop || {}),
+              },
+              about: {
+                ...DEFAULT_SEO_CONFIG.page_seo?.about,
+                ...(rawSeo.page_seo?.about || {}),
+              },
+              contact: {
+                ...DEFAULT_SEO_CONFIG.page_seo?.contact,
+                ...(rawSeo.page_seo?.contact || {}),
+              },
+            },
+          };
+
           const merged: SiteSettings = {
             ...this.settings(),
             ...updated,
@@ -865,6 +981,7 @@ export class SiteSettingsService {
             contact_content: updated.contact_content || data.contact_content || this.settings().contact_content || DEFAULT_CONTACT_PAGE_CONTENT,
             maintenance_content: updated.maintenance_content || data.maintenance_content || this.settings().maintenance_content || DEFAULT_MAINTENANCE_CONTENT,
             store_config: mergedStoreConfig,
+            seo_config: mergedSeoConfig,
           };
 
           this.settings.set(merged);

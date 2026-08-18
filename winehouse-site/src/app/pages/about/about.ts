@@ -27,11 +27,18 @@ export class About implements OnInit {
   }
 
   ngOnInit(): void {
+    const seoConf = this.settingsService.seoConfig();
+    const aboutSeo = seoConf.page_seo?.about;
+    const title = aboutSeo?.title ? this.t(aboutSeo.title) : 'About Our Cellar & Philosophy';
+    const desc = aboutSeo?.description
+      ? this.t(aboutSeo.description)
+      : 'Discover the heritage, sommelier curation philosophy, and ancestral terroir benchmarks of The Winehouse.';
+
     this.seo.setMeta({
-      title: 'About Our Cellar & Philosophy',
-      description:
-        'Discover the heritage, sommelier curation philosophy, and ancestral terroir benchmarks of The Winehouse.',
-      keywords: 'about the winehouse, cellar story, sommelier philosophy, artisanal wine curation',
+      title,
+      description: desc,
+      keywords: seoConf.meta_keywords || 'about the winehouse, cellar story, sommelier philosophy, artisanal wine curation',
+      image: seoConf.og_image,
       type: 'website',
     });
     this.seo.setBreadcrumbStructuredData([

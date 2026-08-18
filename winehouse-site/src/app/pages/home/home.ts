@@ -24,11 +24,18 @@ export class Home implements OnInit, AfterViewInit {
   readonly videoReady = signal(false);
 
   ngOnInit(): void {
+    const seoConf = this.settingsService.seoConfig();
+    const homeSeo = seoConf.page_seo?.home;
+    const title = homeSeo?.title ? this.t(homeSeo.title) : '';
+    const desc = homeSeo?.description
+      ? this.t(homeSeo.description)
+      : 'The Winehouse — Curated artisanal wines, rare volcanic bottles, tastings, cellar consulting and private tours.';
+
     this.seo.setMeta({
-      title: '',
-      description:
-        'The Winehouse — Curated artisanal wines, rare volcanic bottles, tastings, cellar consulting and private tours.',
-      keywords: 'wine cellar, artisanal wine, greek wine, sommelier, wine tasting, volcanic wine',
+      title,
+      description: desc,
+      keywords: seoConf.meta_keywords || 'wine cellar, artisanal wine, greek wine, sommelier, wine tasting, volcanic wine',
+      image: seoConf.og_image,
       type: 'website',
     });
     this.seo.setOrganizationStructuredData();

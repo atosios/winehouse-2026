@@ -11,6 +11,8 @@ Route::get('/', function () {
 });
 
 Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
+Route::get('/llms.txt', [\App\Http\Controllers\LlmsTxtController::class, 'index']);
+Route::get('/llms-full.txt', [\App\Http\Controllers\LlmsTxtController::class, 'full']);
 
 /**
  * Direct storage media file server.

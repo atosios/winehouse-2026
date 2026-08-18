@@ -1,12 +1,14 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AdminApi, SiteSettings, MailConfig } from './api';
+import { AdminApi, SiteSettings, MailConfig, SeoConfigSettings } from './api';
 import {
   SiteSettingsService,
   DEFAULT_SITE_SETTINGS,
   DEFAULT_SITE_COLORS,
   DEFAULT_MAIL_CONFIG,
+  DEFAULT_SEO_CONFIG,
 } from '../core/site-settings.service';
+import { resolveMediaUrl } from '../core/media.utils';
 
 @Component({
   selector: 'wh-admin-settings',
@@ -34,6 +36,7 @@ import {
     <div class="admin-tabs mb-8">
       <button type="button" class="admin-tab" [class.active]="activeTab() === 'general'" (click)="activeTab.set('general')">General</button>
       <button type="button" class="admin-tab" [class.active]="activeTab() === 'contact'" (click)="activeTab.set('contact')">Contact &amp; Hours</button>
+      <button type="button" class="admin-tab" [class.active]="activeTab() === 'seo'" (click)="activeTab.set('seo')">SEO &amp; Analytics</button>
       <button type="button" class="admin-tab" [class.active]="activeTab() === 'email'" (click)="activeTab.set('email')">Mail &amp; Alerts</button>
       <button type="button" class="admin-tab" [class.active]="activeTab() === 'appearance'" (click)="activeTab.set('appearance')">Mode &amp; Aesthetics</button>
       <button type="button" class="admin-tab" [class.active]="activeTab() === 'security'" (click)="activeTab.set('security')">Security</button>
@@ -259,6 +262,309 @@ import {
         <div class="flex justify-end pt-2">
           <button type="button" class="btn btn-primary btn-sm" [disabled]="saving()" (click)="saveSettings()">
             {{ saving() ? 'Saving…' : 'Save Contact & Hours' }}
+          </button>
+        </div>
+      </div>
+    }
+
+    <!-- Tab: SEO & Analytics -->
+    @if (activeTab() === 'seo') {
+      <div class="space-y-6">
+        <!-- Row 1: Search Console Verification & Crawling -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <!-- Section 1: Search Engine Verifications -->
+          <div>
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Search Engine Verifications</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Ownership verification meta tokens for major search engines.</p>
+            </div>
+
+            <div class="admin-card space-y-3.5">
+              <div>
+                <label class="admin-field-label" for="seo-google-verify">Google Search Console Token</label>
+                <input
+                  id="seo-google-verify"
+                  class="admin-field-input font-mono text-xs"
+                  placeholder="google-site-verification token or code"
+                  [(ngModel)]="ensureSeoConfig().google_verification"
+                />
+                <span class="text-[10px] text-slate-400 mt-1 block">Injects &lt;meta name="google-site-verification" content="..."&gt;</span>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label class="admin-field-label" for="seo-bing-verify">Bing Webmaster Token</label>
+                  <input
+                    id="seo-bing-verify"
+                    class="admin-field-input font-mono text-xs"
+                    placeholder="msvalidate.01 token"
+                    [(ngModel)]="ensureSeoConfig().bing_verification"
+                  />
+                </div>
+                <div>
+                  <label class="admin-field-label" for="seo-pinterest-verify">Pinterest Domain Token</label>
+                  <input
+                    id="seo-pinterest-verify"
+                    class="admin-field-input font-mono text-xs"
+                    placeholder="p:domain_verify token"
+                    [(ngModel)]="ensureSeoConfig().pinterest_verification"
+                  />
+                </div>
+              </div>
+
+              <div>
+                <label class="admin-field-label" for="seo-keywords">Default Meta Keywords</label>
+                <input
+                  id="seo-keywords"
+                  class="admin-field-input text-xs"
+                  placeholder="natural wine, santorini assyrtiko, xinomavro, wine atelier..."
+                  [(ngModel)]="ensureSeoConfig().meta_keywords"
+                />
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: Indexing & Social Fallback -->
+          <div>
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Indexing &amp; Social Share Fallback</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Crawler indexing permission and default social preview card.</p>
+            </div>
+
+            <div class="admin-card space-y-4">
+              <div class="flex items-center justify-between p-3.5 rounded-xl bg-slate-50 border border-slate-200/80">
+                <div class="pr-3">
+                  <span class="text-xs font-bold text-slate-900 block">Search Engine Indexing</span>
+                  <span class="text-2xs text-slate-500 block mt-0.5">
+                    {{ ensureSeoConfig().indexing_enabled !== false ? 'Active (index, follow) — Search engines are allowed to index public pages.' : 'Disabled (noindex, nofollow) — Pages are hidden from search engines.' }}
+                  </span>
+                </div>
+                <label class="ios-toggle shrink-0">
+                  <input type="checkbox" [(ngModel)]="ensureSeoConfig().indexing_enabled" />
+                  <span class="ios-toggle-slider"></span>
+                </label>
+              </div>
+
+              <div>
+                <label class="admin-field-label" for="seo-og-image">Default Social Share Image (OG Image)</label>
+                <input
+                  id="seo-og-image"
+                  class="admin-field-input font-mono text-xs"
+                  placeholder="hero_cellar.png or full image URL"
+                  [(ngModel)]="ensureSeoConfig().og_image"
+                />
+              </div>
+
+              @if (ensureSeoConfig().og_image) {
+                <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl space-y-2">
+                  <span class="text-[10px] font-mono font-bold uppercase text-slate-400 block">Social Card Preview</span>
+                  <div class="rounded-lg overflow-hidden border border-slate-200 bg-white shadow-2xs">
+                    <img
+                      [src]="mediaUrl(ensureSeoConfig().og_image)"
+                      alt="Social share preview"
+                      class="w-full h-28 object-cover"
+                    />
+                    <div class="p-2.5 space-y-0.5">
+                      <p class="text-2xs font-mono uppercase text-slate-400">thewinehouse.gr</p>
+                      <p class="text-xs font-bold text-slate-900 truncate">{{ model.name || 'The Winehouse' }} · Artisanal Wine Atelier</p>
+                      <p class="text-[11px] text-slate-500 line-clamp-1">{{ model.description || 'Curated artisanal wines from independent Mediterranean vineyards.' }}</p>
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 2: Analytics & Tag Measurement -->
+        <div class="pt-2 border-t border-slate-200/80">
+          <div class="mb-3">
+            <h2 class="text-base font-bold text-slate-900 tracking-tight">Measurement &amp; Tracking Pixels</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Safe client-side tracking for Google Analytics 4, GTM, and Meta Pixel.</p>
+          </div>
+
+          <div class="admin-card">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="admin-field-label" for="seo-ga4">Google Analytics 4 (GA4)</label>
+                <input
+                  id="seo-ga4"
+                  class="admin-field-input font-mono text-xs"
+                  placeholder="G-XXXXXXXXXX"
+                  [(ngModel)]="ensureSeoConfig().google_analytics_id"
+                />
+                <span class="text-[10px] text-slate-400 mt-1 block">Format: G-XXXXXXXXXX</span>
+              </div>
+
+              <div>
+                <label class="admin-field-label" for="seo-gtm">Google Tag Manager (GTM)</label>
+                <input
+                  id="seo-gtm"
+                  class="admin-field-input font-mono text-xs"
+                  placeholder="GTM-XXXXXXX"
+                  [(ngModel)]="ensureSeoConfig().google_tag_manager_id"
+                />
+                <span class="text-[10px] text-slate-400 mt-1 block">Format: GTM-XXXXXXX</span>
+              </div>
+
+              <div>
+                <label class="admin-field-label" for="seo-pixel">Meta Pixel (Facebook/Instagram)</label>
+                <input
+                  id="seo-pixel"
+                  class="admin-field-input font-mono text-xs"
+                  placeholder="e.g. 123456789012345"
+                  [(ngModel)]="ensureSeoConfig().meta_pixel_id"
+                />
+                <span class="text-[10px] text-slate-400 mt-1 block">Numeric Pixel ID</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 3: Per-Page Bilingual SEO Overrides -->
+        <div class="pt-2 border-t border-slate-200/80">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-3">
+            <div>
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Per-Page Bilingual Metadata Overrides</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Customize individual page titles and meta descriptions for English and Greek.</p>
+            </div>
+
+            <!-- Subtabs for Pages -->
+            <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200/80 text-xs">
+              <button
+                type="button"
+                class="px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer"
+                [class.bg-white]="selectedSeoPage() === 'home'"
+                [class.shadow-2xs]="selectedSeoPage() === 'home'"
+                [class.text-slate-900]="selectedSeoPage() === 'home'"
+                [class.text-slate-600]="selectedSeoPage() !== 'home'"
+                (click)="selectedSeoPage.set('home')"
+              >
+                Home
+              </button>
+              <button
+                type="button"
+                class="px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer"
+                [class.bg-white]="selectedSeoPage() === 'shop'"
+                [class.shadow-2xs]="selectedSeoPage() === 'shop'"
+                [class.text-slate-900]="selectedSeoPage() === 'shop'"
+                [class.text-slate-600]="selectedSeoPage() !== 'shop'"
+                (click)="selectedSeoPage.set('shop')"
+              >
+                e-Shop
+              </button>
+              <button
+                type="button"
+                class="px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer"
+                [class.bg-white]="selectedSeoPage() === 'about'"
+                [class.shadow-2xs]="selectedSeoPage() === 'about'"
+                [class.text-slate-900]="selectedSeoPage() === 'about'"
+                [class.text-slate-600]="selectedSeoPage() !== 'about'"
+                (click)="selectedSeoPage.set('about')"
+              >
+                About Us
+              </button>
+              <button
+                type="button"
+                class="px-2.5 py-1 rounded-md font-semibold transition-all cursor-pointer"
+                [class.bg-white]="selectedSeoPage() === 'contact'"
+                [class.shadow-2xs]="selectedSeoPage() === 'contact'"
+                [class.text-slate-900]="selectedSeoPage() === 'contact'"
+                [class.text-slate-600]="selectedSeoPage() !== 'contact'"
+                (click)="selectedSeoPage.set('contact')"
+              >
+                Contact
+              </button>
+            </div>
+          </div>
+
+          <div class="admin-card space-y-4">
+            @let pageMeta = ensurePageSeo(selectedSeoPage());
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+              <!-- English -->
+              <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
+                <div class="flex items-center gap-1.5 font-bold text-xs text-slate-800">
+                  <span class="text-sm">🇬🇧</span>
+                  <span>English Metadata</span>
+                </div>
+                <div>
+                  <label class="admin-field-label">Page Title (EN)</label>
+                  <input class="admin-field-input text-xs" [(ngModel)]="$any(pageMeta.title).en" placeholder="Page Title in English" />
+                </div>
+                <div>
+                  <label class="admin-field-label">Meta Description (EN)</label>
+                  <textarea class="admin-field-input text-xs min-h-20" [(ngModel)]="$any(pageMeta.description).en" placeholder="Meta description in English..."></textarea>
+                </div>
+              </div>
+
+              <!-- Greek -->
+              <div class="p-3.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-3">
+                <div class="flex items-center gap-1.5 font-bold text-xs text-slate-800">
+                  <span class="text-sm">🇬🇷</span>
+                  <span>Greek Metadata (Ελληνικά)</span>
+                </div>
+                <div>
+                  <label class="admin-field-label">Τίτλος Σελίδας (EL)</label>
+                  <input class="admin-field-input text-xs" [(ngModel)]="$any(pageMeta.title).el" placeholder="Τίτλος σελίδας στα ελληνικά" />
+                </div>
+                <div>
+                  <label class="admin-field-label">Meta Περιγραφή (EL)</label>
+                  <textarea class="admin-field-input text-xs min-h-20" [(ngModel)]="$any(pageMeta.description).el" placeholder="Περιγραφή σελίδας για μηχανές αναζήτησης..."></textarea>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Row 4: AI & Machine-Readable Crawler Inspector -->
+        <div class="pt-2 border-t border-slate-200/80">
+          <div class="mb-3">
+            <h2 class="text-base font-bold text-slate-900 tracking-tight">Machine-Readable &amp; AI Directives</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Live endpoints and protocols available to Google, Bing, and AI search bots.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <a
+              href="/sitemap.xml"
+              target="_blank"
+              class="p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors flex items-center justify-between group"
+            >
+              <div>
+                <span class="text-xs font-bold text-slate-900 block group-hover:text-blue-700">XML Sitemap</span>
+                <span class="text-2xs text-slate-500 font-mono">/sitemap.xml</span>
+              </div>
+              <span class="text-xs text-slate-400 group-hover:text-blue-700">↗</span>
+            </a>
+
+            <a
+              href="/llms.txt"
+              target="_blank"
+              class="p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors flex items-center justify-between group"
+            >
+              <div>
+                <span class="text-xs font-bold text-slate-900 block group-hover:text-emerald-700">AI Context File</span>
+                <span class="text-2xs text-slate-500 font-mono">/llms.txt</span>
+              </div>
+              <span class="text-xs text-slate-400 group-hover:text-emerald-700">↗</span>
+            </a>
+
+            <a
+              href="/robots.txt"
+              target="_blank"
+              class="p-3 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 transition-colors flex items-center justify-between group"
+            >
+              <div>
+                <span class="text-xs font-bold text-slate-900 block group-hover:text-purple-700">Robots Rules</span>
+                <span class="text-2xs text-slate-500 font-mono">/robots.txt</span>
+              </div>
+              <span class="text-xs text-slate-400 group-hover:text-purple-700">↗</span>
+            </a>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button type="button" class="btn btn-primary btn-sm" [disabled]="saving()" (click)="saveSettings()">
+            {{ saving() ? 'Saving…' : 'Save SEO & Analytics' }}
           </button>
         </div>
       </div>
@@ -719,12 +1025,14 @@ export class AdminSettings implements OnInit {
   private api = inject(AdminApi);
   private settingsService = inject(SiteSettingsService);
 
-  activeTab = signal<'general' | 'contact' | 'email' | 'appearance' | 'security'>('general');
+  activeTab = signal<'general' | 'contact' | 'seo' | 'email' | 'appearance' | 'security'>('general');
+  selectedSeoPage = signal<'home' | 'shop' | 'about' | 'contact'>('home');
 
   model: SiteSettings = {
     ...JSON.parse(JSON.stringify(DEFAULT_SITE_SETTINGS)),
     colors: { ...DEFAULT_SITE_COLORS },
     mail_config: { ...DEFAULT_MAIL_CONFIG },
+    seo_config: { ...DEFAULT_SEO_CONFIG },
   };
 
   saving = signal(false);
@@ -748,6 +1056,42 @@ export class AdminSettings implements OnInit {
       this.model.mail_config = { ...DEFAULT_MAIL_CONFIG };
     }
     return this.model.mail_config;
+  }
+
+  ensureSeoConfig(): SeoConfigSettings {
+    if (!this.model.seo_config) {
+      this.model.seo_config = JSON.parse(JSON.stringify(DEFAULT_SEO_CONFIG));
+    }
+    const config = this.model.seo_config!;
+    if (!config.page_seo) {
+      config.page_seo = JSON.parse(JSON.stringify(DEFAULT_SEO_CONFIG.page_seo));
+    }
+    return config;
+  }
+
+  ensurePageSeo(pageKey: 'home' | 'shop' | 'about' | 'contact') {
+    const seo = this.ensureSeoConfig();
+    if (!seo.page_seo) {
+      seo.page_seo = JSON.parse(JSON.stringify(DEFAULT_SEO_CONFIG.page_seo));
+    }
+    if (!seo.page_seo![pageKey]) {
+      seo.page_seo![pageKey] = {
+        title: { en: '', el: '' },
+        description: { en: '', el: '' },
+      };
+    }
+    const page = seo.page_seo![pageKey]!;
+    if (!page.title || typeof page.title !== 'object') {
+      page.title = { en: String(page.title || ''), el: '' };
+    }
+    if (!page.description || typeof page.description !== 'object') {
+      page.description = { en: String(page.description || ''), el: '' };
+    }
+    return page;
+  }
+
+  mediaUrl(path?: string): string {
+    return resolveMediaUrl(path);
   }
 
   sendTestEmail(): void {
@@ -904,6 +1248,16 @@ export class AdminSettings implements OnInit {
             mail_config: {
               ...DEFAULT_MAIL_CONFIG,
               ...(data.mail_config || {}),
+            },
+            seo_config: {
+              ...DEFAULT_SEO_CONFIG,
+              ...(data.seo_config || {}),
+              page_seo: {
+                home: { ...DEFAULT_SEO_CONFIG.page_seo?.home, ...(data.seo_config?.page_seo?.home || {}) },
+                shop: { ...DEFAULT_SEO_CONFIG.page_seo?.shop, ...(data.seo_config?.page_seo?.shop || {}) },
+                about: { ...DEFAULT_SEO_CONFIG.page_seo?.about, ...(data.seo_config?.page_seo?.about || {}) },
+                contact: { ...DEFAULT_SEO_CONFIG.page_seo?.contact, ...(data.seo_config?.page_seo?.contact || {}) },
+              },
             },
           };
           this.settingsService.settings.set(this.model);

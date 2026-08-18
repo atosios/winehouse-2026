@@ -56,16 +56,37 @@ export class Shop implements OnInit, OnDestroy {
   }
 
   ngOnInit(): void {
+    const seoConf = this.settingsService.seoConfig();
+    const shopSeo = seoConf.page_seo?.shop;
+    const title = shopSeo?.title ? this.t(shopSeo.title) : 'e-Shop & Cellar Reserves';
+    const desc = shopSeo?.description
+      ? this.t(shopSeo.description)
+      : 'Explore curated artisanal, volcanic, and ancestral Greek wines. Limited allocations direct from private cellar ledgers.';
+
     this.seo.setMeta({
-      title: 'e-Shop & Cellar Reserves',
-      description:
-        'Explore curated artisanal, volcanic, and ancestral Greek wines. Limited allocations direct from private cellar ledgers.',
-      keywords: 'wine shop, greek wine, volcanic wine, natural wine, buy wine, the winehouse',
+      title,
+      description: desc,
+      keywords: seoConf.meta_keywords || 'wine shop, greek wine, volcanic wine, natural wine, buy wine, the winehouse',
+      image: seoConf.og_image,
       type: 'website',
     });
     this.seo.setBreadcrumbStructuredData([
       { name: 'Home', url: this.seo.getSiteOrigin() },
       { name: 'e-Shop', url: `${this.seo.getSiteOrigin()}/shop` },
+    ]);
+    this.seo.setFaqStructuredData([
+      {
+        question: 'How are wines shipped and preserved during transit?',
+        answer: 'All bottles are dispatched in specialized climate-controlled, shock-absorbent packaging to maintain exact cellar temperature from our atelier to your door.',
+      },
+      {
+        question: 'Can I purchase rare or older vintages in small quantities?',
+        answer: 'Yes, our allocations ledger allows direct purchase of single bottles and curated verticals from independent growers.',
+      },
+      {
+        question: 'What payment methods do you accept?',
+        answer: 'We accept direct bank transfers with IBAN confirmations as well as major credit and debit cards.',
+      },
     ]);
 
     // Restore filters from URL Query Params so back navigation keeps state
@@ -88,6 +109,9 @@ export class Shop implements OnInit, OnDestroy {
       next: (products) => {
         this.dynamicProducts.set(products || []);
         this.productsLoaded.set(true);
+        if (products && products.length > 0) {
+          this.seo.setCatalogStructuredData(products);
+        }
       },
       error: () => {
         this.productsLoaded.set(true);

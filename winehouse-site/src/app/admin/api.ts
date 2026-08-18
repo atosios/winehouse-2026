@@ -437,6 +437,32 @@ export interface MailConfig {
   send_customer_order_confirmation: boolean;
 }
 
+export interface SeoPageMetadata {
+  title?: I18nText;
+  description?: I18nText;
+}
+
+export interface SeoConfigSettings {
+  meta_title?: string;
+  meta_description?: string;
+  meta_keywords?: string;
+  og_image?: string;
+  google_verification?: string;
+  bing_verification?: string;
+  pinterest_verification?: string;
+  yandex_verification?: string;
+  google_analytics_id?: string;
+  google_tag_manager_id?: string;
+  meta_pixel_id?: string;
+  indexing_enabled: boolean;
+  page_seo?: {
+    home?: SeoPageMetadata;
+    shop?: SeoPageMetadata;
+    about?: SeoPageMetadata;
+    contact?: SeoPageMetadata;
+  };
+}
+
 export interface SiteSettings {
   name: string;
   tagline: string;
@@ -465,6 +491,7 @@ export interface SiteSettings {
   maintenance_mode: boolean;
   store_config?: StoreConfig;
   mail_config?: MailConfig;
+  seo_config?: SeoConfigSettings;
 }
 
 export interface GrapeVarietyItem {

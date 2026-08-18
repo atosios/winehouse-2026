@@ -42,6 +42,7 @@ class SitemapController extends Controller
 
         $xml = '<?xml version="1.0" encoding="UTF-8"?>' . "\n";
         $xml .= '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"' . "\n";
+        $xml .= '        xmlns:xhtml="http://www.w3.org/1999/xhtml"' . "\n";
         $xml .= '        xmlns:image="http://www.google.com/schemas/sitemap-image/1.1">' . "\n";
 
         // 1. Static Core Pages
@@ -53,8 +54,12 @@ class SitemapController extends Controller
         ];
 
         foreach ($staticPages as $page) {
+            $escapedLoc = htmlspecialchars($page['loc'], ENT_XML1, 'UTF-8');
             $xml .= "  <url>\n";
-            $xml .= "    <loc>" . htmlspecialchars($page['loc'], ENT_XML1, 'UTF-8') . "</loc>\n";
+            $xml .= "    <loc>" . $escapedLoc . "</loc>\n";
+            $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"" . $escapedLoc . "\" />\n";
+            $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"" . $escapedLoc . "\" />\n";
+            $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"" . $escapedLoc . "\" />\n";
             $xml .= "    <lastmod>" . $page['lastmod'] . "</lastmod>\n";
             $xml .= "    <changefreq>" . $page['changefreq'] . "</changefreq>\n";
             $xml .= "    <priority>" . $page['priority'] . "</priority>\n";
@@ -65,10 +70,14 @@ class SitemapController extends Controller
         foreach ($products as $prod) {
             $slug = !empty($prod->slug) ? $prod->slug : $prod->id;
             $loc = $frontendUrl . '/shop/' . $slug;
+            $escapedLoc = htmlspecialchars($loc, ENT_XML1, 'UTF-8');
             $lastmod = $prod->updated_at ? $prod->updated_at->toIso8601String() : $now;
 
             $xml .= "  <url>\n";
-            $xml .= "    <loc>" . htmlspecialchars($loc, ENT_XML1, 'UTF-8') . "</loc>\n";
+            $xml .= "    <loc>" . $escapedLoc . "</loc>\n";
+            $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"" . $escapedLoc . "\" />\n";
+            $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"" . $escapedLoc . "\" />\n";
+            $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"" . $escapedLoc . "\" />\n";
             $xml .= "    <lastmod>" . $lastmod . "</lastmod>\n";
             $xml .= "    <changefreq>weekly</changefreq>\n";
             $xml .= "    <priority>0.8</priority>\n";
@@ -98,10 +107,14 @@ class SitemapController extends Controller
         // 3. Dynamic Pages (if any published)
         foreach ($pages as $page) {
             $loc = $frontendUrl . '/p/' . $page->slug;
+            $escapedLoc = htmlspecialchars($loc, ENT_XML1, 'UTF-8');
             $lastmod = $page->updated_at ? $page->updated_at->toIso8601String() : $now;
 
             $xml .= "  <url>\n";
-            $xml .= "    <loc>" . htmlspecialchars($loc, ENT_XML1, 'UTF-8') . "</loc>\n";
+            $xml .= "    <loc>" . $escapedLoc . "</loc>\n";
+            $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"" . $escapedLoc . "\" />\n";
+            $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"" . $escapedLoc . "\" />\n";
+            $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"" . $escapedLoc . "\" />\n";
             $xml .= "    <lastmod>" . $lastmod . "</lastmod>\n";
             $xml .= "    <changefreq>monthly</changefreq>\n";
             $xml .= "    <priority>0.6</priority>\n";
@@ -111,10 +124,14 @@ class SitemapController extends Controller
         // 4. Dynamic Posts / Editorial Stories (if any published)
         foreach ($posts as $post) {
             $loc = $frontendUrl . '/stories/' . $post->slug;
+            $escapedLoc = htmlspecialchars($loc, ENT_XML1, 'UTF-8');
             $lastmod = $post->updated_at ? $post->updated_at->toIso8601String() : $now;
 
             $xml .= "  <url>\n";
-            $xml .= "    <loc>" . htmlspecialchars($loc, ENT_XML1, 'UTF-8') . "</loc>\n";
+            $xml .= "    <loc>" . $escapedLoc . "</loc>\n";
+            $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"en\" href=\"" . $escapedLoc . "\" />\n";
+            $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"el\" href=\"" . $escapedLoc . "\" />\n";
+            $xml .= "    <xhtml:link rel=\"alternate\" hreflang=\"x-default\" href=\"" . $escapedLoc . "\" />\n";
             $xml .= "    <lastmod>" . $lastmod . "</lastmod>\n";
             $xml .= "    <changefreq>monthly</changefreq>\n";
             $xml .= "    <priority>0.6</priority>\n";

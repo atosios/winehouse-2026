@@ -78,6 +78,20 @@ class SettingController extends Controller
             'mail_config.notify_on_new_order' => ['nullable', 'boolean'],
             'mail_config.notify_on_new_message' => ['nullable', 'boolean'],
             'mail_config.send_customer_order_confirmation' => ['nullable', 'boolean'],
+            'seo_config' => ['nullable', 'array'],
+            'seo_config.meta_title' => ['nullable', 'string', 'max:255'],
+            'seo_config.meta_description' => ['nullable', 'string', 'max:1000'],
+            'seo_config.meta_keywords' => ['nullable', 'string', 'max:500'],
+            'seo_config.og_image' => ['nullable', 'string', 'max:500'],
+            'seo_config.google_verification' => ['nullable', 'string', 'max:255'],
+            'seo_config.bing_verification' => ['nullable', 'string', 'max:255'],
+            'seo_config.pinterest_verification' => ['nullable', 'string', 'max:255'],
+            'seo_config.yandex_verification' => ['nullable', 'string', 'max:255'],
+            'seo_config.google_analytics_id' => ['nullable', 'string', 'max:100'],
+            'seo_config.google_tag_manager_id' => ['nullable', 'string', 'max:100'],
+            'seo_config.meta_pixel_id' => ['nullable', 'string', 'max:100'],
+            'seo_config.indexing_enabled' => ['nullable', 'boolean'],
+            'seo_config.page_seo' => ['nullable', 'array'],
         ]);
 
         $updated = Setting::updateSettings($validated);

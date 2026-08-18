@@ -29,16 +29,37 @@ export class Contact implements OnInit {
   }
 
   ngOnInit(): void {
+    const seoConf = this.settingsService.seoConfig();
+    const contactSeo = seoConf.page_seo?.contact;
+    const title = contactSeo?.title ? this.t(contactSeo.title) : 'Contact & Cellar Inquiries';
+    const desc = contactSeo?.description
+      ? this.t(contactSeo.description)
+      : 'Connect with The Winehouse for sommelier consultations, private tasting bookings, cellar acquisitions, and direct inquiries.';
+
     this.seo.setMeta({
-      title: 'Contact & Cellar Inquiries',
-      description:
-        'Connect with The Winehouse for sommelier consultations, private tasting bookings, cellar acquisitions, and direct inquiries.',
-      keywords: 'contact the winehouse, cellar visit, sommelier booking, wine tastings contact',
+      title,
+      description: desc,
+      keywords: seoConf.meta_keywords || 'contact the winehouse, cellar visit, sommelier booking, wine tastings contact',
+      image: seoConf.og_image,
       type: 'website',
     });
     this.seo.setBreadcrumbStructuredData([
       { name: 'Home', url: this.seo.getSiteOrigin() },
       { name: 'Contact', url: `${this.seo.getSiteOrigin()}/contact` },
+    ]);
+    this.seo.setFaqStructuredData([
+      {
+        question: 'How do I book a private sommelier tasting flight?',
+        answer: 'You can submit an inquiry through our contact form selecting "Private Tasting" or email us directly at hello@thewinehouse.gr.',
+      },
+      {
+        question: 'Do you offer private cellar consultation and bespoke bottle sourcing?',
+        answer: 'Yes, our head sommelier curates home cellars, private collections, and hospitality wine lists worldwide.',
+      },
+      {
+        question: 'What are your visiting hours for walk-in tastings?',
+        answer: 'Our Athens cellar atelier is open Tuesday through Friday from 12:00 to 22:00 and Saturday from 11:00 to 23:00.',
+      },
     ]);
   }
 

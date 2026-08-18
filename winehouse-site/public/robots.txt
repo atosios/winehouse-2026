@@ -3,6 +3,24 @@ Allow: /
 Disallow: /admin/
 Disallow: /admin/*
 
-# Dynamic Sitemap Locations
-Sitemap: https://api.winehouse.gr/sitemap.xml
+# AI Search & Answer Engine Crawlers
+User-agent: GPTBot
+Allow: /
+Disallow: /admin/
+
+User-agent: ClaudeBot
+Allow: /
+Disallow: /admin/
+
+User-agent: PerplexityBot
+Allow: /
+Disallow: /admin/
+
+User-agent: Google-Extended
+Allow: /
+Disallow: /admin/
+
+# Sitemaps & AI Context Endpoints
 Sitemap: https://winehouse.gr/sitemap.xml
+Sitemap: https://api.winehouse.gr/sitemap.xml
+# LLM Context: https://winehouse.gr/llms.txt
