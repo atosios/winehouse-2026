@@ -4,13 +4,14 @@ import { FormsModule } from '@angular/forms';
 import { SiteSettingsService } from '../../core/site-settings.service';
 import { I18nService, I18nText, isExternalUrl } from '../../core/i18n.service';
 import { WhReveal } from '../../shared/reveal';
+import { WhLogo } from '../../shared/brand-logo';
 import { resolveMediaUrl } from '../../core/media.utils';
 import { AdminApi } from '../../admin/api';
 import { SeoService } from '../../core/seo.service';
 
 @Component({
   selector: 'wh-home',
-  imports: [RouterLink, FormsModule, WhReveal],
+  imports: [RouterLink, FormsModule, WhReveal, WhLogo],
   templateUrl: './home.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -43,7 +44,7 @@ export class Home implements OnInit, AfterViewInit {
 
   readonly heroFallbackImage = computed(() => {
     const hero = this.hp().hero;
-    return hero.fallback_image_url || hero.video_alt_url || '';
+    return hero.fallback_image_url || '';
   });
 
   mediaUrl(url: string | null | undefined): string {
@@ -80,6 +81,8 @@ export class Home implements OnInit, AfterViewInit {
 
   readonly activeQuoteIndex = signal(0);
   readonly formSubmitted = signal(false);
+  readonly submittingContact = signal(false);
+  readonly contactError = signal<string | null>(null);
   readonly dropdownOpen = signal(false);
 
   readonly subjectOptions = [
@@ -97,6 +100,7 @@ export class Home implements OnInit, AfterViewInit {
   contactData = {
     name: '',
     email: '',
+    phone: '',
     projectType: 'Private Tasting',
     message: '',
   };
@@ -139,6 +143,18 @@ export class Home implements OnInit, AfterViewInit {
     this.dropdownOpen.set(false);
   }
 
+  resetContactForm() {
+    this.formSubmitted.set(false);
+    this.contactError.set(null);
+    this.contactData = {
+      name: '',
+      email: '',
+      phone: '',
+      projectType: 'Private Tasting',
+      message: '',
+    };
+  }
+
   @HostListener('document:click')
   onDocumentClick() {
     if (this.dropdownOpen()) {
@@ -158,23 +174,32 @@ export class Home implements OnInit, AfterViewInit {
       return;
     }
 
+    this.submittingContact.set(true);
+    this.contactError.set(null);
+
     this.api
       .submitContactMessage({
         name: this.contactData.name.trim(),
         email: this.contactData.email.trim(),
+        phone: this.contactData.phone?.trim() || undefined,
         subject: this.contactData.projectType,
         project_type: this.contactData.projectType,
         message: this.contactData.message.trim(),
       })
       .subscribe({
         next: () => {
+          this.submittingContact.set(false);
           this.formSubmitted.set(true);
         },
         error: (err) => {
-          console.warn('Backend message submission warning:', err);
-          this.formSubmitted.set(true);
+          console.error('Contact message submission error:', err);
+          this.submittingContact.set(false);
+          this.contactError.set(
+            err?.error?.message || 'We could not dispatch your message. Please check your details and try again.'
+          );
         },
       });
   }
 }
+
 

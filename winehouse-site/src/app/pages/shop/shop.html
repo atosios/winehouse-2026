@@ -244,13 +244,20 @@
               [routerLink]="['/shop', bottle.slug || bottle.id]"
               class="w-full h-full flex items-center justify-center cursor-pointer"
             >
-              <img
-                [src]="getCardImage(bottle)"
-                [alt]="bottle.name + ' ' + (bottle.vintage || '')"
-                class="bottle-img-interactive"
-                loading="lazy"
-                decoding="async"
-              />
+              @if (getCardImage(bottle)) {
+                <img
+                  [src]="getCardImage(bottle)"
+                  [alt]="bottle.name + ' ' + (bottle.vintage || '')"
+                  class="bottle-img-interactive"
+                  loading="lazy"
+                  decoding="async"
+                />
+              } @else {
+                <div class="w-full h-full flex flex-col items-center justify-center bg-[var(--color-paper-light)] text-[var(--color-foreground)]/40 p-4 text-center select-none">
+                  <span class="font-serif text-3xl font-bold mb-1">WH</span>
+                  <span class="font-mono text-[10px] tracking-wider uppercase">{{ bottle.name }}</span>
+                </div>
+              }
             </a>
 
             <!-- Vintage Foil Stamp Badge (Bottom Left) -->
@@ -448,12 +455,19 @@
         <div class="md:col-span-5 p-6 bg-stone-100 border-b md:border-b-0 md:border-r-[1.5px] border-[var(--color-foreground)] flex flex-col justify-between gap-4">
           
           <!-- Main High-Res Image -->
-          <div class="bottle-podium h-80 sm:h-96 rounded-xs border-[1.5px] border-[var(--color-foreground)] bg-white overflow-hidden shadow-xs relative">
-            <img
-              [src]="modalActiveImage() || b.cover_image || b.img || 'cellar_ritual.jpg'"
-              [alt]="b.name"
-              class="w-full h-full object-cover"
-            />
+          <div class="bottle-podium h-80 sm:h-96 rounded-xs border-[1.5px] border-[var(--color-foreground)] bg-white overflow-hidden shadow-xs relative flex items-center justify-center">
+            @if (modalActiveImage() || b.cover_image || b.img) {
+              <img
+                [src]="modalActiveImage() || mediaUrl(b.cover_image || b.img)"
+                [alt]="b.name"
+                class="w-full h-full object-cover"
+              />
+            } @else {
+              <div class="w-full h-full flex flex-col items-center justify-center bg-[var(--color-paper-light)] text-[var(--color-foreground)]/40 p-4 text-center select-none">
+                <span class="font-serif text-4xl font-bold mb-2">WH</span>
+                <span class="font-mono text-xs tracking-wider uppercase">{{ b.name }}</span>
+              </div>
+            }
             @if (b.vintage) {
               <div class="absolute bottom-3 left-3">
                 <span class="shop-vintage-stamp">
@@ -619,7 +633,8 @@
 
       <div class="lg:col-span-4 flex flex-col items-start lg:items-end justify-center gap-4">
         <a
-          routerLink="/contact"
+          [routerLink]="['/contact']"
+          [queryParams]="{ subject: 'Cellar Consulting', inquiry: 'Inquiry regarding personal sommelier concierge & bespoke acquisition' }"
           class="btn bg-white text-[var(--color-foreground)] hover:bg-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] font-mono text-xs font-bold uppercase tracking-wider w-full text-center py-3.5 rounded-xs"
         >
           {{ t(page().concierge.button_text) }}

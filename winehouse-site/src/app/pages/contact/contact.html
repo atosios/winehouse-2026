@@ -28,7 +28,13 @@
     <!-- Left: Minimalist Line Form -->
     <div class="lg:col-span-7 reveal" whReveal>
       @if (!sent()) {
-        <form (ngSubmit)="send()" class="flex flex-col gap-8">
+        <form (ngSubmit)="send()" class="flex flex-col gap-6">
+
+          @if (sendError()) {
+            <div class="p-3.5 bg-red-50 border border-red-200 rounded-xs text-xs font-mono text-red-700">
+              {{ sendError() }}
+            </div>
+          }
           
           <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
             <div>
@@ -132,20 +138,28 @@
 
           <div class="pt-2">
             <button type="submit"
-                    class="font-mono text-sm font-bold uppercase tracking-wider text-[var(--color-foreground)] hover:text-[var(--color-primary)] transition-colors flex items-center gap-3 cursor-pointer py-2 group">
-              <span>{{ t(page().form.button_text) }}</span>
-              <span class="text-lg group-hover:translate-x-1 transition-transform">→</span>
+                    [disabled]="sending()"
+                    class="font-mono text-sm font-bold uppercase tracking-wider text-[var(--color-foreground)] hover:text-[var(--color-primary)] transition-colors flex items-center gap-3 cursor-pointer py-2 group disabled:opacity-50">
+              <span>{{ sending() ? 'SENDING INQUIRY…' : t(page().form.button_text) }}</span>
+              @if (sending()) {
+                <span class="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+              } @else {
+                <span class="text-lg group-hover:translate-x-1 transition-transform">→</span>
+              }
             </button>
           </div>
 
         </form>
       } @else {
         <div class="p-8 border-[1.5px] border-[var(--color-foreground)] bg-white shadow-[4px_4px_0px_0px_var(--color-foreground)]">
-          <span class="tape-sticker mb-4">MESSAGE INGESTED</span>
+          <span class="tape-sticker mb-4 inline-block">MESSAGE RECEIVED</span>
           <h4 class="font-big text-3xl uppercase mt-2">Thank you!</h4>
           <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/70 mt-2 leading-relaxed">
-            Your email application has been prepared with your request. We will be in touch shortly to assist your cellar needs.
+            Your message has been received by our cellar master. We will be in touch shortly to assist your cellar needs.
           </p>
+          <button type="button" (click)="resetForm()" class="mt-6 font-mono text-xs uppercase font-bold text-[var(--color-primary)] hover:underline cursor-pointer flex items-center gap-1.5">
+            <span>← Send another message</span>
+          </button>
         </div>
       }
     </div>

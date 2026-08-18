@@ -105,12 +105,19 @@
           <div class="lg:col-span-5 relative overflow-hidden bg-[#fbf9f6] border-b lg:border-b-0 lg:border-r-[1.5px] border-[var(--color-foreground)] min-h-[480px] sm:min-h-[580px] lg:min-h-full group">
             
             <!-- Full Bleed Image Covering 100% of the Left Column -->
-            <img
-              [src]="activeImage() || getPrimaryImage(p)"
-              [alt]="p.name + (p.vintage ? ' ' + p.vintage : '')"
-              class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-              loading="eager"
-            />
+            @if (activeImage() || getPrimaryImage(p)) {
+              <img
+                [src]="activeImage() || getPrimaryImage(p)"
+                [alt]="p.name + (p.vintage ? ' ' + p.vintage : '')"
+                class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                loading="eager"
+              />
+            } @else {
+              <div class="absolute inset-0 flex flex-col items-center justify-center bg-[var(--color-paper-light)] text-[var(--color-foreground)]/40 p-6 text-center select-none">
+                <span class="font-serif text-5xl font-bold mb-2">WH</span>
+                <span class="font-mono text-sm tracking-wider uppercase">{{ p.name }}</span>
+              </div>
+            }
 
             <!-- Subtle Vignette / Contrast Overlay for Watermarks -->
             <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none"></div>
@@ -340,7 +347,8 @@
                     This vintage allocation has been exhausted. Contact our cellar master to request notification for subsequent library releases.
                   </p>
                   <a
-                    routerLink="/contact"
+                    [routerLink]="['/contact']"
+                    [queryParams]="{ subject: 'Cellar Consulting', bottle: p.name + (p.vintage ? ' (' + p.vintage + ')' : '') }"
                     class="inline-block py-2.5 px-6 bg-[var(--color-foreground)] text-white font-mono text-xs uppercase font-bold tracking-wider rounded-xs hover:bg-[var(--color-primary)] transition-colors"
                   >
                     INQUIRE FOR CELLAR ALLOCATION →
@@ -728,7 +736,8 @@
 
             <div class="lg:col-span-4 flex flex-col items-start lg:items-end justify-center gap-3">
               <a
-                routerLink="/contact"
+                [routerLink]="['/contact']"
+                [queryParams]="{ subject: 'Cellar Consulting', inquiry: 'Inquiry regarding sommelier sourcing for private cellar collection' }"
                 class="btn bg-white text-[var(--color-foreground)] hover:bg-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] font-mono text-xs font-bold uppercase tracking-wider w-full text-center py-3 rounded-xs cursor-pointer"
               >
                 CONSULT OUR SOMMELIER →

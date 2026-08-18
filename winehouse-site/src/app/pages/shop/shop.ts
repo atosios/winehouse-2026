@@ -297,6 +297,10 @@ export class Shop implements OnInit, OnDestroy {
     this.updateUrlParams();
   }
 
+  mediaUrl(url: string | null | undefined): string {
+    return resolveMediaUrl(url);
+  }
+
   hasStatusLabel(label?: I18nText | string | null): boolean {
     if (!label) return false;
     const text = this.t(label);
@@ -306,7 +310,7 @@ export class Shop implements OnInit, OnDestroy {
   getCardImage(bottle: CartItemProduct): string {
     const custom = this.activeCardImage()[bottle.id];
     if (custom) return resolveMediaUrl(custom);
-    return resolveMediaUrl(bottle.cover_image || bottle.img || 'cellar_ritual.jpg');
+    return resolveMediaUrl(bottle.cover_image || bottle.img || '');
   }
 
   setCardImage(bottleId: number | string, imgUrl: string, event?: Event): void {
@@ -344,7 +348,7 @@ export class Shop implements OnInit, OnDestroy {
     }
     this.modalQty.set(1);
     this.selectedBottle.set(bottle);
-    this.modalActiveImage.set(resolveMediaUrl(bottle.cover_image || bottle.img || 'cellar_ritual.jpg'));
+    this.modalActiveImage.set(resolveMediaUrl(bottle.cover_image || bottle.img || ''));
   }
 
   closeBottleModal(): void {

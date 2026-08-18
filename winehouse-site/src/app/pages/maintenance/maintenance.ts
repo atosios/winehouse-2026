@@ -37,23 +37,34 @@ import { resolveMediaUrl } from '../../core/media.utils';
         </div>
 
         <!-- Video Box with Editorial Frame -->
-        <div class="relative w-full border-[1.5px] border-white/20 bg-black/40 overflow-hidden shadow-2xl">
-          <video
-            class="w-full max-h-[380px] object-cover object-center filter contrast-105"
-            [src]="mediaUrl(page().video_url || 'maintenance.mp4')"
-            autoplay
-            loop
-            muted
-            playsinline
-            disablepictureinpicture
-            [attr.aria-label]="site.name + ' — under maintenance'"
-          ></video>
-          <div class="absolute bottom-3 left-3">
-            <span class="px-2 py-0.5 bg-black/80 text-white font-mono text-[9px] uppercase tracking-widest border border-white/20">
-              {{ t(page().video_badge) }}
-            </span>
+        @if (page().video_url) {
+          <div class="relative w-full border-[1.5px] border-white/20 bg-black/40 overflow-hidden shadow-2xl">
+            <video
+              class="w-full max-h-[380px] object-cover object-center filter contrast-105"
+              [src]="mediaUrl(page().video_url)"
+              autoplay
+              loop
+              muted
+              playsinline
+              disablepictureinpicture
+              [attr.aria-label]="site.name + ' — under maintenance'"
+            ></video>
+            @if (page().video_badge) {
+              <div class="absolute bottom-3 left-3">
+                <span class="px-2 py-0.5 bg-black/80 text-white font-mono text-[9px] uppercase tracking-widest border border-white/20">
+                  {{ t(page().video_badge) }}
+                </span>
+              </div>
+            }
           </div>
-        </div>
+        } @else {
+          <div class="w-full max-w-md p-8 border border-white/15 bg-white/5 backdrop-blur-md text-center rounded-xl space-y-3">
+            <div class="w-12 h-12 mx-auto rounded-full bg-[var(--color-terracotta)]/20 border border-[var(--color-terracotta)] flex items-center justify-center text-[var(--color-terracotta)]">
+              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+            </div>
+            <p class="font-mono text-xs text-white/80 uppercase tracking-widest">Cellar restock in progress</p>
+          </div>
+        }
 
         <div class="pt-2">
           <a

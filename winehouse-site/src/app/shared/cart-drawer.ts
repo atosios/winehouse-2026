@@ -48,12 +48,16 @@ import { resolveMediaUrl } from '../core/media.utils';
             @for (item of cart.items(); track item.id) {
               <div class="p-4 border-[1.5px] border-[var(--color-foreground)] bg-white/80 shadow-[2px_2px_0px_0px_var(--color-foreground)] flex items-start gap-4">
                 <!-- Thumbnail -->
-                <div class="w-16 h-20 bg-slate-100 border border-[var(--color-foreground)]/20 overflow-hidden shrink-0">
-                  <img
-                    [src]="mediaUrl(item.product.cover_image || item.product.img || 'cellar_ritual.jpg')"
-                    [alt]="item.product.name"
-                    class="w-full h-full object-cover"
-                  />
+                <div class="w-16 h-20 bg-[var(--color-paper-light)] border border-[var(--color-foreground)]/20 overflow-hidden shrink-0 flex items-center justify-center">
+                  @if (item.product.cover_image || item.product.img) {
+                    <img
+                      [src]="mediaUrl(item.product.cover_image || item.product.img)"
+                      [alt]="item.product.name"
+                      class="w-full h-full object-cover"
+                    />
+                  } @else {
+                    <span class="font-serif font-bold text-xs text-[var(--color-foreground)]/40">WH</span>
+                  }
                 </div>
 
                 <!-- Info -->

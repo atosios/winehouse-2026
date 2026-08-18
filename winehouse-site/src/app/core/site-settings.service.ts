@@ -23,7 +23,7 @@ export const DEFAULT_SEO_CONFIG: SeoConfigSettings = {
     'Curated artisanal wines from independent Mediterranean vineyards, stories from the cellar, tastings and private tours. Poured with care, told with love.',
   meta_keywords:
     'wine atelier, natural wine, greek wine, santorini assyrtiko, xinomavro, biodynamic wine, private wine tasting, sommelier curation, cellar archive',
-  og_image: 'hero_cellar.png',
+  og_image: '',
   google_verification: '',
   bing_verification: '',
   pinterest_verification: '',
@@ -128,9 +128,9 @@ export const DEFAULT_SITE_COLORS: SiteColors = {
 export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
   hero: {
     tag: '/ HERO',
-    video_url: 'def.mp4',
-    fallback_image_url: 'editorial_intro.jpg',
-    video_alt_url: 'hero_video.mp4',
+    video_url: '',
+    fallback_image_url: '',
+    video_alt_url: '',
     small_prefix: 'The',
     big_title: 'Winehouse',
     show_stain: false,
@@ -148,7 +148,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
     ],
     philosophy_label: 'Philosophy',
     philosophy_quote: '“Wine is bottled emotion, shaped by ancient sun and quiet patience.”',
-    image_url: 'editorial_intro.jpg',
+    image_url: '',
     image_tag: 'CURATED SELECTION',
     monogram: 'WH',
     vertical_banner: 'AVAILABLE FOR PRIVATE TASTINGS',
@@ -226,7 +226,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
       {
         name: 'RITUÁL',
         font_style: 'font-serif tracking-wider font-semibold',
-        img: 'cellar_ritual.jpg',
+        img: '',
         tags: ['BRANDING', 'XINOMAVRO', '2021'],
         link: '/shop',
         badge_bg: 'bg-[#b83822]',
@@ -234,7 +234,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
       {
         name: 'AUREA',
         font_style: 'font-serif tracking-widest uppercase font-light',
-        img: 'cellar_aurea.jpg',
+        img: '',
         tags: ['VOLCANIC', 'ASSYRTIKO', '2023'],
         link: '/shop',
         badge_bg: 'bg-[#111111]',
@@ -242,7 +242,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
       {
         name: 'NÉCTAR',
         font_style: 'font-sans font-bold tracking-tight',
-        img: 'cellar_nectar.jpg',
+        img: '',
         tags: ['NATURAL', 'ORANGE', '2024'],
         link: '/shop',
         badge_bg: 'bg-[#b83822]',
@@ -250,7 +250,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
       {
         name: 'SABLE',
         font_style: 'font-sans font-extrabold tracking-normal',
-        img: 'cellar_sable.jpg',
+        img: '',
         tags: ['RESERVE', 'CELLAR LOT', '2019'],
         link: '/shop',
         badge_bg: 'bg-[#111111]',
@@ -324,7 +324,7 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
   footer: {
     tag: '/ FOOTER',
     brand_name: 'THE WINEHOUSE',
-    badge_logo: '/logo_badge.png',
+    badge_logo: '',
     tagline: 'A house of wine, stories & slow living',
     copyright_text: '© 2026 THE WINEHOUSE. ALL RIGHTS RESERVED.',
     links: [
@@ -459,7 +459,7 @@ export const DEFAULT_SHOP_CONTENT: ShopPageContent = {
         en: 'Sundried tomato, wild rosehip, dark cherry, and tense mineral tannins. Pure northern elegance.',
         el: 'Λιαστή ντομάτα, άγριο κυνόροδο, σκούρο κεράσι και έντονες ορυκτές τανίνες.',
       },
-      img: 'cellar_ritual.jpg',
+      img: '',
       alcohol: '13.5%',
       soil: { en: 'Limestone & Clay Slopes', el: 'Ασβεστολιθικές & Αργιλώδεις Πλαγιές' },
     },
@@ -477,7 +477,7 @@ export const DEFAULT_SHOP_CONTENT: ShopPageContent = {
         en: 'Razor-sharp salinity, crushed volcanic pumice, citrus blossom, and electrifying acidity.',
         el: 'Κοφτερή αλατότητα, θρυμματισμένη κίσσηρη, άνθη εσπεριδοειδών και ηλεκτριστική οξύτητα.',
       },
-      img: 'cellar_aurea.jpg',
+      img: '',
       alcohol: '14.0%',
       soil: { en: 'Volcanic Ash & Basalt', el: 'Ηφαιστειακή Τέφρα & Βασάλτης' },
     },
@@ -495,7 +495,7 @@ export const DEFAULT_SHOP_CONTENT: ShopPageContent = {
         en: 'Bergamot peel, chamomile, dried apricot, and subtle amber tea tannins. Unfiltered soul.',
         el: 'Φλούδα περγαμόντου, χαμομήλι, αποξηραμένο βερίκοκο και ήπιες τανίνες.',
       },
-      img: 'cellar_nectar.jpg',
+      img: '',
       alcohol: '13.0%',
       soil: { en: 'Schist & Loam', el: 'Σχιστόλιθος & Πηλός' },
     },
@@ -513,7 +513,7 @@ export const DEFAULT_SHOP_CONTENT: ShopPageContent = {
         en: 'Dark bramble fruit, crushed peppercorn, tobacco leaf, and structured deep Mediterranean warmth.',
         el: 'Σκούρα φρούτα του δάσους, πιπέρι, καπνός και βαθιά μεσογειακή δομή.',
       },
-      img: 'cellar_sable.jpg',
+      img: '',
       alcohol: '14.5%',
       soil: { en: 'Granitic Sandy Soil', el: 'Γρανιτικό Αμμώδες Έδαφος' },
     },
@@ -531,7 +531,7 @@ export const DEFAULT_SHOP_CONTENT: ShopPageContent = {
         en: 'Flint smoke, green pear, mountain herbs, and an invigorating limestone crystalline finish.',
         el: 'Καπνός πυρόλιθου, πράσινο αχλάδι, ορεινά βότανα και κρυστάλλινη επίγευση.',
       },
-      img: 'editorial_intro.jpg',
+      img: '',
       alcohol: '13.0%',
       soil: { en: 'High Altitude Limestone', el: 'Υψίπεδο Ασβεστολίθου' },
     },
@@ -549,7 +549,7 @@ export const DEFAULT_SHOP_CONTENT: ShopPageContent = {
         en: 'Dried fig, graphite, cedarwood, wild rosemary, and massive velvety depth from 7 years cellar sleep.',
         el: 'Αποξηραμένο σύκο, γραφίτης, κέδρος, δεντρολίβανο και βελούδινο βάθος.',
       },
-      img: 'hero_cellar.png',
+      img: '',
       alcohol: '14.5%',
       soil: { en: 'Ungrafted Volcanic Soil', el: 'Αυτόριζο Ηφαιστειακό Έδαφος' },
     },
@@ -600,7 +600,7 @@ export const DEFAULT_MAINTENANCE_CONTENT: MaintenancePageContent = {
   badge: 'CELLAR CURATION',
   headline: 'THE CELLAR IS BEING RESTOCKED',
   subtext: 'Our allocations ledger and digital cellar space are undergoing seasonal curation.',
-  video_url: 'maintenance.mp4',
+  video_url: '',
   video_badge: 'REOPENING SOON',
   inquiry_prefix: 'Direct Inquiries:',
 };
@@ -631,6 +631,8 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   seo_config: JSON.parse(JSON.stringify(DEFAULT_SEO_CONFIG)),
 };
 
+const SETTINGS_CACHE_KEY = 'wh_site_settings_cache';
+
 @Injectable({ providedIn: 'root' })
 export class SiteSettingsService {
   private http = inject(HttpClient);
@@ -658,7 +660,66 @@ export class SiteSettingsService {
   readonly seoConfig = computed<SeoConfigSettings>(() => this.settings().seo_config || DEFAULT_SEO_CONFIG);
 
   constructor() {
+    this.initFromCache();
+    this.setupStorageListener();
+  }
+
+  /**
+   * Synchronously restore settings from localStorage in browser to eliminate any layout/maintenance flash.
+   */
+  private initFromCache(): void {
+    if (!isPlatformBrowser(this.platformId)) {
+      this.applyTheme(DEFAULT_SITE_COLORS);
+      return;
+    }
+    try {
+      const cachedRaw = localStorage.getItem(SETTINGS_CACHE_KEY);
+      if (cachedRaw) {
+        const cached = JSON.parse(cachedRaw) as SiteSettings;
+        if (cached && typeof cached === 'object') {
+          this.settings.set(cached);
+          this.applyTheme(cached.colors);
+          this.isLoaded.set(true);
+          return;
+        }
+      }
+    } catch {
+      // Ignore localStorage parse errors and proceed
+    }
     this.applyTheme(DEFAULT_SITE_COLORS);
+  }
+
+  /**
+   * Listen to storage events so changes in admin immediately propagate to open visitor tabs.
+   */
+  private setupStorageListener(): void {
+    if (!isPlatformBrowser(this.platformId) || typeof window === 'undefined') return;
+    window.addEventListener('storage', (event) => {
+      if (event.key === SETTINGS_CACHE_KEY && event.newValue) {
+        try {
+          const updated = JSON.parse(event.newValue) as SiteSettings;
+          if (updated && typeof updated === 'object') {
+            this.settings.set(updated);
+            this.applyTheme(updated.colors);
+            this.isLoaded.set(true);
+          }
+        } catch {
+          // Ignore
+        }
+      }
+    });
+  }
+
+  /**
+   * Persist current settings state to localStorage.
+   */
+  private saveToCache(data: SiteSettings): void {
+    if (!isPlatformBrowser(this.platformId)) return;
+    try {
+      localStorage.setItem(SETTINGS_CACHE_KEY, JSON.stringify(data));
+    } catch {
+      // Ignore quota errors
+    }
   }
 
   /**
@@ -694,14 +755,14 @@ export class SiteSettingsService {
   }
 
   /**
-   * Load public settings from backend API. Falls back cleanly to local defaults.
+   * Load public settings from backend API. Falls back cleanly to local cache or defaults.
    */
   load(): Observable<SiteSettings> {
     if (!isPlatformBrowser(this.platformId)) {
       this.isLoaded.set(true);
       return of(this.settings());
     }
-    return this.http.get<SiteSettings>(`${API_BASE}/settings`).pipe(
+    return this.http.get<SiteSettings>(`${API_BASE}/settings?_t=${Date.now()}`).pipe(
       tap((loaded) => {
         if (loaded && typeof loaded === 'object') {
           const mergedColors: SiteColors = {
@@ -847,12 +908,12 @@ export class SiteSettingsService {
 
           this.settings.set(merged);
           this.applyTheme(mergedColors);
+          this.saveToCache(merged);
         }
         this.isLoaded.set(true);
       }),
       catchError(() => {
-        // Backend offline or unreachable — keep default fallback
-        this.applyTheme(DEFAULT_SITE_COLORS);
+        // Backend offline or unreachable — keep cached or default fallback
         this.isLoaded.set(true);
         return of(this.settings());
       })
@@ -986,6 +1047,7 @@ export class SiteSettingsService {
 
           this.settings.set(merged);
           this.applyTheme(mergedColors);
+          this.saveToCache(merged);
         }
       })
     );

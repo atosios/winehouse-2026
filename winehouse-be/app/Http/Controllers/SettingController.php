@@ -77,6 +77,7 @@ class SettingController extends Controller
             'mail_config.company_notification_email' => ['nullable', 'string', 'max:255'],
             'mail_config.notify_on_new_order' => ['nullable', 'boolean'],
             'mail_config.notify_on_new_message' => ['nullable', 'boolean'],
+            'mail_config.notify_on_order_status_change' => ['nullable', 'boolean'],
             'mail_config.send_customer_order_confirmation' => ['nullable', 'boolean'],
             'seo_config' => ['nullable', 'array'],
             'seo_config.meta_title' => ['nullable', 'string', 'max:255'],

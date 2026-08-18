@@ -105,8 +105,15 @@
             </div>
 
             <div class="relative overflow-hidden aspect-[3/4] bg-[var(--color-paper-dark)]">
-              <img [src]="mediaUrl(hp().intro.image_url)" [alt]="t(hp().hero.big_title) + ' Atelier'"
-                class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              @if (hp().intro.image_url) {
+                <img [src]="mediaUrl(hp().intro.image_url)" [alt]="t(hp().hero.big_title) + ' Atelier'"
+                  class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" />
+              } @else {
+                <div class="w-full h-full flex flex-col items-center justify-center bg-[var(--color-paper-dark)] text-white/40 font-mono text-xs uppercase tracking-widest p-6 text-center">
+                  <span class="font-serif text-3xl mb-2 text-white/60">WH</span>
+                  <span>{{ t(hp().hero.big_title) }} Atelier</span>
+                </div>
+              }
 
               @if (hp().intro.image_tag) {
               <div
@@ -355,7 +362,13 @@
 
           <!-- Card Image -->
           <div class="cellar-img-wrap">
-            <img [src]="mediaUrl(item.img)" [alt]="t(item.name) + ' — ' + t(hp().hero.big_title) + ' selection'" />
+            @if (item.img) {
+              <img [src]="mediaUrl(item.img)" [alt]="t(item.name) + ' — ' + t(hp().hero.big_title) + ' selection'" />
+            } @else {
+              <div class="w-full h-full min-h-[220px] flex items-center justify-center bg-[var(--color-paper-dark)]/90 text-white/40 font-mono text-xs uppercase tracking-widest p-6 text-center">
+                <span>{{ t(item.name) }}</span>
+              </div>
+            }
           </div>
 
           <!-- Card Footer Pills -->
@@ -491,93 +504,117 @@
         <!-- Middle: Minimalist Line Form -->
         <div class="lg:col-span-5 reveal" whReveal [revealDelay]="100">
           @if (!formSubmitted()) {
-          <form (ngSubmit)="submitContact()" class="flex flex-col gap-8">
+          <form (ngSubmit)="submitContact()" class="flex flex-col gap-6">
+
+            @if (contactError()) {
+              <div class="p-3.5 bg-red-50 border border-red-200 rounded-xs text-xs font-mono text-red-700">
+                {{ contactError() }}
+              </div>
+            }
 
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
               <div>
-                <input type="text" name="name" [(ngModel)]="contactData.name" required placeholder="YOUR NAME"
+                <input type="text" name="name" [(ngModel)]="contactData.name" required placeholder="YOUR NAME *"
                   class="editorial-input" />
               </div>
               <div>
-                <input type="email" name="email" [(ngModel)]="contactData.email" required placeholder="EMAIL ADDRESS"
+                <input type="email" name="email" [(ngModel)]="contactData.email" required placeholder="EMAIL ADDRESS *"
                   class="editorial-input" />
               </div>
             </div>
 
-            <!-- Custom Editorial Dropdown: Subject / Occasion -->
-            <div class="relative" (click)="$event.stopPropagation()">
-              <label
-                class="font-mono text-[10px] uppercase tracking-widest text-[var(--color-foreground)]/60 font-semibold block mb-1">
-                Subject / Occasion
-              </label>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              <!-- Custom Editorial Dropdown: Subject / Occasion -->
+              <div class="relative" (click)="$event.stopPropagation()">
+                <label
+                  class="font-mono text-[10px] uppercase tracking-widest text-[var(--color-foreground)]/60 font-semibold block mb-1">
+                  Subject / Occasion
+                </label>
 
-              <button type="button" (click)="toggleDropdown($event)" [attr.aria-expanded]="dropdownOpen()"
-                aria-haspopup="listbox"
-                class="w-full flex items-center justify-between py-2 text-left border-b-[1.5px] border-[var(--color-foreground)] bg-transparent cursor-pointer transition-colors duration-200 group focus:outline-none focus:border-[var(--color-primary)]"
-                [class.border-[var(--color-primary)]]="dropdownOpen()">
-                <span
-                  class="font-mono text-xs uppercase tracking-wider font-bold text-[var(--color-foreground)] group-hover:text-[var(--color-primary)] transition-colors">
-                  {{ selectedSubjectLabel }}
-                </span>
-                <span
-                  class="text-xs text-[var(--color-foreground)]/70 group-hover:text-[var(--color-primary)] transition-transform duration-200 transform"
-                  [class.rotate-180]="dropdownOpen()" [class.text-[var(--color-primary)]]="dropdownOpen()">
-                  <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 inline-block" viewBox="0 0 20 20"
-                    fill="currentColor">
-                    <path fill-rule="evenodd"
-                      d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
-                      clip-rule="evenodd" />
-                  </svg>
-                </span>
-              </button>
-
-              <!-- Popover Options Menu -->
-              @if (dropdownOpen()) {
-              <div
-                class="absolute left-0 right-0 top-full mt-1.5 z-30 bg-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] shadow-[4px_4px_0px_0px_var(--color-foreground)] overflow-hidden"
-                role="listbox">
-                @for (opt of subjectOptions; track opt.value) {
-                <button type="button" (click)="selectProjectType(opt.value)" role="option"
-                  [attr.aria-selected]="contactData.projectType === opt.value"
-                  class="w-full text-left px-4 py-3 border-b-[1.5px] border-[var(--color-foreground)]/10 last:border-b-0 flex items-center justify-between font-mono text-xs uppercase tracking-wider transition-colors duration-150 cursor-pointer group"
-                  [class.bg-[var(--color-foreground)]]="contactData.projectType === opt.value"
-                  [class.text-[var(--color-paper-light)]]="contactData.projectType === opt.value"
-                  [class.text-[var(--color-foreground)]/80]="contactData.projectType !== opt.value"
-                  [class.hover:bg-[var(--color-foreground)]]="contactData.projectType !== opt.value"
-                  [class.hover:text-[var(--color-paper-light)]]="contactData.projectType !== opt.value">
-                  <span class="font-semibold">{{ opt.label }}</span>
-                  @if (contactData.projectType === opt.value) {
-                  <span class="text-xs text-[var(--color-paper-light)] font-bold">✓</span>
-                  } @else {
-                  <span class="text-xs opacity-0 group-hover:opacity-100 transition-opacity">→</span>
-                  }
+                <button type="button" (click)="toggleDropdown($event)" [attr.aria-expanded]="dropdownOpen()"
+                  aria-haspopup="listbox"
+                  class="w-full flex items-center justify-between py-2 text-left border-b-[1.5px] border-[var(--color-foreground)] bg-transparent cursor-pointer transition-colors duration-200 group focus:outline-none focus:border-[var(--color-primary)]"
+                  [class.border-[var(--color-primary)]]="dropdownOpen()">
+                  <span
+                    class="font-mono text-xs uppercase tracking-wider font-bold text-[var(--color-foreground)] group-hover:text-[var(--color-primary)] transition-colors">
+                    {{ selectedSubjectLabel }}
+                  </span>
+                  <span
+                    class="text-xs text-[var(--color-foreground)]/70 group-hover:text-[var(--color-primary)] transition-transform duration-200 transform"
+                    [class.rotate-180]="dropdownOpen()" [class.text-[var(--color-primary)]]="dropdownOpen()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5 inline-block" viewBox="0 0 20 20"
+                      fill="currentColor">
+                      <path fill-rule="evenodd"
+                        d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z"
+                        clip-rule="evenodd" />
+                    </svg>
+                  </span>
                 </button>
+
+                <!-- Popover Options Menu -->
+                @if (dropdownOpen()) {
+                <div
+                  class="absolute left-0 right-0 top-full mt-1.5 z-30 bg-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] shadow-[4px_4px_0px_0px_var(--color-foreground)] overflow-hidden"
+                  role="listbox">
+                  @for (opt of subjectOptions; track opt.value) {
+                  <button type="button" (click)="selectProjectType(opt.value)" role="option"
+                    [attr.aria-selected]="contactData.projectType === opt.value"
+                    class="w-full text-left px-4 py-3 border-b-[1.5px] border-[var(--color-foreground)]/10 last:border-b-0 flex items-center justify-between font-mono text-xs uppercase tracking-wider transition-colors duration-150 cursor-pointer group"
+                    [class.bg-[var(--color-foreground)]]="contactData.projectType === opt.value"
+                    [class.text-[var(--color-paper-light)]]="contactData.projectType === opt.value"
+                    [class.text-[var(--color-foreground)]/80]="contactData.projectType !== opt.value"
+                    [class.hover:bg-[var(--color-foreground)]]="contactData.projectType !== opt.value"
+                    [class.hover:text-[var(--color-paper-light)]]="contactData.projectType !== opt.value">
+                    <span class="font-semibold">{{ opt.label }}</span>
+                    @if (contactData.projectType === opt.value) {
+                    <span class="text-xs text-[var(--color-paper-light)] font-bold">✓</span>
+                    } @else {
+                    <span class="text-xs opacity-0 group-hover:opacity-100 transition-opacity">→</span>
+                    }
+                  </button>
+                  }
+                </div>
                 }
               </div>
-              }
+
+              <div>
+                <label
+                  class="font-mono text-[10px] uppercase tracking-widest text-[var(--color-foreground)]/60 font-semibold block mb-1">
+                  Phone (Optional)
+                </label>
+                <input type="tel" name="phone" [(ngModel)]="contactData.phone" placeholder="+30 210 000 0000"
+                  class="editorial-input" />
+              </div>
             </div>
 
             <div>
               <textarea name="message" [(ngModel)]="contactData.message" rows="3" required
-                placeholder="TELL US ABOUT YOUR OCCASION OR REQUEST" class="editorial-input resize-none"></textarea>
+                placeholder="TELL US ABOUT YOUR OCCASION OR REQUEST *" class="editorial-input resize-none"></textarea>
             </div>
 
             <div class="pt-2">
-              <button type="submit"
-                class="font-mono text-sm font-bold uppercase tracking-wider text-[var(--color-foreground)] hover:text-[var(--color-primary)] transition-colors flex items-center gap-3 cursor-pointer py-2">
-                <span>{{ t(hp().contact.button_text) }}</span>
-                <span class="text-lg">→</span>
+              <button type="submit" [disabled]="submittingContact()"
+                class="font-mono text-sm font-bold uppercase tracking-wider text-[var(--color-foreground)] hover:text-[var(--color-primary)] transition-colors flex items-center gap-3 cursor-pointer py-2 disabled:opacity-50">
+                <span>{{ submittingContact() ? 'SENDING INQUIRY…' : t(hp().contact.button_text) }}</span>
+                @if (submittingContact()) {
+                  <span class="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin"></span>
+                } @else {
+                  <span class="text-lg">→</span>
+                }
               </button>
             </div>
 
           </form>
           } @else {
-          <div class="p-8 border-[1.5px] border-[var(--color-foreground)] bg-white">
-            <span class="tape-sticker mb-4">MESSAGE RECEIVED</span>
+          <div class="p-8 border-[1.5px] border-[var(--color-foreground)] bg-white shadow-[4px_4px_0px_0px_var(--color-foreground)]">
+            <span class="tape-sticker mb-4 inline-block">MESSAGE RECEIVED</span>
             <h4 class="font-big text-2xl uppercase mt-2">Thank you!</h4>
-            <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/70 mt-2">
-              We will be in touch shortly to plan your wine experience.
+            <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/70 mt-2 leading-relaxed">
+              Your inquiry has been received by our cellar master. We will be in touch shortly.
             </p>
+            <button type="button" (click)="resetContactForm()" class="mt-6 font-mono text-xs uppercase font-bold text-[var(--color-primary)] hover:underline cursor-pointer flex items-center gap-1.5">
+              <span>← Send another inquiry</span>
+            </button>
           </div>
           }
         </div>
@@ -640,8 +677,12 @@
           <span class="font-big text-2xl sm:text-3xl uppercase tracking-tight text-white leading-none">
             {{ t(hp().footer.brand_name) }}
           </span>
-          <img [src]="hp().footer.badge_logo || '/logo_badge.png'" [alt]="t(hp().footer.brand_name) + ' Badge'"
-            class="h-8 sm:h-9 w-auto object-contain select-none rounded-[6px] shadow-sm hover:scale-105 transition-transform" />
+          @if (hp().footer.badge_logo) {
+            <img [src]="mediaUrl(hp().footer.badge_logo)" [alt]="t(hp().footer.brand_name) + ' Badge'"
+              class="h-8 sm:h-9 w-auto object-contain select-none rounded-[6px] shadow-sm hover:scale-105 transition-transform" />
+          } @else {
+            <wh-logo variant="white-badge" [size]="34" />
+          }
         </div>
 
         <!-- Navigation Links -->

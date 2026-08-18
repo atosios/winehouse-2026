@@ -26,13 +26,18 @@ import { AdminAuth } from './auth';
     <!-- Apple KPI Stat Widgets Row -->
     <div class="grid gap-4 grid-cols-2 lg:grid-cols-4 mb-8">
       @for (stat of stats(); track stat.label) {
-        <div class="admin-stat-card">
-          <div>
-            <div class="admin-stat-value">{{ stat.value }}</div>
-            <div class="admin-stat-label">{{ stat.label }}</div>
+        <a [routerLink]="stat.link || null" class="admin-stat-card block transition-transform hover:-translate-y-0.5">
+          <div class="flex items-start justify-between">
+            <div>
+              <div class="admin-stat-value">{{ stat.value }}</div>
+              <div class="admin-stat-label">{{ stat.label }}</div>
+            </div>
+            <div class="admin-stat-icon" [innerHTML]="stat.icon"></div>
           </div>
-          <div class="admin-stat-icon" [innerHTML]="stat.icon"></div>
-        </div>
+          @if (stat.subtext) {
+            <p class="text-[11px] font-mono text-slate-400 mt-2">{{ stat.subtext }}</p>
+          }
+        </a>
       }
     </div>
 
@@ -117,7 +122,7 @@ export class AdminOverview implements OnInit {
 
   today = new Date();
   loading = signal(true);
-  stats = signal<{ label: string; value: number; icon: string }[]>([]);
+  stats = signal<{ label: string; value: number | string; icon: string; link?: string; subtext?: string }[]>([]);
   recentItems = signal<{ id: number; title: string; type: string; published: boolean; updated_at: string }[]>([]);
 
   get userName(): string {
@@ -136,6 +141,11 @@ export class AdminOverview implements OnInit {
   }
 
   quickActions = [
+    {
+      path: '/admin/messages',
+      label: 'Inquiries',
+      icon: this.svgIcon('<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>'),
+    },
     {
       path: '/admin/homepage-editor',
       label: 'Page Studio',
@@ -157,14 +167,9 @@ export class AdminOverview implements OnInit {
       icon: this.svgIcon('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'),
     },
     {
-      path: '/admin/store-config',
-      label: 'Store Config',
-      icon: this.svgIcon('<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>'),
-    },
-    {
       path: '/admin/settings',
       label: 'Site Settings',
-      icon: this.svgIcon('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>'),
+      icon: this.svgIcon('<circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>'),
     },
   ];
 
@@ -173,15 +178,42 @@ export class AdminOverview implements OnInit {
       posts: this.api.listPosts(),
       pages: this.api.listPages(),
       assets: this.api.listAssets(),
+      messages: this.api.listMessages(),
     }).subscribe({
-      next: ({ posts, pages, assets }) => {
+      next: ({ posts, pages, assets, messages }) => {
         const publishedPosts = posts.filter((p) => p.published).length;
+        const unreadMessages = messages.unread_count || 0;
+        const totalMessages = messages.total_count ?? messages.messages.length;
 
         this.stats.set([
-          { label: 'Journal Posts', value: posts.length, icon: this.svgIcon('<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>') },
-          { label: 'Published Live', value: publishedPosts, icon: this.svgIcon('<polyline points="20 6 9 17 4 12"/>') },
-          { label: 'Custom Pages', value: pages.length, icon: this.svgIcon('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>') },
-          { label: 'Media Files', value: assets.length, icon: this.svgIcon('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>') },
+          {
+            label: 'Inquiries',
+            value: totalMessages,
+            subtext: unreadMessages > 0 ? `${unreadMessages} unread` : 'All read',
+            icon: this.svgIcon('<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>'),
+            link: '/admin/messages',
+          },
+          {
+            label: 'Journal Posts',
+            value: posts.length,
+            subtext: `${publishedPosts} published`,
+            icon: this.svgIcon('<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>'),
+            link: '/admin/posts',
+          },
+          {
+            label: 'Custom Pages',
+            value: pages.length,
+            subtext: 'Static & studio pages',
+            icon: this.svgIcon('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'),
+            link: '/admin/pages',
+          },
+          {
+            label: 'Media Files',
+            value: assets.length,
+            subtext: 'Atelier gallery assets',
+            icon: this.svgIcon('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'),
+            link: '/admin/assets',
+          },
         ]);
 
         const items = [

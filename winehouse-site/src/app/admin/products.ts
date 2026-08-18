@@ -129,12 +129,16 @@ import { resolveMediaUrl } from '../core/media.utils';
                 <tr>
                   <!-- Thumbnail & Gallery Indicator -->
                   <td>
-                    <div class="relative w-10 h-12 bg-slate-100 rounded border border-slate-200 overflow-hidden shrink-0">
-                      <img
-                        [src]="mediaUrl(item.cover_image || 'cellar_ritual.jpg')"
-                        [alt]="item.name"
-                        class="w-full h-full object-cover"
-                      />
+                    <div class="relative w-10 h-12 bg-slate-100 rounded border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
+                      @if (item.cover_image) {
+                        <img
+                          [src]="mediaUrl(item.cover_image)"
+                          [alt]="item.name"
+                          class="w-full h-full object-cover"
+                        />
+                      } @else {
+                        <span class="font-mono text-[9px] text-slate-400 font-bold">WH</span>
+                      }
                       @if (item.gallery && item.gallery.length > 0) {
                         <span class="absolute bottom-0 right-0 bg-slate-900/80 text-white font-mono text-[9px] px-1 rounded-tl" title="{{ item.gallery.length }} additional images">
                           +{{ item.gallery.length }}

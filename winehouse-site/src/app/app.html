@@ -1,4 +1,6 @@
-@if (showMaintenance()) {
+@if (!isLoaded() && !isAdmin()) {
+  <div class="fixed inset-0 z-[200] bg-[#0f0e0d] transition-opacity duration-300 pointer-events-none" aria-hidden="true"></div>
+} @else if (showMaintenance()) {
   <wh-maintenance />
 } @else {
   @if (!isAdmin()) {

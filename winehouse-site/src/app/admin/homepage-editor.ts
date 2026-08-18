@@ -1648,7 +1648,7 @@ export class AdminHomepageEditor implements OnInit {
     this.content.cellar.items.push({
       name: { en: 'NEW BOTTLE', el: '' },
       font_style: 'font-serif tracking-wider font-semibold',
-      img: 'cellar_ritual.jpg',
+      img: '',
       tags: [{ en: 'EXCLUSIVE', el: '' }, { en: 'VINTAGE', el: '' }],
       link: '/shop',
     });
@@ -1810,7 +1810,7 @@ export class AdminHomepageEditor implements OnInit {
       status: { en: 'LIMITED ALLOCATION', el: '' },
       statusBg: 'bg-[#922e1b]',
       tastingNote: { en: 'Fresh acidity, crisp minerality and citrus notes.', el: '' },
-      img: 'cellar_ritual.jpg',
+      img: '',
       alcohol: '13.5%',
       soil: { en: 'Volcanic Soil', el: '' },
     });

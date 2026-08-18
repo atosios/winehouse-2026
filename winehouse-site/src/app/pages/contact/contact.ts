@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { ActivatedRoute } from '@angular/router';
 import { SiteSettingsService } from '../../core/site-settings.service';
 import { I18nService, I18nText } from '../../core/i18n.service';
 import { WhReveal } from '../../shared/reveal';
@@ -17,6 +18,7 @@ export class Contact implements OnInit {
   private i18n = inject(I18nService);
   private api = inject(AdminApi);
   private seo = inject(SeoService);
+  private route = inject(ActivatedRoute);
 
   readonly page = computed(() => this.settingsService.contactPage());
 
@@ -26,6 +28,33 @@ export class Contact implements OnInit {
 
   t(val: I18nText | string): string {
     return this.i18n.t(val as I18nText);
+  }
+
+  name = '';
+  email = '';
+  phone = '';
+  projectType = 'Private Tasting';
+  message = '';
+  readonly sent = signal(false);
+  readonly sending = signal(false);
+  readonly sendError = signal<string | null>(null);
+  readonly dropdownOpen = signal(false);
+
+  readonly subjectOptions = computed(() => {
+    return (
+      this.page().form?.subjects || [
+        { value: 'Private Tasting', label: 'PRIVATE TASTING & PAIRINGS' },
+        { value: 'Cellar Consulting', label: 'CELLAR CONSULTING & SOURCING' },
+        { value: 'Event Hosting', label: 'EVENT HOSTING & SOMMELIER' },
+        { value: 'Press & Collab', label: 'PRESS & EDITORIAL INQUIRY' },
+        { value: 'General Inquiry', label: 'GENERAL INQUIRY' },
+      ]
+    );
+  });
+
+  get selectedSubjectLabel(): string {
+    const found = this.subjectOptions().find(o => o.value === this.projectType);
+    return found ? found.label : (this.projectType || 'SELECT SUBJECT');
   }
 
   ngOnInit(): void {
@@ -61,32 +90,25 @@ export class Contact implements OnInit {
         answer: 'Our Athens cellar atelier is open Tuesday through Friday from 12:00 to 22:00 and Saturday from 11:00 to 23:00.',
       },
     ]);
-  }
 
-  name = '';
-  email = '';
-  phone = '';
-  projectType = 'Private Tasting';
-  message = '';
-  readonly sent = signal(false);
-  readonly sending = signal(false);
-  readonly dropdownOpen = signal(false);
-
-  readonly subjectOptions = computed(() => {
-    return (
-      this.page().form?.subjects || [
-        { value: 'Private Tasting', label: 'PRIVATE TASTING & PAIRINGS' },
-        { value: 'Cellar Consulting', label: 'CELLAR CONSULTING & SOURCING' },
-        { value: 'Event Hosting', label: 'EVENT HOSTING & SOMMELIER' },
-        { value: 'Press & Collab', label: 'PRESS & EDITORIAL INQUIRY' },
-        { value: 'General Inquiry', label: 'GENERAL INQUIRY' },
-      ]
-    );
-  });
-
-  get selectedSubjectLabel(): string {
-    const found = this.subjectOptions().find(o => o.value === this.projectType);
-    return found ? found.label : (this.projectType || 'SELECT SUBJECT');
+    // Handle incoming query params (e.g. from shop concierge or bottle out-of-stock allocation inquiry)
+    this.route.queryParams.subscribe((params) => {
+      if (params['subject']) {
+        const found = this.subjectOptions().find(
+          (o) => o.value.toLowerCase() === params['subject'].toLowerCase()
+        );
+        if (found) {
+          this.projectType = found.value;
+        } else {
+          this.projectType = params['subject'];
+        }
+      }
+      if (params['inquiry']) {
+        this.message = params['inquiry'];
+      } else if (params['bottle']) {
+        this.message = `Inquiry regarding vintage allocation for: ${params['bottle']}`;
+      }
+    });
   }
 
   toggleDropdown(event?: Event) {
@@ -99,6 +121,16 @@ export class Contact implements OnInit {
   selectProjectType(val: string) {
     this.projectType = val;
     this.dropdownOpen.set(false);
+  }
+
+  resetForm(): void {
+    this.sent.set(false);
+    this.sendError.set(null);
+    this.name = '';
+    this.email = '';
+    this.phone = '';
+    this.projectType = 'Private Tasting';
+    this.message = '';
   }
 
   @HostListener('document:click')
@@ -121,6 +153,7 @@ export class Contact implements OnInit {
     }
 
     this.sending.set(true);
+    this.sendError.set(null);
 
     this.api
       .submitContactMessage({
@@ -137,10 +170,13 @@ export class Contact implements OnInit {
           this.sent.set(true);
         },
         error: (err) => {
-          console.warn('Backend message submission warning:', err);
+          console.error('Contact form submission error:', err);
           this.sending.set(false);
-          this.sent.set(true);
+          this.sendError.set(
+            err?.error?.message || 'We could not dispatch your message. Please check your connection and try again.'
+          );
         },
       });
   }
 }
+

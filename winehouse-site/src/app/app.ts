@@ -42,6 +42,8 @@ export class App implements OnInit {
     { initialValue: typeof location !== 'undefined' ? location.pathname.startsWith('/admin') : false },
   );
 
+  readonly isLoaded = this.settings.isLoaded;
+
   showMaintenance = computed(() => {
     return this.settings.isMaintenanceMode() && !this.auth.isLoggedIn && !this.isAdmin();
   });

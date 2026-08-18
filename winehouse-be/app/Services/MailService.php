@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\ContactMessage;
 use App\Models\Order;
 use App\Models\Setting;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 
@@ -26,11 +27,29 @@ class MailService
             $encryption = null;
         }
 
-        $username = $mailConfig['mail_username'] ?? env('MAIL_USERNAME', '');
-        $password = $mailConfig['mail_password'] ?? env('MAIL_PASSWORD', '');
-        $fromAddress = $mailConfig['mail_from_address'] ?? ($siteSettings['contact']['email'] ?? env('MAIL_FROM_ADDRESS', 'info@winehouse.gr'));
-        $fromName = $mailConfig['mail_from_name'] ?? ($siteSettings['name'] ?? env('MAIL_FROM_NAME', 'The Winehouse'));
-        $companyEmail = $mailConfig['company_notification_email'] ?? ($siteSettings['contact']['email'] ?? 'info@winehouse.gr');
+        $username = !empty($mailConfig['mail_username']) ? $mailConfig['mail_username'] : env('MAIL_USERNAME', null);
+        $password = !empty($mailConfig['mail_password']) ? $mailConfig['mail_password'] : env('MAIL_PASSWORD', null);
+
+        // If either username or password is empty, don't supply credentials to prevent Symfony CRAM-MD5 auth crashes
+        if (empty($username) || empty($password)) {
+            $username = null;
+            $password = null;
+        }
+
+        $fromAddress = !empty($mailConfig['mail_from_address'])
+            ? trim($mailConfig['mail_from_address'])
+            : (!empty($siteSettings['contact']['email']) ? trim($siteSettings['contact']['email']) : env('MAIL_FROM_ADDRESS', 'info@winehouse.gr'));
+        
+        $fromName = !empty($mailConfig['mail_from_name'])
+            ? trim($mailConfig['mail_from_name'])
+            : (!empty($siteSettings['name']) ? trim($siteSettings['name']) : env('MAIL_FROM_NAME', 'The Winehouse'));
+
+        // Resolve destination admin notification mailbox
+        $companyEmail = !empty($mailConfig['company_notification_email'])
+            ? trim($mailConfig['company_notification_email'])
+            : (!empty($siteSettings['contact']['email'])
+                ? trim($siteSettings['contact']['email'])
+                : (User::orderBy('id')->value('email') ?? $fromAddress));
 
         config([
             'mail.default' => $driver,
@@ -43,6 +62,20 @@ class MailService
             'mail.from.address' => $fromAddress,
             'mail.from.name' => $fromName,
         ]);
+
+        if ($driver === 'log') {
+            config([
+                'mail.mailers.log.transport' => 'log',
+                'mail.mailers.log.channel' => env('MAIL_LOG_CHANNEL', 'stack'),
+            ]);
+        }
+
+        // Purge cached mail manager instances to ensure runtime settings are applied immediately
+        try {
+            Mail::purge();
+        } catch (\Throwable $e) {
+            // Ignore if mail manager not yet initialized
+        }
 
         return [
             'driver' => $driver,
@@ -79,6 +112,7 @@ class MailService
                     <div><strong>Driver:</strong> ' . htmlspecialchars($cfg['driver']) . '</div>
                     <div><strong>Host:</strong> ' . htmlspecialchars($cfg['host']) . ':' . htmlspecialchars((string) $cfg['port']) . '</div>
                     <div><strong>From:</strong> ' . htmlspecialchars($cfg['from_name']) . ' &lt;' . htmlspecialchars($cfg['from_address']) . '&gt;</div>
+                    <div><strong>Admin Recipient:</strong> ' . htmlspecialchars($cfg['company_email']) . '</div>
                     <div><strong>Timestamp:</strong> ' . date('Y-m-d H:i:s') . ' UTC</div>
                 </div>
                 <p style="font-size: 12px; color: #777777; margin-top: 30px; border-top: 1px solid #e0deda; padding-top: 15px;">The Winehouse Independent Atelier • Automated Delivery Service</p>
@@ -105,61 +139,87 @@ class MailService
         try {
             $cfg = self::configureMailer();
             if (empty($cfg['notify_on_new_message']) || empty($cfg['company_email'])) {
+                Log::info('Contact message notification skipped (disabled in settings or no recipient email configured).');
                 return;
             }
 
-            $recipient = $cfg['company_email'];
-            $subject = "[Inquiry] New message from {$contactMessage->name} — " . ($contactMessage->subject ?: 'Website Contact');
+            // Support comma-separated or semicolon-separated recipient list
+            $recipients = array_filter(array_map('trim', preg_split('/[,;]+/', $cfg['company_email'])));
+            if (empty($recipients)) {
+                return;
+            }
+
+            $subject = "[Website Inquiry] " . ($contactMessage->subject ?: 'Guest Message') . " — from " . $contactMessage->name;
+            $formattedDate = $contactMessage->created_at ? $contactMessage->created_at->format('M d, Y H:i T') : date('M d, Y H:i T');
 
             $html = '
-            <div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Helvetica, Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 30px; background-color: #fcfbfa; border: 1.5px solid #111111; color: #111111;">
-                <div style="border-bottom: 2px solid #c84b31; padding-bottom: 15px; margin-bottom: 20px;">
-                    <span style="background-color: #c84b31; color: #ffffff; font-family: monospace; font-size: 10px; font-weight: bold; padding: 3px 8px; text-transform: uppercase; letter-spacing: 1px;">New Ingestion</span>
-                    <h1 style="font-size: 20px; font-weight: 800; margin: 10px 0 0 0; text-transform: uppercase;">' . htmlspecialchars($contactMessage->subject ?: 'Guest Inquiry') . '</h1>
+            <div style="font-family: -apple-system, BlinkMacSystemFont, \'Segoe UI\', Roboto, Helvetica, Arial, sans-serif; max-width: 620px; margin: 0 auto; padding: 32px; background-color: #fcfbfa; border: 1.5px solid #111111; color: #111111; border-radius: 4px;">
+                <div style="border-bottom: 2px solid #c84b31; padding-bottom: 16px; margin-bottom: 24px;">
+                    <span style="background-color: #c84b31; color: #ffffff; font-family: monospace; font-size: 10px; font-weight: bold; padding: 4px 8px; text-transform: uppercase; letter-spacing: 1px; border-radius: 2px;">New Inquiry Ingestion</span>
+                    <h1 style="font-size: 22px; font-weight: 800; margin: 12px 0 4px 0; text-transform: uppercase; letter-spacing: -0.3px; color: #111111;">' . htmlspecialchars($contactMessage->subject ?: 'General Inquiry') . '</h1>
+                    <p style="font-family: monospace; font-size: 11px; color: #777777; margin: 0;">The Winehouse Digital Atelier • Contact Submissions</p>
                 </div>
                 
-                <div style="background-color: #ffffff; border: 1px solid #e2ded8; padding: 18px; border-radius: 6px; margin-bottom: 20px;">
-                    <table style="width: 100%; font-size: 13px; border-collapse: collapse;">
+                <div style="background-color: #ffffff; border: 1px solid #e2ded8; padding: 18px 20px; border-radius: 6px; margin-bottom: 22px;">
+                    <table style="width: 100%; font-size: 13px; border-collapse: collapse; line-height: 1.6;">
                         <tr>
-                            <td style="padding: 4px 0; color: #777777; width: 80px; font-family: monospace; font-size: 11px; text-transform: uppercase;">From:</td>
-                            <td style="padding: 4px 0; font-weight: bold;">' . htmlspecialchars($contactMessage->name) . '</td>
+                            <td style="padding: 5px 0; color: #777777; width: 90px; font-family: monospace; font-size: 11px; text-transform: uppercase; font-weight: bold;">Sender:</td>
+                            <td style="padding: 5px 0; font-weight: bold; color: #111111;">' . htmlspecialchars($contactMessage->name) . '</td>
                         </tr>
                         <tr>
-                            <td style="padding: 4px 0; color: #777777; font-family: monospace; font-size: 11px; text-transform: uppercase;">Email:</td>
-                            <td style="padding: 4px 0;"><a href="mailto:' . htmlspecialchars($contactMessage->email) . '" style="color: #c84b31; text-decoration: none; font-weight: bold;">' . htmlspecialchars($contactMessage->email) . '</a></td>
+                            <td style="padding: 5px 0; color: #777777; font-family: monospace; font-size: 11px; text-transform: uppercase; font-weight: bold;">Email:</td>
+                            <td style="padding: 5px 0;"><a href="mailto:' . htmlspecialchars($contactMessage->email) . '" style="color: #c84b31; text-decoration: none; font-weight: bold;">' . htmlspecialchars($contactMessage->email) . '</a></td>
                         </tr>' .
                         ($contactMessage->phone ? '
                         <tr>
-                            <td style="padding: 4px 0; color: #777777; font-family: monospace; font-size: 11px; text-transform: uppercase;">Phone:</td>
-                            <td style="padding: 4px 0;">' . htmlspecialchars($contactMessage->phone) . '</td>
+                            <td style="padding: 5px 0; color: #777777; font-family: monospace; font-size: 11px; text-transform: uppercase; font-weight: bold;">Phone:</td>
+                            <td style="padding: 5px 0; font-family: monospace;"><a href="tel:' . htmlspecialchars($contactMessage->phone) . '" style="color: #111111; text-decoration: none;">' . htmlspecialchars($contactMessage->phone) . '</a></td>
                         </tr>' : '') . '
                         <tr>
-                            <td style="padding: 4px 0; color: #777777; font-family: monospace; font-size: 11px; text-transform: uppercase;">Date:</td>
-                            <td style="padding: 4px 0; font-family: monospace; font-size: 12px;">' . $contactMessage->created_at->format('M d, Y H:i') . '</td>
+                            <td style="padding: 5px 0; color: #777777; font-family: monospace; font-size: 11px; text-transform: uppercase; font-weight: bold;">Topic / Type:</td>
+                            <td style="padding: 5px 0; font-weight: 600;">' . htmlspecialchars($contactMessage->project_type ?: $contactMessage->subject ?: 'General') . '</td>
                         </tr>
+                        <tr>
+                            <td style="padding: 5px 0; color: #777777; font-family: monospace; font-size: 11px; text-transform: uppercase; font-weight: bold;">Received:</td>
+                            <td style="padding: 5px 0; font-family: monospace; font-size: 12px; color: #555555;">' . $formattedDate . '</td>
+                        </tr>' .
+                        ($contactMessage->ip_address ? '
+                        <tr>
+                            <td style="padding: 5px 0; color: #777777; font-family: monospace; font-size: 11px; text-transform: uppercase; font-weight: bold;">IP Address:</td>
+                            <td style="padding: 5px 0; font-family: monospace; font-size: 11px; color: #888888;">' . htmlspecialchars($contactMessage->ip_address) . '</td>
+                        </tr>' : '') . '
                     </table>
                 </div>
 
                 <div style="margin-bottom: 25px;">
-                    <div style="font-family: monospace; font-size: 11px; font-weight: bold; color: #666666; text-transform: uppercase; margin-bottom: 8px;">Message:</div>
-                    <div style="background-color: #ffffff; border-left: 3px solid #c84b31; border: 1px solid #e2ded8; padding: 18px; font-size: 14px; line-height: 1.6; color: #222222; white-space: pre-wrap;">'
+                    <div style="font-family: monospace; font-size: 11px; font-weight: bold; color: #666666; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 8px;">Message Content:</div>
+                    <div style="background-color: #ffffff; border-left: 3px solid #c84b31; border: 1px solid #e2ded8; padding: 20px; font-size: 14px; line-height: 1.65; color: #222222; white-space: pre-wrap; border-radius: 4px;">'
                         . nl2br(htmlspecialchars($contactMessage->message)) .
                     '</div>
                 </div>
 
-                <div style="text-align: center; margin-top: 25px;">
-                    <a href="mailto:' . htmlspecialchars($contactMessage->email) . '?subject=Re: ' . rawurlencode($contactMessage->subject ?: 'The Winehouse Inquiry') . '" style="display: inline-block; background-color: #111111; color: #ffffff; padding: 10px 22px; font-family: monospace; font-size: 12px; font-weight: bold; text-decoration: none; text-transform: uppercase; letter-spacing: 1px;">Reply to Guest →</a>
+                <div style="text-align: center; margin-top: 28px; padding-top: 20px; border-top: 1px solid #e0deda;">
+                    <a href="mailto:' . htmlspecialchars($contactMessage->email) . '?subject=Re: ' . rawurlencode($contactMessage->subject ?: 'The Winehouse Inquiry') . '" style="display: inline-block; background-color: #111111; color: #ffffff; padding: 12px 26px; font-family: monospace; font-size: 12px; font-weight: bold; text-decoration: none; text-transform: uppercase; letter-spacing: 1px; border-radius: 3px; margin: 4px;">Reply Directly to ' . htmlspecialchars($contactMessage->name) . ' →</a>
+                </div>
+
+                <div style="font-size: 11px; color: #888888; text-align: center; margin-top: 24px;">
+                    This message was securely logged in your Winehouse Admin Dashboard &bull; ID #' . $contactMessage->id . '
                 </div>
             </div>';
 
-            Mail::html($html, function ($message) use ($recipient, $subject, $cfg, $contactMessage) {
-                $message->to($recipient)
+            Mail::html($html, function ($message) use ($recipients, $subject, $cfg, $contactMessage) {
+                $message->to($recipients)
                         ->from($cfg['from_address'], $cfg['from_name'])
                         ->replyTo($contactMessage->email, $contactMessage->name)
                         ->subject($subject);
             });
+
+            Log::info("Dispatched company contact notification for message #{$contactMessage->id} to " . implode(', ', $recipients));
         } catch (\Throwable $e) {
-            Log::error('Failed to dispatch company contact notification email: ' . $e->getMessage());
+            Log::error('Failed to dispatch company contact notification email: ' . $e->getMessage(), [
+                'exception' => $e,
+                'message_id' => $contactMessage->id ?? null,
+            ]);
         }
     }
 
@@ -174,7 +234,11 @@ class MailService
                 return;
             }
 
-            $recipient = $cfg['company_email'];
+            $recipients = array_filter(array_map('trim', preg_split('/[,;]+/', $cfg['company_email'])));
+            if (empty($recipients)) {
+                return;
+            }
+
             $subject = "[New Order #{$order->order_number}] {$order->customer_name} — " . number_format($order->total, 2) . " {$order->currency}";
 
             $itemsRows = '';
@@ -234,8 +298,8 @@ class MailService
                 </div>
             </div>';
 
-            Mail::html($html, function ($message) use ($recipient, $subject, $cfg, $order) {
-                $message->to($recipient)
+            Mail::html($html, function ($message) use ($recipients, $subject, $cfg, $order) {
+                $message->to($recipients)
                         ->from($cfg['from_address'], $cfg['from_name'])
                         ->replyTo($order->customer_email, $order->customer_name)
                         ->subject($subject);
@@ -341,3 +405,4 @@ class MailService
         }
     }
 }
+

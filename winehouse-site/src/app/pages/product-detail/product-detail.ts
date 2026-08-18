@@ -157,7 +157,7 @@ export class ProductDetail implements OnInit, OnDestroy {
     const productUrl = `${this.seo.getSiteOrigin()}/shop/${prod.slug || prod.id}`;
     const coverImg = prod.cover_image
       ? resolveMediaUrl(prod.cover_image)
-      : `${this.seo.getSiteOrigin()}/cellar_ritual.jpg`;
+      : '';
 
     // 1. Meta Tags (Title, Description, OpenGraph, Twitter, Canonical)
     this.seo.setMeta({
@@ -196,7 +196,7 @@ export class ProductDetail implements OnInit, OnDestroy {
   }
 
   getPrimaryImage(prod: Product): string {
-    return resolveMediaUrl(prod.cover_image || 'cellar_ritual.jpg');
+    return prod.cover_image ? resolveMediaUrl(prod.cover_image) : '';
   }
 
   getAllImages(): string[] {
@@ -215,9 +215,6 @@ export class ProductDetail implements OnInit, OnDestroy {
           }
         }
       });
-    }
-    if (images.length === 0) {
-      images.push(resolveMediaUrl('cellar_ritual.jpg'));
     }
     return images;
   }
