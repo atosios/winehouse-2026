@@ -48,6 +48,7 @@ class SettingController extends Controller
             'socials' => ['nullable', 'array'],
             'socials.*.label' => ['required_with:socials', 'string', 'max:255'],
             'socials.*.url' => ['required_with:socials', 'string', 'max:500'],
+            'socials.*.icon' => ['nullable', 'string', 'max:50'],
             'nav' => ['nullable', 'array'],
             'nav.*.label' => ['required_with:nav', 'string', 'max:255'],
             'nav.*.path' => ['required_with:nav', 'string', 'max:255'],

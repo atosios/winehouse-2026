@@ -864,8 +864,8 @@
   .admin-sidebar-logo {
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    padding: 0.25rem 1.25rem 1.25rem;
+    justify-content: flex-start;
+    padding: 0.5rem 1.25rem 1.25rem;
     border-bottom: 1px solid rgba(255, 255, 255, 0.07);
     margin-bottom: 1.25rem;
     text-decoration: none;
@@ -873,7 +873,9 @@
 
   .admin-sidebar-logo img {
     height: 2.25rem;
-    filter: brightness(1.2);
+    width: auto;
+    object-fit: contain;
+    border-radius: 6px;
   }
 
   .admin-sidebar-badge {
@@ -2896,6 +2898,95 @@
     background: linear-gradient(90deg, #ece7e1 25%, #f5efe8 50%, #ece7e1 75%);
     background-size: 200% 100%;
     animation: shop-shimmer 1.6s infinite ease-in-out;
+  }
+
+  /* Multi-line clamp utility for product descriptions */
+  .line-clamp-8 {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* ---------------------------------------------------------------------------
+     Public Header Layout with Wide-Screen Sideways Alignment & Frosted Blur
+     --------------------------------------------------------------------------- */
+  .header-root {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 50;
+    transition: color 300ms ease, backdrop-filter 300ms ease;
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(6px);
+    background: transparent;
+  }
+
+  .header-container {
+    width: 100%;
+    padding-block: 0.85rem;
+    transition: padding 200ms ease;
+  }
+
+  @media (max-width: 1359px) {
+    .header-container {
+      max-width: var(--container-content, 72rem);
+      margin-inline: auto;
+      padding-inline: clamp(1.25rem, 4vw, 2.5rem);
+    }
+    .header-wide-layout {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      width: 100%;
+    }
+    .header-col-left {
+      display: flex;
+      align-items: center;
+      flex-shrink: 0;
+    }
+    .header-col-center {
+      display: flex;
+      align-items: center;
+      gap: 1.5rem;
+    }
+    .header-col-right {
+      display: none;
+    }
+  }
+
+  @media (min-width: 1360px) {
+    .header-container {
+      width: 100%;
+      padding-inline: 0;
+    }
+    .header-wide-layout {
+      display: grid;
+      grid-template-columns: 1fr minmax(0, var(--container-content, 72rem)) 1fr;
+      align-items: center;
+      width: 100%;
+    }
+    .header-col-left {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      padding-right: 1.75rem;
+    }
+    .header-col-center {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding-inline: clamp(1.25rem, 3vw, 2.5rem);
+    }
+    .header-col-right {
+      display: flex;
+      align-items: center;
+      justify-content: flex-start;
+      padding-left: 1.75rem;
+    }
   }
 }
 

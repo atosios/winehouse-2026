@@ -1,4 +1,4 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, OnInit, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi, SiteSettings, MailConfig, SeoConfigSettings } from './api';
 import {
@@ -9,10 +9,11 @@ import {
   DEFAULT_SEO_CONFIG,
 } from '../core/site-settings.service';
 import { resolveMediaUrl } from '../core/media.utils';
+import { WhSocialIcon, SOCIAL_ICON_LIBRARY, resolveSocialIconKey, SocialIconDef } from '../shared/social-icon';
 
 @Component({
   selector: 'wh-admin-settings',
-  imports: [FormsModule],
+  imports: [FormsModule, WhSocialIcon],
   template: `
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
       <div>
@@ -224,35 +225,134 @@ import { resolveMediaUrl } from '../core/media.utils';
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
               <div>
                 <h2 class="text-base font-bold text-slate-900 tracking-tight">Social Channels</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Links to Instagram, Facebook, Vivino, etc.</p>
+                <p class="text-xs text-slate-500 mt-0.5">Links and icons for Facebook, X (Twitter), Instagram, TikTok, YouTube, etc.</p>
               </div>
               <button type="button" class="btn btn-secondary btn-xs flex items-center gap-1 cursor-pointer" (click)="addSocialRow()">
                 <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                <span>Add Link</span>
+                <span>Add Custom Link</span>
               </button>
             </div>
 
-            <div class="admin-card space-y-2.5">
+            <!-- Quick Add Presets Bar -->
+            <div class="mb-3.5 p-2.5 bg-slate-50 border border-slate-200/80 rounded-xl flex flex-wrap items-center gap-1.5">
+              <span class="text-[11px] font-mono font-bold uppercase text-slate-500 mr-1">Quick Add:</span>
+              <button type="button" class="btn btn-secondary !py-1 !px-2 text-2xs inline-flex items-center gap-1.5 cursor-pointer hover:border-pink-500 hover:text-pink-700" (click)="addPresetSocial('Instagram', 'https://instagram.com/', 'instagram')">
+                <wh-social-icon name="instagram" [size]="12" class="w-3 h-3 text-pink-600" />
+                <span>+ Instagram</span>
+              </button>
+              <button type="button" class="btn btn-secondary !py-1 !px-2 text-2xs inline-flex items-center gap-1.5 cursor-pointer hover:border-blue-600 hover:text-blue-700" (click)="addPresetSocial('Facebook', 'https://facebook.com/', 'facebook')">
+                <wh-social-icon name="facebook" [size]="12" class="w-3 h-3 text-blue-600" />
+                <span>+ Facebook</span>
+              </button>
+              <button type="button" class="btn btn-secondary !py-1 !px-2 text-2xs inline-flex items-center gap-1.5 cursor-pointer hover:border-slate-800 hover:text-slate-900" (click)="addPresetSocial('X (Twitter)', 'https://x.com/', 'x')">
+                <wh-social-icon name="x" [size]="12" class="w-3 h-3 text-slate-900" />
+                <span>+ X (Twitter)</span>
+              </button>
+              <button type="button" class="btn btn-secondary !py-1 !px-2 text-2xs inline-flex items-center gap-1.5 cursor-pointer hover:border-slate-800 hover:text-slate-900" (click)="addPresetSocial('TikTok', 'https://tiktok.com/@', 'tiktok')">
+                <wh-social-icon name="tiktok" [size]="12" class="w-3 h-3 text-slate-900" />
+                <span>+ TikTok</span>
+              </button>
+              <button type="button" class="btn btn-secondary !py-1 !px-2 text-2xs inline-flex items-center gap-1.5 cursor-pointer hover:border-red-600 hover:text-red-700" (click)="addPresetSocial('YouTube', 'https://youtube.com/', 'youtube')">
+                <wh-social-icon name="youtube" [size]="12" class="w-3 h-3 text-red-600" />
+                <span>+ YouTube</span>
+              </button>
+            </div>
+
+            <div class="admin-card space-y-3">
+              @if (model.socials.length === 0) {
+                <div class="p-6 text-center text-xs text-slate-400 font-mono border border-dashed border-slate-200 rounded-xl">
+                  No social channels added yet. Click "+ Add Custom Link" or select a Quick Add preset above.
+                </div>
+              }
+
               @for (social of model.socials; track $index) {
-                <div class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl">
+                <div class="relative flex flex-col sm:flex-row sm:items-center gap-2.5 p-3 bg-slate-50/80 border border-slate-200/80 rounded-xl hover:border-slate-300 transition-colors">
+                  
+                  <!-- Icon Selector Trigger Button with Popover -->
+                  <div class="relative shrink-0">
+                    <button
+                      type="button"
+                      (click)="toggleSocialIconPicker($index, $event)"
+                      class="h-9 px-2.5 bg-white border border-slate-200 rounded-lg flex items-center gap-1.5 hover:border-wine-600 hover:bg-wine-50/50 transition-all cursor-pointer shadow-2xs group"
+                      title="Click to choose icon from library"
+                    >
+                      <wh-social-icon [name]="getSocialIcon(social)" [size]="16" class="w-4 h-4 text-slate-700 group-hover:text-wine-800" />
+                      <span class="text-2xs font-mono font-bold uppercase text-slate-600 group-hover:text-wine-800">
+                        {{ getSocialIcon(social) }}
+                      </span>
+                      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-slate-400"><polyline points="6 9 12 15 18 9"/></svg>
+                    </button>
+
+                    <!-- Icon Selection Popover / Grid -->
+                    @if (openSocialIconPickerIndex() === $index) {
+                      <div
+                        class="absolute left-0 top-full mt-1.5 z-50 p-3 bg-white rounded-2xl shadow-2xl border border-slate-200 w-72 sm:w-80 space-y-2"
+                        (click)="$event.stopPropagation()"
+                      >
+                        <div class="flex items-center justify-between border-b border-slate-100 pb-2">
+                          <span class="text-xs font-bold text-slate-800 font-mono uppercase tracking-wider">Icon Library</span>
+                          <button type="button" (click)="openSocialIconPickerIndex.set(null)" class="text-slate-400 hover:text-slate-700 text-xs font-bold p-1">✕</button>
+                        </div>
+                        <div class="grid grid-cols-3 sm:grid-cols-4 gap-1.5 max-h-56 overflow-y-auto p-0.5">
+                          @for (opt of socialIconLibrary; track opt.key) {
+                            <button
+                              type="button"
+                              (click)="selectSocialIcon(social, opt.key)"
+                              class="flex flex-col items-center justify-center p-2 rounded-xl border text-xs gap-1 transition-all cursor-pointer"
+                              [class.border-wine-600]="getSocialIcon(social) === opt.key"
+                              [class.bg-wine-50]="getSocialIcon(social) === opt.key"
+                              [class.text-wine-800]="getSocialIcon(social) === opt.key"
+                              [class.border-slate-200/80]="getSocialIcon(social) !== opt.key"
+                              [class.hover:border-slate-300]="getSocialIcon(social) !== opt.key"
+                              [class.hover:bg-slate-50]="getSocialIcon(social) !== opt.key"
+                            >
+                              <wh-social-icon [name]="opt.key" [size]="18" class="w-4.5 h-4.5" />
+                              <span class="text-[10px] font-mono font-medium truncate max-w-full text-center">{{ opt.name }}</span>
+                            </button>
+                          }
+                        </div>
+                      </div>
+                    }
+                  </div>
+
+                  <!-- Label Input -->
                   <input
-                    class="admin-field-input w-28 shrink-0 font-medium text-xs"
+                    class="admin-field-input w-full sm:w-36 shrink-0 font-medium text-xs !py-2"
                     placeholder="e.g. Instagram"
                     [(ngModel)]="social.label"
+                    (ngModelChange)="onSocialLabelChange(social)"
                   />
+
+                  <!-- URL Input -->
                   <input
-                    class="admin-field-input flex-1 text-xs"
-                    placeholder="https://..."
+                    class="admin-field-input flex-1 text-xs !py-2 font-mono"
+                    placeholder="https://instagram.com/..."
                     [(ngModel)]="social.url"
+                    (ngModelChange)="onSocialLabelChange(social)"
                   />
-                  <button
-                    type="button"
-                    class="w-6 h-6 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center shrink-0 transition-colors cursor-pointer text-xs"
-                    (click)="removeSocialRow($index)"
-                    title="Remove profile"
-                  >
-                    ✕
-                  </button>
+
+                  <!-- Actions / Delete Button -->
+                  <div class="flex items-center gap-1.5 self-end sm:self-auto shrink-0">
+                    @if (social.url) {
+                      <a
+                        [href]="social.url"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        class="h-8 px-2 rounded-lg border border-slate-200 text-slate-500 hover:text-slate-800 hover:bg-slate-100 flex items-center justify-center transition-colors cursor-pointer text-xs"
+                        title="Test Open Link in New Tab"
+                      >
+                        ↗
+                      </a>
+                    }
+                    <button
+                      type="button"
+                      class="h-8 w-8 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors cursor-pointer text-xs"
+                      (click)="removeSocialRow($index)"
+                      title="Remove social link"
+                    >
+                      ✕
+                    </button>
+                  </div>
                 </div>
               }
             </div>
@@ -1287,12 +1387,59 @@ export class AdminSettings implements OnInit {
     this.model.hours.splice(index, 1);
   }
 
+  readonly socialIconLibrary = SOCIAL_ICON_LIBRARY;
+  readonly openSocialIconPickerIndex = signal<number | null>(null);
+
+  getSocialIcon(social: { icon?: string; label?: string; url?: string }): string {
+    return resolveSocialIconKey(social.icon, social.label, social.url);
+  }
+
+  toggleSocialIconPicker(index: number, event?: Event): void {
+    if (event) event.stopPropagation();
+    this.openSocialIconPickerIndex.update((curr) => (curr === index ? null : index));
+  }
+
+  selectSocialIcon(social: { icon?: string; label?: string; url?: string }, iconKey: string): void {
+    social.icon = iconKey;
+    this.openSocialIconPickerIndex.set(null);
+  }
+
+  onSocialLabelChange(social: { icon?: string; label?: string; url?: string }): void {
+    if (!social.icon || social.icon === 'globe') {
+      const detected = resolveSocialIconKey(null, social.label, social.url);
+      if (detected !== 'globe') {
+        social.icon = detected;
+      }
+    }
+  }
+
   addSocialRow(): void {
-    this.model.socials.push({ label: '', url: '' });
+    this.model.socials.push({ label: '', url: '', icon: 'instagram' });
+  }
+
+  addPresetSocial(label: string, url: string, icon: string): void {
+    this.model.socials.push({ label, url, icon });
   }
 
   removeSocialRow(index: number): void {
     this.model.socials.splice(index, 1);
+    if (this.openSocialIconPickerIndex() === index) {
+      this.openSocialIconPickerIndex.set(null);
+    }
+  }
+
+  @HostListener('document:click')
+  onDocumentClick(): void {
+    if (this.openSocialIconPickerIndex() !== null) {
+      this.openSocialIconPickerIndex.set(null);
+    }
+  }
+
+  @HostListener('document:keydown.escape')
+  onDocumentEscape(): void {
+    if (this.openSocialIconPickerIndex() !== null) {
+      this.openSocialIconPickerIndex.set(null);
+    }
   }
 
   saveSettings(): void {

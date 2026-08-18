@@ -41,11 +41,14 @@
         <!-- Socials -->
         <div>
           <h5 class="footer-heading">Follow us</h5>
-          <ul class="flex flex-col gap-1">
+          <ul class="flex flex-col gap-2">
             @for (social of site.socials; track social.label) {
             <li>
               <a [href]="social.url" target="_blank" rel="noopener noreferrer"
-                class="text-sm text-sand-300 transition-colors hover:text-gold-200">{{ social.label }}</a>
+                class="text-sm text-sand-300 transition-colors hover:text-gold-200 inline-flex items-center gap-2 group">
+                <wh-social-icon [name]="social.icon" [label]="social.label" [url]="social.url" [size]="15" class="w-3.5 h-3.5 text-sand-400 group-hover:text-gold-300 transition-colors" />
+                <span>{{ social.label }}</span>
+              </a>
             </li>
             }
           </ul>

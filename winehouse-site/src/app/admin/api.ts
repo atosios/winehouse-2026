@@ -480,7 +480,7 @@ export interface SiteSettings {
     mapUrl: string;
   };
   hours: Array<{ days: string; time: string }>;
-  socials: Array<{ label: string; url: string }>;
+  socials: Array<{ label: string; url: string; icon?: string }>;
   nav: Array<{ label: string; path: string }>;
   colors: SiteColors;
   homepage_content?: HomepageContent;

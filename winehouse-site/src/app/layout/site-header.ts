@@ -5,10 +5,11 @@ import { SiteSettingsService } from '../core/site-settings.service';
 import { I18nService } from '../core/i18n.service';
 import { CartService } from '../core/cart.service';
 import { WhLogo } from '../shared/brand-logo';
+import { WhSocialIcon } from '../shared/social-icon';
 
 @Component({
   selector: 'wh-header',
-  imports: [RouterLink, RouterLinkActive, WhLogo],
+  imports: [RouterLink, RouterLinkActive, WhLogo, WhSocialIcon],
   templateUrl: './site-header.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

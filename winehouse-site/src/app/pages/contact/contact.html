@@ -191,9 +191,12 @@
         <p class="font-mono text-[11px] uppercase tracking-widest text-white/70 font-semibold mb-2">Connect &amp; Follow</p>
         <div class="flex flex-col gap-1 font-mono text-xs uppercase text-white font-bold">
           @for (soc of site.socials; track soc.label) {
-            <a [href]="soc.url" target="_blank" rel="noopener noreferrer" class="hover:underline flex items-center justify-between border-b border-white/15 py-1">
-              <span>{{ soc.label }}</span>
-              <span>↗</span>
+            <a [href]="soc.url" target="_blank" rel="noopener noreferrer" class="hover:underline flex items-center justify-between border-b border-white/15 py-1.5 group">
+              <span class="flex items-center gap-2">
+                <wh-social-icon [name]="soc.icon" [label]="soc.label" [url]="soc.url" [size]="14" class="w-3.5 h-3.5 opacity-80 group-hover:opacity-100 group-hover:text-gold-200 transition-colors" />
+                <span>{{ soc.label }}</span>
+              </span>
+              <span class="text-white/60 group-hover:text-white group-hover:translate-x-0.5 transition-all">↗</span>
             </a>
           }
         </div>

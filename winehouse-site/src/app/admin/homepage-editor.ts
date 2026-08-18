@@ -741,7 +741,20 @@ export interface PageLibraryCard {
               <div class="md:col-span-2">
                 <wh-i18n-input label="Subtext" [(value)]="content.contact.subtext" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
               </div>
-              <wh-i18n-input label="Dispatch Kraft Note" [(value)]="content.contact.card_kraft_note" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
+              <div class="md:col-span-2">
+                <wh-i18n-input label="Dispatch Kraft Note" [(value)]="content.contact.card_kraft_note" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
+              </div>
+            </div>
+
+            <!-- Centralized Contact & Socials Notice -->
+            <div class="mt-5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-start gap-3 text-xs text-slate-600">
+              <div class="w-5 h-5 rounded-md bg-wine-100 text-wine-800 flex items-center justify-center font-bold text-2xs shrink-0 mt-0.5">ℹ</div>
+              <div class="space-y-1">
+                <span class="font-bold text-slate-900 block">Direct Lines &amp; Social Channels</span>
+                <p class="text-2xs text-slate-500 leading-relaxed">
+                  The contact card's email, phone, and social channels (Instagram, Facebook, Substack, etc.) are dynamically loaded from your global configuration in <a routerLink="/admin/settings" class="text-wine-700 font-bold hover:underline">Admin Settings &gt; Contact &amp; Socials</a>. No per-page social link editing is required.
+                </p>
+              </div>
             </div>
           </div>
         </div>

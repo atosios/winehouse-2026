@@ -1,163 +1,206 @@
-<header class="fixed top-0 left-0 right-0 z-50 transition-all duration-300">
-  <div class="shell flex items-center justify-between gap-6 py-4">
+<header
+  class="header-root"
+  [class.text-white]="isDarkSection()"
+  [class.text-[var(--color-foreground)]]="!isDarkSection()"
+>
+  <div class="header-container">
+    <div class="header-wide-layout">
 
-    <!-- Brand mark -->
-    <a routerLink="/" (click)="closeMenu()" class="group flex items-center gap-3" [attr.aria-label]="site.name + ' — home'">
-      <wh-logo
-        [variant]="isDarkSection() ? 'white-badge' : 'dark-badge'"
-        [size]="34"
-        class="transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105"
-      />
-    </a>
-
-    <!-- Desktop nav -->
-    <nav class="hidden items-center gap-8 md:flex" aria-label="Main">
-      @for (item of site.nav; track item.path) {
-        <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.path === '/' }"
-           class="nav-link font-medium transition-colors duration-300"
-           [class.text-white]="isDarkSection()"
-           [class.hover:text-white]="isDarkSection()"
-           [class.text-[var(--color-foreground)]]="!isDarkSection()"
-           [class.hover:text-[var(--color-primary)]]="!isDarkSection()">
-          {{ item.label }}
+      <!-- Column 1 (Left / Gutter on wide screen): Brand mark -->
+      <div class="header-col-left">
+        <a routerLink="/" (click)="closeMenu()" class="group flex items-center gap-3" [attr.aria-label]="site.name + ' — home'">
+          <wh-logo
+            [variant]="isDarkSection() ? 'white-badge' : 'dark-badge'"
+            [size]="34"
+            class="transition-transform duration-300 group-hover:-rotate-3 group-hover:scale-105"
+          />
         </a>
-      }
-
-      <!-- Minimalist Editorial Language Switcher -->
-      <div
-        class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-2xs font-mono font-bold tracking-widest uppercase transition-all duration-300 border backdrop-blur-sm shadow-2xs select-none"
-        [class.border-white/20]="isDarkSection()"
-        [class.bg-white/10]="isDarkSection()"
-        [class.text-white]="isDarkSection()"
-        [class.border-[var(--color-foreground)]/20]="!isDarkSection()"
-        [class.bg-[var(--color-foreground)]/5]="!isDarkSection()"
-        [class.text-[var(--color-foreground)]]="!isDarkSection()"
-      >
-        <button
-          type="button"
-          (click)="i18n.setLang('en')"
-          class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
-          [class.opacity-100]="i18n.currentLang() === 'en'"
-          [class.opacity-35]="i18n.currentLang() !== 'en'"
-          title="English"
-        >
-          EN
-        </button>
-        <span class="opacity-25 text-[10px] font-normal">/</span>
-        <button
-          type="button"
-          (click)="i18n.setLang('el')"
-          class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
-          [class.opacity-100]="i18n.currentLang() === 'el'"
-          [class.opacity-35]="i18n.currentLang() !== 'el'"
-          title="Ελληνικά"
-        >
-          GR
-        </button>
       </div>
 
-      <!-- Cellar Cart Button -->
-      <button
-        type="button"
-        (click)="cart.openDrawer()"
-        class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold tracking-wider uppercase transition-all duration-300 border shadow-2xs cursor-pointer select-none group"
-        [class.border-white/30]="isDarkSection()"
-        [class.bg-white/15]="isDarkSection()"
-        [class.text-white]="isDarkSection()"
-        [class.hover:bg-white/25]="isDarkSection()"
-        [class.border-[var(--color-foreground)]]="!isDarkSection()"
-        [class.bg-[var(--color-foreground)]]="!isDarkSection()"
-        [class.text-[var(--color-paper-light)]]="!isDarkSection()"
-        [class.hover:bg-[var(--color-primary)]]="!isDarkSection()"
-        title="Open Cart"
-      >
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
-          <circle cx="8" cy="21" r="1"/>
-          <circle cx="19" cy="21" r="1"/>
-          <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
-        </svg>
-        <span>Cart</span>
-        @if (cart.totalCount() > 0) {
-          <span class="px-1.5 py-0.2 rounded-full bg-[var(--color-primary)] text-white text-[10px] font-mono font-extrabold animate-pulse">
-            {{ cart.totalCount() }}
-          </span>
-        }
-      </button>
-    </nav>
-
-    <!-- Mobile menu toggle & Language indicator -->
-    <div class="flex items-center gap-2 md:hidden">
-      <!-- Mobile Cart Icon Button -->
-      <button
-        type="button"
-        (click)="cart.openDrawer()"
-        class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-2xs font-mono font-bold tracking-wider uppercase transition-colors select-none cursor-pointer"
-        [class.border]="true"
-        [class.border-white/30]="isDarkSection()"
-        [class.bg-white/15]="isDarkSection()"
-        [class.text-white]="isDarkSection()"
-        [class.border-[var(--color-foreground)]]="!isDarkSection()"
-        [class.bg-[var(--color-foreground)]]="!isDarkSection()"
-        [class.text-white]="!isDarkSection()"
-        aria-label="Open Cart"
-      >
-        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
-          <circle cx="8" cy="21" r="1"/>
-          <circle cx="19" cy="21" r="1"/>
-          <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
-        </svg>
-        @if (cart.totalCount() > 0) {
-          <span class="px-1 bg-[var(--color-primary)] text-white text-[9px] font-extrabold rounded-full">
-            {{ cart.totalCount() }}
-          </span>
-        }
-      </button>
-      <div
-        class="flex items-center gap-1 px-2.5 py-1 rounded-full text-2xs font-mono font-bold tracking-wider uppercase transition-colors select-none"
-        [class.border]="true"
-        [class.border-white/20]="isDarkSection()"
-        [class.bg-white/10]="isDarkSection()"
-        [class.text-white]="isDarkSection()"
-        [class.border-[var(--color-foreground)]/20]="!isDarkSection()"
-        [class.bg-[var(--color-foreground)]/5]="!isDarkSection()"
-        [class.text-[var(--color-foreground)]]="!isDarkSection()"
-      >
-        <button
-          type="button"
-          (click)="i18n.setLang('en')"
-          class="transition-opacity duration-200"
-          [class.opacity-100]="i18n.currentLang() === 'en'"
-          [class.opacity-35]="i18n.currentLang() !== 'en'"
-        >
-          EN
-        </button>
-        <span class="opacity-25 text-[10px] font-normal">/</span>
-        <button
-          type="button"
-          (click)="i18n.setLang('el')"
-          class="transition-opacity duration-200"
-          [class.opacity-100]="i18n.currentLang() === 'el'"
-          [class.opacity-35]="i18n.currentLang() !== 'el'"
-        >
-          GR
-        </button>
-      </div>
-
-      <button type="button" class="-mr-2 p-2 transition-colors duration-300"
-              [class.text-white]="isDarkSection()"
-              [class.hover:text-white]="isDarkSection()"
-              [class.text-[var(--color-foreground)]]="!isDarkSection()"
-              [class.hover:text-[var(--color-primary)]]="!isDarkSection()"
-              (click)="toggleMenu()"
-              [attr.aria-expanded]="menuOpen()" aria-controls="mobile-nav" aria-label="Toggle menu">
-        <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
-          @if (menuOpen()) {
-            <path d="M5 5 Q 13 14 21 21 M21 5 Q 13 14 5 21" />
-          } @else {
-            <path d="M3 7 Q 13 5.5 23 7 M3 13.5 Q 13 12 23 13.5 M3 20 Q 13 18.5 23 20" />
+      <!-- Column 2 (Center / Main Shell Content on wide screen): Desktop nav & Mobile Bar -->
+      <div class="header-col-center">
+        <!-- Desktop nav items -->
+        <nav class="hidden items-center gap-7 lg:gap-8 md:flex" aria-label="Main">
+          @for (item of site.nav; track item.path) {
+            <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.path === '/' }"
+               class="nav-link font-medium transition-colors duration-300 whitespace-nowrap"
+               [class.text-white]="isDarkSection()"
+               [class.hover:text-white]="isDarkSection()"
+               [class.text-[var(--color-foreground)]]="!isDarkSection()"
+               [class.hover:text-[var(--color-primary)]]="!isDarkSection()">
+              {{ item.label }}
+            </a>
           }
-        </svg>
-      </button>
+
+          <!-- Minimalist Editorial Language Switcher -->
+          <div
+            class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-2xs font-mono font-bold tracking-widest uppercase transition-all duration-300 border backdrop-blur-sm shadow-2xs select-none"
+            [class.border-white/20]="isDarkSection()"
+            [class.bg-white/10]="isDarkSection()"
+            [class.text-white]="isDarkSection()"
+            [class.border-[var(--color-foreground)]/20]="!isDarkSection()"
+            [class.bg-[var(--color-foreground)]/5]="!isDarkSection()"
+            [class.text-[var(--color-foreground)]]="!isDarkSection()"
+          >
+            <button
+              type="button"
+              (click)="i18n.setLang('en')"
+              class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
+              [class.opacity-100]="i18n.currentLang() === 'en'"
+              [class.opacity-35]="i18n.currentLang() !== 'en'"
+              title="English"
+            >
+              EN
+            </button>
+            <span class="opacity-25 text-[10px] font-normal">/</span>
+            <button
+              type="button"
+              (click)="i18n.setLang('el')"
+              class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
+              [class.opacity-100]="i18n.currentLang() === 'el'"
+              [class.opacity-35]="i18n.currentLang() !== 'el'"
+              title="Ελληνικά"
+            >
+              GR
+            </button>
+          </div>
+
+          <!-- Cellar Cart Button (Standard Desktop for screens < 1360px) -->
+          <button
+            type="button"
+            (click)="cart.openDrawer()"
+            class="inline-flex min-[1360px]:hidden items-center gap-2 px-3.5 py-1.5 rounded-full text-xs font-mono font-bold tracking-wider uppercase transition-all duration-300 border shadow-2xs cursor-pointer select-none group"
+            [class.border-white/30]="isDarkSection()"
+            [class.bg-white/15]="isDarkSection()"
+            [class.text-white]="isDarkSection()"
+            [class.hover:bg-white/25]="isDarkSection()"
+            [class.border-[var(--color-foreground)]]="!isDarkSection()"
+            [class.bg-[var(--color-foreground)]]="!isDarkSection()"
+            [class.text-[var(--color-paper-light)]]="!isDarkSection()"
+            [class.hover:bg-[var(--color-primary)]]="!isDarkSection()"
+            title="Open Cart"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+              <circle cx="8" cy="21" r="1"/>
+              <circle cx="19" cy="21" r="1"/>
+              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+            </svg>
+            <span>Cart</span>
+            @if (cart.totalCount() > 0) {
+              <span class="px-1.5 py-0.2 rounded-full bg-[var(--color-primary)] text-white text-[10px] font-mono font-extrabold animate-pulse">
+                {{ cart.totalCount() }}
+              </span>
+            }
+          </button>
+        </nav>
+
+        <!-- Mobile menu toggle & Language indicator (< 768px) -->
+        <div class="flex items-center gap-2 md:hidden">
+          <!-- Mobile Cart Icon Button -->
+          <button
+            type="button"
+            (click)="cart.openDrawer()"
+            class="flex items-center gap-1.5 px-2.5 py-1 rounded-full text-2xs font-mono font-bold tracking-wider uppercase transition-colors select-none cursor-pointer"
+            [class.border]="true"
+            [class.border-white/30]="isDarkSection()"
+            [class.bg-white/15]="isDarkSection()"
+            [class.text-white]="isDarkSection()"
+            [class.border-[var(--color-foreground)]]="!isDarkSection()"
+            [class.bg-[var(--color-foreground)]]="!isDarkSection()"
+            [class.text-white]="!isDarkSection()"
+            aria-label="Open Cart"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+              <circle cx="8" cy="21" r="1"/>
+              <circle cx="19" cy="21" r="1"/>
+              <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+            </svg>
+            @if (cart.totalCount() > 0) {
+              <span class="px-1 bg-[var(--color-primary)] text-white text-[9px] font-extrabold rounded-full">
+                {{ cart.totalCount() }}
+              </span>
+            }
+          </button>
+          
+          <div
+            class="flex items-center gap-1 px-2.5 py-1 rounded-full text-2xs font-mono font-bold tracking-wider uppercase transition-colors select-none"
+            [class.border]="true"
+            [class.border-white/20]="isDarkSection()"
+            [class.bg-white/10]="isDarkSection()"
+            [class.text-white]="isDarkSection()"
+            [class.border-[var(--color-foreground)]/20]="!isDarkSection()"
+            [class.bg-[var(--color-foreground)]/5]="!isDarkSection()"
+            [class.text-[var(--color-foreground)]]="!isDarkSection()"
+          >
+            <button
+              type="button"
+              (click)="i18n.setLang('en')"
+              class="transition-opacity duration-200"
+              [class.opacity-100]="i18n.currentLang() === 'en'"
+              [class.opacity-35]="i18n.currentLang() !== 'en'"
+            >
+              EN
+            </button>
+            <span class="opacity-25 text-[10px] font-normal">/</span>
+            <button
+              type="button"
+              (click)="i18n.setLang('el')"
+              class="transition-opacity duration-200"
+              [class.opacity-100]="i18n.currentLang() === 'el'"
+              [class.opacity-35]="i18n.currentLang() !== 'el'"
+            >
+              GR
+            </button>
+          </div>
+
+          <button type="button" class="-mr-2 p-2 transition-colors duration-300"
+                  [class.text-white]="isDarkSection()"
+                  [class.hover:text-white]="isDarkSection()"
+                  [class.text-[var(--color-foreground)]]="!isDarkSection()"
+                  [class.hover:text-[var(--color-primary)]]="!isDarkSection()"
+                  (click)="toggleMenu()"
+                  [attr.aria-expanded]="menuOpen()" aria-controls="mobile-nav" aria-label="Toggle menu">
+            <svg width="26" height="26" viewBox="0 0 26 26" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" aria-hidden="true">
+              @if (menuOpen()) {
+                <path d="M5 5 Q 13 14 21 21 M21 5 Q 13 14 5 21" />
+              } @else {
+                <path d="M3 7 Q 13 5.5 23 7 M3 13.5 Q 13 12 23 13.5 M3 20 Q 13 18.5 23 20" />
+              }
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Column 3 (Right / Out of End Main Page Line on wide screens >= 1360px): Dedicated Cart Button -->
+      <div class="header-col-right max-[1359px]:hidden">
+        <button
+          type="button"
+          (click)="cart.openDrawer()"
+          class="inline-flex items-center gap-2 px-4 py-2 rounded-full text-xs font-mono font-bold tracking-wider uppercase transition-all duration-300 border shadow-2xs cursor-pointer select-none group"
+          [class.border-white/30]="isDarkSection()"
+          [class.bg-white/15]="isDarkSection()"
+          [class.text-white]="isDarkSection()"
+          [class.hover:bg-white/25]="isDarkSection()"
+          [class.border-[var(--color-foreground)]]="!isDarkSection()"
+          [class.bg-[var(--color-foreground)]]="!isDarkSection()"
+          [class.text-[var(--color-paper-light)]]="!isDarkSection()"
+          [class.hover:bg-[var(--color-primary)]]="!isDarkSection()"
+          title="Open Cart"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
+            <circle cx="8" cy="21" r="1"/>
+            <circle cx="19" cy="21" r="1"/>
+            <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
+          </svg>
+          <span>Cart</span>
+          @if (cart.totalCount() > 0) {
+            <span class="px-1.5 py-0.2 rounded-full bg-[var(--color-primary)] text-white text-[10px] font-mono font-extrabold animate-pulse">
+              {{ cart.totalCount() }}
+            </span>
+          }
+        </button>
+      </div>
+
     </div>
   </div>
 
@@ -168,6 +211,17 @@
         @for (item of site.nav; track item.path) {
           <a [routerLink]="item.path" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: item.path === '/' }"
              (click)="closeMenu()" class="nav-link py-2 text-base text-[var(--color-foreground)]">{{ item.label }}</a>
+        }
+        @if (site.socials && site.socials.length > 0) {
+          <div class="pt-4 mt-2 border-t border-[var(--color-foreground)]/10 flex flex-wrap items-center gap-4">
+            @for (soc of site.socials; track soc.label) {
+              <a [href]="soc.url" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 font-mono text-2xs uppercase tracking-wider font-semibold text-[var(--color-foreground)]/70 hover:text-[var(--color-primary)] transition-colors">
+                <wh-social-icon [name]="soc.icon" [label]="soc.label" [url]="soc.url" [size]="14" class="w-3.5 h-3.5" />
+                <span>{{ soc.label }}</span>
+                <span>↗</span>
+              </a>
+            }
+          </div>
         }
       </div>
     </nav>

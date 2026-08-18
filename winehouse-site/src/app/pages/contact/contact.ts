@@ -4,12 +4,13 @@ import { ActivatedRoute } from '@angular/router';
 import { SiteSettingsService } from '../../core/site-settings.service';
 import { I18nService, I18nText } from '../../core/i18n.service';
 import { WhReveal } from '../../shared/reveal';
+import { WhSocialIcon } from '../../shared/social-icon';
 import { AdminApi } from '../../admin/api';
 import { SeoService } from '../../core/seo.service';
 
 @Component({
   selector: 'wh-contact',
-  imports: [FormsModule, WhReveal],
+  imports: [FormsModule, WhReveal, WhSocialIcon],
   templateUrl: './contact.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

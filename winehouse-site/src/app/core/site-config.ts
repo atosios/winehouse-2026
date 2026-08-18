@@ -37,8 +37,8 @@ export const SITE = {
 
   /* Social links — remove a line to hide it ---------------------------------- */
   socials: [
-    { label: 'Instagram', url: 'https://instagram.com/thewinehouse' },
-    { label: 'Facebook', url: 'https://facebook.com/thewinehouse' },
+    { label: 'Instagram', url: 'https://instagram.com/thewinehouse', icon: 'instagram' },
+    { label: 'Facebook', url: 'https://facebook.com/thewinehouse', icon: 'facebook' },
   ],
 
   /* Main navigation (header) -------------------------------------------------- */

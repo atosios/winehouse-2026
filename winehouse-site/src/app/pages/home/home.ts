@@ -5,13 +5,14 @@ import { SiteSettingsService } from '../../core/site-settings.service';
 import { I18nService, I18nText, isExternalUrl } from '../../core/i18n.service';
 import { WhReveal } from '../../shared/reveal';
 import { WhLogo } from '../../shared/brand-logo';
+import { WhSocialIcon } from '../../shared/social-icon';
 import { resolveMediaUrl } from '../../core/media.utils';
 import { AdminApi } from '../../admin/api';
 import { SeoService } from '../../core/seo.service';
 
 @Component({
   selector: 'wh-home',
-  imports: [RouterLink, FormsModule, WhReveal, WhLogo],
+  imports: [RouterLink, FormsModule, WhReveal, WhLogo, WhSocialIcon],
   templateUrl: './home.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -39,7 +40,7 @@ export class Home implements OnInit, AfterViewInit {
       image: seoConf.og_image,
       type: 'website',
     });
-    this.seo.setOrganizationStructuredData();
+    this.seo.setOrganizationStructuredData(this.settingsService.settings());
   }
 
   readonly heroFallbackImage = computed(() => {

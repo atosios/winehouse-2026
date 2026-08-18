@@ -21,11 +21,7 @@ import { AdminApi } from './api';
       <aside class="admin-sidebar" [class.open]="sidebarOpen()">
         <!-- Brand Header -->
         <a routerLink="/" class="admin-sidebar-logo" title="View website">
-          <div class="flex items-center gap-2.5">
-            <img src="/logo_white_mark.png" alt="The Winehouse" class="h-7 w-auto" />
-            <span class="font-semibold text-sm tracking-tight text-white">The Winehouse</span>
-          </div>
-          <span class="admin-sidebar-badge">Admin</span>
+          <img src="/logo_badge.png" alt="The Winehouse" class="h-9 w-auto rounded-[6px] object-contain shadow-xs hover:scale-105 transition-transform" />
         </a>
 
         <!-- Commerce Section -->

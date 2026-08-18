@@ -325,9 +325,9 @@
                 </span>
               </div>
 
-              <!-- Tasting Note Pull-Quote -->
+              <!-- Tasting Note Pull-Quote (Ellipsized after 8 lines) -->
               @if (bottle.tasting_note) {
-                <p class="font-sans text-xs leading-relaxed text-[var(--color-foreground)]/75 italic border-l border-[var(--color-foreground)]/30 pl-3 py-0.5 mt-2.5">
+                <p class="font-sans text-xs leading-relaxed text-[var(--color-foreground)]/75 italic border-l border-[var(--color-foreground)]/30 pl-3 py-0.5 mt-2.5 line-clamp-8">
                   “{{ t(bottle.tasting_note) }}”
                 </p>
               }
@@ -548,7 +548,7 @@
                 <span class="font-mono text-[10px] uppercase font-bold tracking-wider text-[var(--color-foreground)]/60 block">
                   SOMMELIER PROFILE:
                 </span>
-                <p class="font-sans text-xs sm:text-sm leading-relaxed text-[var(--color-foreground)]/85 italic bg-stone-50 p-3.5 border-l-2 border-[var(--color-primary)]">
+                <p class="font-sans text-xs sm:text-sm leading-relaxed text-[var(--color-foreground)]/85 italic bg-stone-50 p-3.5 border-l-2 border-[var(--color-primary)] line-clamp-8">
                   “{{ t(b.tasting_note) }}”
                 </p>
               </div>

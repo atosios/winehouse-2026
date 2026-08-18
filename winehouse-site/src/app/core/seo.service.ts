@@ -481,28 +481,30 @@ export class SeoService {
   /**
    * Sets enriched Winery / LocalBusiness structured data on general pages.
    */
-  setOrganizationStructuredData(): void {
+  setOrganizationStructuredData(siteSettings?: SiteSettings | null): void {
     const origin = this.getSiteOrigin();
+    const settings = siteSettings || null;
+    const sameAsList = settings?.socials?.length
+      ? settings.socials.map((s) => s.url).filter(Boolean)
+      : SITE.socials.map((s) => s.url).filter(Boolean);
+
     const schema = {
       '@context': 'https://schema.org',
       '@type': 'Winery',
-      name: SITE.name,
+      name: settings?.name || SITE.name,
       url: origin,
       logo: `${origin}/logo_default.png`,
       image: `${origin}/hero_cellar.png`,
-      description: SITE.description,
+      description: settings?.description || SITE.description,
       priceRange: '€€€',
       currenciesAccepted: 'EUR',
       paymentAccepted: 'Cash, Credit Card, Bank Transfer',
-      sameAs: [
-        'https://instagram.com/thewinehouse',
-        'https://facebook.com/thewinehouse',
-      ],
+      sameAs: sameAsList,
       address: {
         '@type': 'PostalAddress',
-        addressLocality: SITE.contact.address.city || 'Athens',
-        postalCode: SITE.contact.address.postalCode || '10557',
-        streetAddress: SITE.contact.address.street || 'Independent Wine Atelier',
+        addressLocality: settings?.contact?.address?.city || SITE.contact.address.city || 'Athens',
+        postalCode: settings?.contact?.address?.postalCode || SITE.contact.address.postalCode || '10557',
+        streetAddress: settings?.contact?.address?.street || SITE.contact.address.street || 'Independent Wine Atelier',
         addressCountry: 'GR',
       },
       geo: {
@@ -524,8 +526,8 @@ export class SeoService {
           closes: '23:00',
         },
       ],
-      telephone: SITE.contact.phone,
-      email: SITE.contact.email,
+      telephone: settings?.contact?.phone || SITE.contact.phone,
+      email: settings?.contact?.email || SITE.contact.email,
     };
 
     this.setStructuredData(schema, 'organization-schema-jsonld');
