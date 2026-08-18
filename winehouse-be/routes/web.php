@@ -10,6 +10,8 @@ Route::get('/', function () {
     ]);
 });
 
+Route::get('/sitemap.xml', [\App\Http\Controllers\SitemapController::class, 'index']);
+
 /**
  * Direct storage media file server.
  * Ensures media files (images, videos, documents) work seamlessly on shared hosting (StackCP/cPanel)

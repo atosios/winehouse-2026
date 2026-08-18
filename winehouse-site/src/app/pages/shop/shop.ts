@@ -1,11 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit, OnDestroy } from '@angular/core';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { Subscription } from 'rxjs';
 import { SiteSettingsService } from '../../core/site-settings.service';
 import { I18nService, I18nText } from '../../core/i18n.service';
 import { CartService, CartItemProduct } from '../../core/cart.service';
 import { WhReveal } from '../../shared/reveal';
 import { AdminApi, Product, StoreCategory } from '../../admin/api';
 import { resolveMediaUrl } from '../../core/media.utils';
+import { SeoService } from '../../core/seo.service';
 
 @Component({
   selector: 'wh-shop',
@@ -13,11 +15,16 @@ import { resolveMediaUrl } from '../../core/media.utils';
   templateUrl: './shop.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Shop implements OnInit {
+export class Shop implements OnInit, OnDestroy {
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   private settingsService = inject(SiteSettingsService);
   private api = inject(AdminApi);
   private i18n = inject(I18nService);
+  private seo = inject(SeoService);
   readonly cart = inject(CartService);
+
+  private querySub?: Subscription;
 
   readonly dynamicProducts = signal<Product[]>([]);
   readonly productsLoaded = signal<boolean>(false);
@@ -49,6 +56,34 @@ export class Shop implements OnInit {
   }
 
   ngOnInit(): void {
+    this.seo.setMeta({
+      title: 'e-Shop & Cellar Reserves',
+      description:
+        'Explore curated artisanal, volcanic, and ancestral Greek wines. Limited allocations direct from private cellar ledgers.',
+      keywords: 'wine shop, greek wine, volcanic wine, natural wine, buy wine, the winehouse',
+      type: 'website',
+    });
+    this.seo.setBreadcrumbStructuredData([
+      { name: 'Home', url: this.seo.getSiteOrigin() },
+      { name: 'e-Shop', url: `${this.seo.getSiteOrigin()}/shop` },
+    ]);
+
+    // Restore filters from URL Query Params so back navigation keeps state
+    this.querySub = this.route.queryParamMap.subscribe((params) => {
+      const cat = params.get('category');
+      const search = params.get('search');
+      const sort = params.get('sort');
+      if (cat) {
+        this.activeCategory.set(cat);
+      }
+      if (search !== null && search !== undefined) {
+        this.searchQuery.set(search);
+      }
+      if (sort) {
+        this.selectedSort.set(sort);
+      }
+    });
+
     this.api.getPublicProducts().subscribe({
       next: (products) => {
         this.dynamicProducts.set(products || []);
@@ -57,6 +92,29 @@ export class Shop implements OnInit {
       error: () => {
         this.productsLoaded.set(true);
       },
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.querySub?.unsubscribe();
+  }
+
+  private updateUrlParams(): void {
+    const category = this.activeCategory();
+    const search = this.searchQuery().trim();
+    const sort = this.selectedSort();
+
+    const queryParams: Record<string, string | null> = {
+      category: category && category !== 'ALL' ? category : null,
+      search: search ? search : null,
+      sort: sort && sort !== 'default' ? sort : null,
+    };
+
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams,
+      queryParamsHandling: 'merge',
+      replaceUrl: true,
     });
   }
 
@@ -90,6 +148,7 @@ export class Shop implements OnInit {
     return dyn.map((p) => ({
       id: p.id,
       name: p.name,
+      slug: p.slug,
       vintage: p.vintage,
       region: p.region,
       varietal: p.varietal,
@@ -183,20 +242,24 @@ export class Shop implements OnInit {
 
   setCategory(key: string): void {
     this.activeCategory.set(key);
+    this.updateUrlParams();
   }
 
   setSearchQuery(event: Event): void {
     const val = (event.target as HTMLInputElement)?.value ?? '';
     this.searchQuery.set(val);
+    this.updateUrlParams();
   }
 
   clearSearch(): void {
     this.searchQuery.set('');
+    this.updateUrlParams();
   }
 
   setSort(event: Event): void {
     const val = (event.target as HTMLSelectElement)?.value ?? 'default';
     this.selectedSort.set(val);
+    this.updateUrlParams();
   }
 
   setGridLayout(layout: '3-col' | '4-col'): void {
@@ -207,6 +270,7 @@ export class Shop implements OnInit {
     this.activeCategory.set('ALL');
     this.searchQuery.set('');
     this.selectedSort.set('default');
+    this.updateUrlParams();
   }
 
   hasStatusLabel(label?: I18nText | string | null): boolean {
@@ -301,4 +365,3 @@ export class Shop implements OnInit {
     }
   }
 }
-

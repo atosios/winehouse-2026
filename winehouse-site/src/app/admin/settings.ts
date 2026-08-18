@@ -56,32 +56,56 @@ import {
 
     <!-- Tab: General (Brand & Identity) -->
     @if (activeTab() === 'general') {
-      <div class="w-full space-y-6">
-        <div class="admin-card space-y-5">
-          <h2 class="text-base font-bold text-slate-900 tracking-tight mb-2">Brand Identity</h2>
-
+      <div class="space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <!-- Section 1: Brand Identity -->
           <div>
-            <label class="admin-field-label" for="site-name">Site / Business Name</label>
-            <input id="site-name" class="admin-field-input" name="name" [(ngModel)]="model.name" required />
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Brand &amp; Identity</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Define your estate name, motto, and legal entity for headers and footers.</p>
+            </div>
+
+            <div class="admin-card space-y-4">
+              <div>
+                <label class="admin-field-label" for="site-name">Site / Business Name</label>
+                <input id="site-name" class="admin-field-input" name="name" [(ngModel)]="model.name" required />
+              </div>
+
+              <div>
+                <label class="admin-field-label" for="site-tagline">Tagline / Motto</label>
+                <input id="site-tagline" class="admin-field-input" name="tagline" [(ngModel)]="model.tagline" />
+              </div>
+
+              <div>
+                <label class="admin-field-label" for="site-legal">Footer Legal Entity / Copyright Name</label>
+                <input id="site-legal" class="admin-field-input" name="legalName" [(ngModel)]="model.legalName" />
+              </div>
+            </div>
           </div>
 
+          <!-- Section 2: SEO & Meta Description -->
           <div>
-            <label class="admin-field-label" for="site-tagline">Tagline / Motto</label>
-            <input id="site-tagline" class="admin-field-input" name="tagline" [(ngModel)]="model.tagline" />
-          </div>
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">SEO &amp; Story Intro</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Search engine meta descriptions and search summary previews.</p>
+            </div>
 
-          <div>
-            <label class="admin-field-label" for="site-desc">Meta Description (SEO & Story Intro)</label>
-            <textarea id="site-desc" class="admin-field-input min-h-24" name="description" [(ngModel)]="model.description"></textarea>
-          </div>
+            <div class="admin-card space-y-4">
+              <div>
+                <label class="admin-field-label" for="site-desc">Meta Description (SEO)</label>
+                <textarea id="site-desc" class="admin-field-input min-h-28" name="description" [(ngModel)]="model.description" placeholder="Brief summary of the atelier..."></textarea>
+              </div>
 
-          <div>
-            <label class="admin-field-label" for="site-legal">Footer Legal Entity / Copyright Name</label>
-            <input id="site-legal" class="admin-field-input" name="legalName" [(ngModel)]="model.legalName" />
+              <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl space-y-1">
+                <span class="text-[10px] font-mono font-bold uppercase text-slate-400 block">Search Snippet Preview</span>
+                <p class="text-xs font-bold text-blue-800 truncate">{{ model.name || 'The Winehouse' }} · Fine Greek Terroir</p>
+                <p class="text-2xs text-slate-500 line-clamp-2">{{ model.description || 'Curated natural wines and rare vintages from Greece.' }}</p>
+              </div>
+            </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-3 pt-2">
+        <div class="flex justify-end pt-2">
           <button type="button" class="btn btn-primary btn-sm" [disabled]="saving()" (click)="saveSettings()">
             {{ saving() ? 'Saving…' : 'Save Brand Settings' }}
           </button>
@@ -91,121 +115,148 @@ import {
 
     <!-- Tab: Contact & Opening Hours & Socials -->
     @if (activeTab() === 'contact') {
-      <div class="w-full space-y-6">
-        <!-- Contact Details -->
-        <div class="admin-card space-y-5">
-          <h2 class="text-base font-bold text-slate-900 tracking-tight mb-2">Contact Channels</h2>
-
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label class="admin-field-label" for="contact-email">Public Email</label>
-              <input id="contact-email" class="admin-field-input" type="email" name="email" [(ngModel)]="model.contact.email" />
+      <div class="space-y-6">
+        <!-- Row 1: Contact Coordinates & Physical Address (2 columns) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <!-- Section 1: Contact Coordinates -->
+          <div>
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Contact &amp; Communication</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Public concierge email, phone number, and Google Maps link.</p>
             </div>
-            <div>
-              <label class="admin-field-label" for="contact-phone">Phone Number</label>
-              <input id="contact-phone" class="admin-field-input" name="phone" [(ngModel)]="model.contact.phone" />
+
+            <div class="admin-card space-y-4">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="admin-field-label" for="contact-email">Public Email</label>
+                  <input id="contact-email" class="admin-field-input" type="email" name="email" [(ngModel)]="model.contact.email" />
+                </div>
+                <div>
+                  <label class="admin-field-label" for="contact-phone">Phone Number</label>
+                  <input id="contact-phone" class="admin-field-input" name="phone" [(ngModel)]="model.contact.phone" />
+                </div>
+              </div>
+
+              <div>
+                <label class="admin-field-label" for="contact-map">Google Maps Location Link</label>
+                <input id="contact-map" class="admin-field-input" name="mapUrl" [(ngModel)]="model.contact.mapUrl" placeholder="https://maps.google.com/..." />
+              </div>
             </div>
           </div>
 
-          <div class="border-t border-slate-100 pt-5 mt-5">
-            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Physical Address</h3>
-            <div class="grid gap-4 sm:grid-cols-2">
-              <div class="sm:col-span-2">
+          <!-- Section 2: Physical Estate Address -->
+          <div>
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Physical Estate Address</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Cellar street address, postal code, and country location.</p>
+            </div>
+
+            <div class="admin-card space-y-4">
+              <div>
                 <label class="admin-field-label" for="address-street">Street Address</label>
                 <input id="address-street" class="admin-field-input" name="street" [(ngModel)]="model.contact.address.street" />
               </div>
-              <div>
-                <label class="admin-field-label" for="address-city">City</label>
-                <input id="address-city" class="admin-field-input" name="city" [(ngModel)]="model.contact.address.city" />
-              </div>
-              <div>
-                <label class="admin-field-label" for="address-postal">Postal Code</label>
-                <input id="address-postal" class="admin-field-input" name="postalCode" [(ngModel)]="model.contact.address.postalCode" />
-              </div>
-              <div class="sm:col-span-2">
-                <label class="admin-field-label" for="address-country">Country</label>
-                <input id="address-country" class="admin-field-input" name="country" [(ngModel)]="model.contact.address.country" />
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5">
+                <div>
+                  <label class="admin-field-label" for="address-city">City</label>
+                  <input id="address-city" class="admin-field-input" name="city" [(ngModel)]="model.contact.address.city" />
+                </div>
+                <div>
+                  <label class="admin-field-label" for="address-postal">Postal Code</label>
+                  <input id="address-postal" class="admin-field-input" name="postalCode" [(ngModel)]="model.contact.address.postalCode" />
+                </div>
+                <div>
+                  <label class="admin-field-label" for="address-country">Country</label>
+                  <input id="address-country" class="admin-field-input" name="country" [(ngModel)]="model.contact.address.country" />
+                </div>
               </div>
             </div>
           </div>
-
-          <div class="border-t border-slate-100 pt-5 mt-5">
-            <label class="admin-field-label" for="contact-map">Google Maps Location Link</label>
-            <input id="contact-map" class="admin-field-input" name="mapUrl" [(ngModel)]="model.contact.mapUrl" placeholder="https://maps.google.com/..." />
-          </div>
         </div>
 
-        <!-- Opening Hours -->
-        <div class="admin-card">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-base font-bold text-slate-900 tracking-tight">Opening Hours</h2>
-            <button type="button" class="text-xs font-semibold text-slate-700 hover:text-slate-900 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 transition-colors" (click)="addHourRow()">
-              + Add Row
-            </button>
-          </div>
-
-          <div class="space-y-3">
-            @for (hour of model.hours; track $index) {
-              <div class="flex items-center gap-3">
-                <input
-                  class="admin-field-input flex-1"
-                  placeholder="e.g. Tuesday – Friday"
-                  [(ngModel)]="hour.days"
-                />
-                <input
-                  class="admin-field-input flex-1"
-                  placeholder="e.g. 12:00 – 22:00 or Closed"
-                  [(ngModel)]="hour.time"
-                />
-                <button
-                  type="button"
-                  class="w-8 h-8 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center shrink-0 transition-colors"
-                  (click)="removeHourRow($index)"
-                  title="Remove row"
-                >
-                  ✕
-                </button>
+        <!-- Row 2: Visiting Hours & Social Channels (2 columns) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start pt-2 border-t border-slate-200/80">
+          <!-- Section 3: Visiting Hours -->
+          <div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+              <div>
+                <h2 class="text-base font-bold text-slate-900 tracking-tight">Visiting &amp; Cellar Hours</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Operating schedule shown in footer and contact page.</p>
               </div>
-            }
-          </div>
-        </div>
+              <button type="button" class="btn btn-secondary btn-xs flex items-center gap-1 cursor-pointer" (click)="addHourRow()">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Add Row</span>
+              </button>
+            </div>
 
-        <!-- Social Media Links -->
-        <div class="admin-card">
-          <div class="flex items-center justify-between mb-4">
-            <h2 class="text-base font-bold text-slate-900 tracking-tight">Social Profiles</h2>
-            <button type="button" class="text-xs font-semibold text-slate-700 hover:text-slate-900 px-2.5 py-1 rounded-md bg-slate-100 hover:bg-slate-200 transition-colors" (click)="addSocialRow()">
-              + Add Profile
-            </button>
+            <div class="admin-card space-y-2.5">
+              @for (hour of model.hours; track $index) {
+                <div class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl">
+                  <input
+                    class="admin-field-input flex-1 text-xs"
+                    placeholder="e.g. Tuesday – Friday"
+                    [(ngModel)]="hour.days"
+                  />
+                  <input
+                    class="admin-field-input flex-1 text-xs"
+                    placeholder="e.g. 12:00 – 22:00"
+                    [(ngModel)]="hour.time"
+                  />
+                  <button
+                    type="button"
+                    class="w-6 h-6 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center shrink-0 transition-colors cursor-pointer text-xs"
+                    (click)="removeHourRow($index)"
+                    title="Remove row"
+                  >
+                    ✕
+                  </button>
+                </div>
+              }
+            </div>
           </div>
 
-          <div class="space-y-3">
-            @for (social of model.socials; track $index) {
-              <div class="flex items-center gap-3">
-                <input
-                  class="admin-field-input w-1/3"
-                  placeholder="e.g. Instagram"
-                  [(ngModel)]="social.label"
-                />
-                <input
-                  class="admin-field-input flex-1"
-                  placeholder="e.g. https://instagram.com/thewinehouse"
-                  [(ngModel)]="social.url"
-                />
-                <button
-                  type="button"
-                  class="w-8 h-8 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center shrink-0 transition-colors"
-                  (click)="removeSocialRow($index)"
-                  title="Remove profile"
-                >
-                  ✕
-                </button>
+          <!-- Section 4: Social Channels -->
+          <div>
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+              <div>
+                <h2 class="text-base font-bold text-slate-900 tracking-tight">Social Channels</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Links to Instagram, Facebook, Vivino, etc.</p>
               </div>
-            }
+              <button type="button" class="btn btn-secondary btn-xs flex items-center gap-1 cursor-pointer" (click)="addSocialRow()">
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <span>Add Link</span>
+              </button>
+            </div>
+
+            <div class="admin-card space-y-2.5">
+              @for (social of model.socials; track $index) {
+                <div class="flex items-center gap-2 p-2 bg-slate-50/80 border border-slate-200/80 rounded-xl">
+                  <input
+                    class="admin-field-input w-28 shrink-0 font-medium text-xs"
+                    placeholder="e.g. Instagram"
+                    [(ngModel)]="social.label"
+                  />
+                  <input
+                    class="admin-field-input flex-1 text-xs"
+                    placeholder="https://..."
+                    [(ngModel)]="social.url"
+                  />
+                  <button
+                    type="button"
+                    class="w-6 h-6 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center shrink-0 transition-colors cursor-pointer text-xs"
+                    (click)="removeSocialRow($index)"
+                    title="Remove profile"
+                  >
+                    ✕
+                  </button>
+                </div>
+              }
+            </div>
           </div>
         </div>
 
-        <div class="flex items-center gap-3 pt-2">
+        <div class="flex justify-end pt-2">
           <button type="button" class="btn btn-primary btn-sm" [disabled]="saving()" (click)="saveSettings()">
             {{ saving() ? 'Saving…' : 'Save Contact & Hours' }}
           </button>
@@ -215,586 +266,449 @@ import {
 
     <!-- Tab: Mail & Alerts -->
     @if (activeTab() === 'email') {
-      <div class="w-full space-y-6">
-        
-        <!-- Company Email Alerts Configuration -->
-        <div class="admin-card space-y-5">
+      <div class="space-y-6">
+        <!-- Row 1: Ingestion Alerts & Connectivity Diagnostic (2 columns) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <!-- Section 1: Alert Notifications -->
           <div>
-            <h2 class="text-base font-bold text-slate-900 tracking-tight mb-1">Company Ingestion &amp; Notifications</h2>
-            <p class="text-xs text-slate-500">
-              Configure which company inbox receives live alerts whenever guest inquiries or customer orders arrive.
-            </p>
-          </div>
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Alert Notifications</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Notification mailbox for inquiries and new order allocations.</p>
+            </div>
 
-          <div>
-            <label class="admin-field-label" for="company-notify-email">Company Notification Email Address</label>
-            <input
-              id="company-notify-email"
-              class="admin-field-input font-mono"
-              type="email"
-              placeholder="info@thewinehouse.gr"
-              [(ngModel)]="ensureMailConfig().company_notification_email"
-            />
-            <span class="text-2xs text-slate-400 mt-1 block">
-              Direct destination for all cellar orders and website inquiries.
-            </span>
-          </div>
-
-          <div class="space-y-3 pt-2">
-            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer">
-              <input
-                type="checkbox"
-                class="mt-0.5 rounded border-slate-300 text-wine-700 focus:ring-wine-500"
-                [(ngModel)]="ensureMailConfig().notify_on_new_message"
-              />
+            <div class="admin-card space-y-3.5">
               <div>
-                <span class="text-xs font-bold text-slate-900 block">Contact &amp; Tasting Inquiries Alert</span>
-                <span class="text-2xs text-slate-500">
-                  Immediately forward all website contact form submissions and sommelier booking requests to the company inbox.
-                </span>
+                <label class="admin-field-label" for="company-notify-email">Notification Recipient Email</label>
+                <input
+                  id="company-notify-email"
+                  class="admin-field-input font-mono text-xs"
+                  type="email"
+                  placeholder="info@thewinehouse.gr"
+                  [(ngModel)]="ensureMailConfig().company_notification_email"
+                />
               </div>
-            </label>
 
-            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer">
-              <input
-                type="checkbox"
-                class="mt-0.5 rounded border-slate-300 text-wine-700 focus:ring-wine-500"
-                [(ngModel)]="ensureMailConfig().notify_on_new_order"
-              />
-              <div>
-                <span class="text-xs font-bold text-slate-900 block">New Order &amp; Cellar Allocation Alert</span>
-                <span class="text-2xs text-slate-500">
-                  Receive an automated itemized breakdown whenever a customer completes an online order.
-                </span>
-              </div>
-            </label>
+              <div class="space-y-2 pt-1">
+                <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer">
+                  <div>
+                    <span class="text-xs font-bold text-slate-900 block">Inquiry Alerts</span>
+                    <span class="text-2xs text-slate-500">Forward contact form submissions immediately.</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    class="rounded border-slate-300 text-wine-700 focus:ring-wine-500"
+                    [(ngModel)]="ensureMailConfig().notify_on_new_message"
+                  />
+                </label>
 
-            <label class="flex items-start gap-3 p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer">
-              <input
-                type="checkbox"
-                class="mt-0.5 rounded border-slate-300 text-wine-700 focus:ring-wine-500"
-                [(ngModel)]="ensureMailConfig().send_customer_order_confirmation"
-              />
-              <div>
-                <span class="text-xs font-bold text-slate-900 block">Send Customer Order Receipts &amp; Bank Settlement Details</span>
-                <span class="text-2xs text-slate-500">
-                  Automatically email an official cellar confirmation and wire transfer instructions (IBAN/BIC) to the customer.
-                </span>
+                <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer">
+                  <div>
+                    <span class="text-xs font-bold text-slate-900 block">New Order Alerts</span>
+                    <span class="text-2xs text-slate-500">Receive alert on completed customer checkout.</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    class="rounded border-slate-300 text-wine-700 focus:ring-wine-500"
+                    [(ngModel)]="ensureMailConfig().notify_on_new_order"
+                  />
+                </label>
+
+                <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer">
+                  <div>
+                    <span class="text-xs font-bold text-slate-900 block">Buyer Order Receipts</span>
+                    <span class="text-2xs text-slate-500">Send order confirmations &amp; IBAN bank details.</span>
+                  </div>
+                  <input
+                    type="checkbox"
+                    class="rounded border-slate-300 text-wine-700 focus:ring-wine-500"
+                    [(ngModel)]="ensureMailConfig().send_customer_order_confirmation"
+                  />
+                </label>
               </div>
-            </label>
+            </div>
           </div>
-        </div>
 
-        <!-- Mail Server & SMTP Configuration -->
-        <div class="admin-card space-y-5">
+          <!-- Section 2: Test Diagnostic Dispatcher -->
           <div>
-            <h2 class="text-base font-bold text-slate-900 tracking-tight mb-1">Mail Server &amp; SMTP Hosting Credentials</h2>
-            <p class="text-xs text-slate-500">
-              Configure your hosting provider's outgoing SMTP server to dispatch authentic branded emails.
-            </p>
-          </div>
-
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label class="admin-field-label" for="mail-driver">Mail Delivery Driver</label>
-              <select
-                id="mail-driver"
-                class="admin-field-input"
-                [(ngModel)]="ensureMailConfig().mail_driver"
-              >
-                <option value="smtp">SMTP (Dedicated Mail Server / Hosting Provider)</option>
-                <option value="log">Log File (Development Mode — write to disk)</option>
-                <option value="sendmail">Sendmail (Host Server Binary)</option>
-              </select>
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Test Connectivity</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Send a test diagnostic message to confirm SMTP credentials.</p>
             </div>
 
-            <div>
-              <label class="admin-field-label" for="mail-encryption">Encryption Protocol</label>
-              <select
-                id="mail-encryption"
-                class="admin-field-input"
-                [(ngModel)]="ensureMailConfig().mail_encryption"
-              >
-                <option value="tls">TLS (STARTTLS — Recommended on Port 587)</option>
-                <option value="ssl">SSL (Port 465)</option>
-                <option value="none">None / Plain (Port 25 or 587)</option>
-              </select>
-            </div>
-          </div>
-
-          <div class="grid gap-4 sm:grid-cols-3">
-            <div class="sm:col-span-2">
-              <label class="admin-field-label" for="mail-host">SMTP Host Server</label>
-              <input
-                id="mail-host"
-                class="admin-field-input font-mono"
-                type="text"
-                placeholder="mail.winehouse.gr or smtp.yourhost.com"
-                [(ngModel)]="ensureMailConfig().mail_host"
-              />
-            </div>
-            <div>
-              <label class="admin-field-label" for="mail-port">SMTP Port</label>
-              <input
-                id="mail-port"
-                class="admin-field-input font-mono"
-                type="number"
-                placeholder="587"
-                [(ngModel)]="ensureMailConfig().mail_port"
-              />
-            </div>
-          </div>
-
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label class="admin-field-label" for="mail-user">SMTP Username / Account</label>
-              <input
-                id="mail-user"
-                class="admin-field-input font-mono"
-                type="text"
-                placeholder="info@thewinehouse.gr"
-                [(ngModel)]="ensureMailConfig().mail_username"
-              />
-            </div>
-            <div>
-              <div class="flex items-center justify-between">
-                <label class="admin-field-label" for="mail-pass">SMTP Password</label>
-                <button
-                  type="button"
-                  (click)="showMailPassword.update(v => !v)"
-                  class="text-2xs text-slate-500 hover:text-slate-800 underline cursor-pointer mb-1"
-                >
-                  {{ showMailPassword() ? 'Hide' : 'Show' }}
-                </button>
+            <div class="admin-card space-y-3.5">
+              <div>
+                <label class="admin-field-label">Recipient Test Email</label>
+                <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                  <input
+                    class="admin-field-input font-mono flex-1 text-xs"
+                    type="email"
+                    placeholder="Enter test recipient email..."
+                    [(ngModel)]="testEmailRecipient"
+                  />
+                  <button
+                    type="button"
+                    class="btn btn-secondary shrink-0 cursor-pointer flex items-center justify-center gap-1.5 text-xs"
+                    [disabled]="testingEmail()"
+                    (click)="sendTestEmail()"
+                  >
+                    @if (testingEmail()) {
+                      <span class="w-3.5 h-3.5 border-2 border-slate-500 border-t-transparent rounded-full animate-spin"></span>
+                      <span>Testing…</span>
+                    } @else {
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                      <span>Send Test</span>
+                    }
+                  </button>
+                </div>
               </div>
-              <input
-                id="mail-pass"
-                class="admin-field-input font-mono"
-                [type]="showMailPassword() ? 'text' : 'password'"
-                placeholder="••••••••••••"
-                [(ngModel)]="ensureMailConfig().mail_password"
-              />
-            </div>
-          </div>
 
-          <div class="grid gap-4 sm:grid-cols-2">
-            <div>
-              <label class="admin-field-label" for="mail-from-email">Sender "From" Email</label>
-              <input
-                id="mail-from-email"
-                class="admin-field-input font-mono"
-                type="email"
-                placeholder="info@thewinehouse.gr"
-                [(ngModel)]="ensureMailConfig().mail_from_address"
-              />
-            </div>
-            <div>
-              <label class="admin-field-label" for="mail-from-name">Sender "From" Name</label>
-              <input
-                id="mail-from-name"
-                class="admin-field-input"
-                type="text"
-                placeholder="The Winehouse Atelier"
-                [(ngModel)]="ensureMailConfig().mail_from_name"
-              />
-            </div>
-          </div>
-        </div>
-
-        <!-- Live SMTP Diagnostic / Test Dispatcher -->
-        <div class="admin-card space-y-4">
-          <div>
-            <h2 class="text-base font-bold text-slate-900 tracking-tight mb-1">Test Mail Server Connectivity</h2>
-            <p class="text-xs text-slate-500">
-              Send a test diagnostic message to verify authentication and SMTP delivery with your mailhost before saving.
-            </p>
-          </div>
-
-          <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-            <input
-              class="admin-field-input font-mono flex-1"
-              type="email"
-              placeholder="Enter destination email (e.g. your personal email)"
-              [(ngModel)]="testEmailRecipient"
-            />
-            <button
-              type="button"
-              class="btn btn-secondary shrink-0 cursor-pointer flex items-center justify-center gap-1.5"
-              [disabled]="testingEmail()"
-              (click)="sendTestEmail()"
-            >
-              @if (testingEmail()) {
-                <span class="w-3.5 h-3.5 border-2 border-slate-500 border-t-transparent rounded-full animate-spin"></span>
-                <span>Testing Connection…</span>
-              } @else {
-                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
-                <span>Send Test Email</span>
+              @if (testEmailResult(); as res) {
+                @if (res.success) {
+                  <div class="p-3 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
+                    <span>✓</span>
+                    <span>{{ res.message || 'Test email successfully dispatched!' }}</span>
+                  </div>
+                } @else {
+                  <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs space-y-1">
+                    <p class="font-bold">SMTP Diagnostic Failed</p>
+                    <p class="font-mono text-2xs whitespace-pre-wrap">{{ res.error }}</p>
+                  </div>
+                }
               }
-            </button>
-          </div>
 
-          @if (testEmailResult(); as res) {
-            @if (res.success) {
-              <div class="p-3.5 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-2">
-                <span>✓</span>
-                <span>{{ res.message || 'Test email successfully dispatched!' }}</span>
+              <div class="p-3 bg-slate-50 border border-slate-200/80 rounded-xl">
+                <span class="text-2xs text-slate-500 leading-relaxed block">
+                  Clicking "Send Test" performs an immediate live TLS handshake to verify your mail server settings.
+                </span>
               </div>
-            } @else {
-              <div class="p-3.5 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs space-y-1">
-                <p class="font-bold">✕ SMTP Diagnostic Failed</p>
-                <p class="font-mono text-2xs whitespace-pre-wrap">{{ res.error }}</p>
-              </div>
-            }
-          }
+            </div>
+          </div>
         </div>
 
-        <div class="flex items-center gap-3 pt-2">
+        <!-- Row 2: SMTP Mail Server Configuration -->
+        <div class="pt-2 border-t border-slate-200/80">
+          <div class="mb-3">
+            <h2 class="text-base font-bold text-slate-900 tracking-tight">SMTP Mail Server Settings</h2>
+            <p class="text-xs text-slate-500 mt-0.5">Outgoing server host, port, authentication credentials, and sender address.</p>
+          </div>
+
+          <div class="admin-card space-y-4">
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="admin-field-label" for="mail-driver">Mail Driver</label>
+                <select id="mail-driver" class="admin-field-input" [(ngModel)]="ensureMailConfig().mail_driver">
+                  <option value="smtp">SMTP Server</option>
+                  <option value="log">Log to Disk</option>
+                  <option value="sendmail">Sendmail</option>
+                </select>
+              </div>
+
+              <div>
+                <label class="admin-field-label" for="mail-host">SMTP Host Server</label>
+                <input id="mail-host" class="admin-field-input font-mono text-xs" type="text" placeholder="mail.winehouse.gr" [(ngModel)]="ensureMailConfig().mail_host" />
+              </div>
+
+              <div class="grid grid-cols-2 gap-2">
+                <div>
+                  <label class="admin-field-label" for="mail-port">Port</label>
+                  <input id="mail-port" class="admin-field-input font-mono text-xs" type="number" placeholder="587" [(ngModel)]="ensureMailConfig().mail_port" />
+                </div>
+                <div>
+                  <label class="admin-field-label" for="mail-encryption">Encryption</label>
+                  <select id="mail-encryption" class="admin-field-input text-xs" [(ngModel)]="ensureMailConfig().mail_encryption">
+                    <option value="tls">TLS</option>
+                    <option value="ssl">SSL</option>
+                    <option value="none">None</option>
+                  </select>
+                </div>
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+              <div>
+                <label class="admin-field-label" for="mail-user">SMTP Username / Account</label>
+                <input id="mail-user" class="admin-field-input font-mono text-xs" type="text" placeholder="info@thewinehouse.gr" [(ngModel)]="ensureMailConfig().mail_username" />
+              </div>
+
+              <div>
+                <div class="flex items-center justify-between">
+                  <label class="admin-field-label" for="mail-pass">SMTP Password</label>
+                  <button type="button" (click)="showMailPassword.update(v => !v)" class="text-2xs text-slate-500 hover:text-slate-800 underline cursor-pointer mb-1">
+                    {{ showMailPassword() ? 'Hide' : 'Show' }}
+                  </button>
+                </div>
+                <input id="mail-pass" class="admin-field-input font-mono text-xs" [type]="showMailPassword() ? 'text' : 'password'" placeholder="••••••••••••" [(ngModel)]="ensureMailConfig().mail_password" />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+              <div>
+                <label class="admin-field-label" for="mail-from-email">Sender "From" Email</label>
+                <input id="mail-from-email" class="admin-field-input font-mono text-xs" type="email" placeholder="info@thewinehouse.gr" [(ngModel)]="ensureMailConfig().mail_from_address" />
+              </div>
+
+              <div>
+                <label class="admin-field-label" for="mail-from-name">Sender "From" Name</label>
+                <input id="mail-from-name" class="admin-field-input text-xs" type="text" placeholder="The Winehouse Atelier" [(ngModel)]="ensureMailConfig().mail_from_name" />
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
           <button type="button" class="btn btn-primary btn-sm" [disabled]="saving()" (click)="saveSettings()">
-            {{ saving() ? 'Saving…' : 'Save Mail & Notification Settings' }}
+            {{ saving() ? 'Saving…' : 'Save Mail Settings' }}
           </button>
         </div>
-
       </div>
     }
 
     <!-- Tab: Mode & Aesthetics -->
     @if (activeTab() === 'appearance') {
-      <div class="w-full space-y-6">
-        <!-- Apple-style Maintenance Mode Toggle Card -->
-        <div class="admin-card space-y-4">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h2 class="text-base font-bold text-slate-900 tracking-tight mb-1">Maintenance & Coming Soon Mode</h2>
-              <p class="text-xs text-slate-500 max-w-lg">
-                When activated, regular visitors land on the holding page with the ambient video. Logged-in administrators have full website access.
-              </p>
-            </div>
-            <span
-              class="admin-badge shrink-0"
-              [class]="model.maintenance_mode ? 'admin-badge-draft' : 'admin-badge-live'"
-            >
-              <span class="admin-badge-dot"></span>
-              {{ model.maintenance_mode ? 'Maintenance Active' : 'Live to Public' }}
-            </span>
-          </div>
-
-          <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200/80">
-            <div>
-              <span class="text-sm font-semibold text-slate-900 block">Enable Maintenance Holding Screen</span>
-              <span class="text-xs text-slate-500">
-                {{ model.maintenance_mode ? 'Visitors currently see holding screen.' : 'Visitors see the live full website.' }}
-              </span>
-            </div>
-            <label class="ios-toggle">
-              <input
-                type="checkbox"
-                [(ngModel)]="model.maintenance_mode"
-              />
-              <span class="ios-toggle-slider"></span>
-            </label>
-          </div>
-
-          <button type="button" class="btn btn-primary btn-sm" [disabled]="saving()" (click)="saveSettings()">
-            {{ saving() ? 'Applying…' : 'Save Mode Setting' }}
-          </button>
-        </div>
-
-        <!-- Interactive Theme & Color Palette Customizer -->
-        <div class="admin-card space-y-6">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <h2 class="text-base font-bold text-slate-900 tracking-tight mb-1">Color Palette &amp; Atelier Theme</h2>
-              <p class="text-xs text-slate-500 max-w-lg">
-                Customize the palette used across the website. Changing colors updates the live site immediately upon saving.
-              </p>
-            </div>
-            <button type="button" class="btn btn-primary btn-sm" [disabled]="saving()" (click)="saveSettings()">
-              {{ saving() ? 'Saving…' : 'Save Colors' }}
-            </button>
-          </div>
-
-          <!-- Color Presets -->
+      <div class="space-y-6">
+        <!-- Row 1: Maintenance & Presets (2 columns) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <!-- Section 1: Maintenance Mode -->
           <div>
-            <label class="admin-field-label mb-2">Curated Color Presets</label>
-            <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5">
-              @for (preset of colorPresets; track preset.name) {
-                <button
-                  type="button"
-                  (click)="applyPreset(preset)"
-                  class="p-3 rounded-xl border border-slate-200 bg-slate-50/50 hover:bg-slate-100 hover:border-slate-300 transition-all text-left group cursor-pointer"
-                >
-                  <div class="flex items-center gap-1 mb-2">
-                    <span class="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0" [style.background-color]="preset.colors.primary"></span>
-                    <span class="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0" [style.background-color]="preset.colors.paper"></span>
-                    <span class="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0" [style.background-color]="preset.colors.terracotta"></span>
-                    <span class="w-3.5 h-3.5 rounded-full border border-black/10 shrink-0" [style.background-color]="preset.colors.ink"></span>
-                  </div>
-                  <span class="text-xs font-bold text-slate-800 block truncate group-hover:text-slate-950">{{ preset.name }}</span>
-                </button>
-              }
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Maintenance &amp; Gateway</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Control public storefront access vs holding screen.</p>
             </div>
-          </div>
 
-          <!-- Individual Color Controls -->
-          <div class="border-t border-slate-100 pt-5">
-            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-4">Custom Color Configuration</h3>
-            
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
-              
-              <!-- Primary Brand -->
-              <div class="p-3.5 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-2">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-slate-800">Primary Brand</span>
-                  <input
-                    type="color"
-                    [(ngModel)]="model.colors.primary"
-                    (ngModelChange)="onColorChange()"
-                    class="w-7 h-7 rounded cursor-pointer border-0 p-0 bg-transparent"
-                  />
+            <div class="admin-card space-y-4">
+              <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 border border-slate-200/80">
+                <div class="pr-3">
+                  <span class="text-xs font-bold text-slate-900 block">Holding Gateway Mode</span>
+                  <span class="text-2xs text-slate-500 block mt-0.5">
+                    {{ model.maintenance_mode ? 'Active — Public visitors see holding screen.' : 'Inactive — Public sees the live storefront.' }}
+                  </span>
                 </div>
-                <input
-                  class="admin-field-input font-mono text-xs uppercase"
-                  [(ngModel)]="model.colors.primary"
-                  (ngModelChange)="onColorChange()"
-                  placeholder="#C84B31"
-                />
-                <span class="text-2xs text-slate-400 block">Buttons, active links, accents</span>
-              </div>
-
-              <!-- Canvas Paper -->
-              <div class="p-3.5 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-2">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-slate-800">Canvas / Paper</span>
-                  <input
-                    type="color"
-                    [(ngModel)]="model.colors.paper"
-                    (ngModelChange)="onColorChange()"
-                    class="w-7 h-7 rounded cursor-pointer border-0 p-0 bg-transparent"
-                  />
-                </div>
-                <input
-                  class="admin-field-input font-mono text-xs uppercase"
-                  [(ngModel)]="model.colors.paper"
-                  (ngModelChange)="onColorChange()"
-                  placeholder="#ECE7E1"
-                />
-                <span class="text-2xs text-slate-400 block">Light background & canvas panels</span>
-              </div>
-
-              <!-- Dark Ink / Text -->
-              <div class="p-3.5 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-2">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-slate-800">Typography / Ink</span>
-                  <input
-                    type="color"
-                    [(ngModel)]="model.colors.ink"
-                    (ngModelChange)="onColorChange()"
-                    class="w-7 h-7 rounded cursor-pointer border-0 p-0 bg-transparent"
-                  />
-                </div>
-                <input
-                  class="admin-field-input font-mono text-xs uppercase"
-                  [(ngModel)]="model.colors.ink"
-                  (ngModelChange)="onColorChange()"
-                  placeholder="#111111"
-                />
-                <span class="text-2xs text-slate-400 block">Headings, body text, structural borders</span>
-              </div>
-
-              <!-- Terracotta Highlight -->
-              <div class="p-3.5 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-2">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-slate-800">Terracotta Accent</span>
-                  <input
-                    type="color"
-                    [(ngModel)]="model.colors.terracotta"
-                    (ngModelChange)="onColorChange()"
-                    class="w-7 h-7 rounded cursor-pointer border-0 p-0 bg-transparent"
-                  />
-                </div>
-                <input
-                  class="admin-field-input font-mono text-xs uppercase"
-                  [(ngModel)]="model.colors.terracotta"
-                  (ngModelChange)="onColorChange()"
-                  placeholder="#C84B31"
-                />
-                <span class="text-2xs text-slate-400 block">Tape stickers, asterisk card, badges</span>
-              </div>
-
-              <!-- Gold Amber Highlight -->
-              <div class="p-3.5 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-2">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-slate-800">Gold Accent</span>
-                  <input
-                    type="color"
-                    [(ngModel)]="model.colors.accent"
-                    (ngModelChange)="onColorChange()"
-                    class="w-7 h-7 rounded cursor-pointer border-0 p-0 bg-transparent"
-                  />
-                </div>
-                <input
-                  class="admin-field-input font-mono text-xs uppercase"
-                  [(ngModel)]="model.colors.accent"
-                  (ngModelChange)="onColorChange()"
-                  placeholder="#C9A227"
-                />
-                <span class="text-2xs text-slate-400 block">Foil highlights, stamps, sparkle details</span>
-              </div>
-
-              <!-- Dark Sections -->
-              <div class="p-3.5 rounded-xl border border-slate-200 bg-white shadow-2xs space-y-2">
-                <div class="flex items-center justify-between">
-                  <span class="text-xs font-bold text-slate-900">Dark Sections</span>
-                  <input
-                    type="color"
-                    [(ngModel)]="model.colors.card_dark"
-                    (ngModelChange)="onColorChange()"
-                    class="w-7 h-7 rounded cursor-pointer border-0 p-0 bg-transparent"
-                  />
-                </div>
-                <input
-                  class="admin-field-input font-mono text-xs uppercase"
-                  [(ngModel)]="model.colors.card_dark"
-                  (ngModelChange)="onColorChange()"
-                  placeholder="#111111"
-                />
-                <span class="text-2xs text-slate-400 block">Manifesto block & showcase cards</span>
-              </div>
-
-            </div>
-          </div>
-
-          <!-- Live Preview Banner -->
-          <div class="border-t border-slate-100 pt-5">
-            <h3 class="text-xs font-bold text-slate-900 uppercase tracking-wider mb-3">Live Atelier Preview</h3>
-            <div
-              class="p-6 rounded-2xl border transition-all"
-              [style.background-color]="model.colors.paper"
-              [style.color]="model.colors.ink"
-              [style.border-color]="model.colors.ink"
-            >
-              <div class="flex items-center justify-between gap-4 mb-4">
-                <span
-                  class="px-2.5 py-1 text-[11px] font-mono font-bold uppercase"
-                  [style.background-color]="model.colors.terracotta"
-                  style="color: #ffffff"
-                >
-                  WINE ATELIER
-                </span>
-                <span class="text-xs font-mono font-bold uppercase" [style.color]="model.colors.primary">
-                  EXPLORE SELECTION →
-                </span>
-              </div>
-              <h4 class="text-2xl font-bold uppercase tracking-tight mb-2" [style.color]="model.colors.ink">
-                Good Wine Isn't Decoration. It's Direction.
-              </h4>
-              <p class="text-xs font-serif italic mb-4" [style.color]="model.colors.ink">
-                Curating small-batch independent growers with low intervention.
-              </p>
-              <div class="flex items-center gap-3">
-                <button
-                  type="button"
-                  class="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded border"
-                  [style.background-color]="model.colors.primary"
-                  [style.border-color]="model.colors.primary"
-                  style="color: #ffffff"
-                >
-                  Primary Action
-                </button>
-                <button
-                  type="button"
-                  class="px-4 py-2 text-xs font-bold uppercase tracking-wider rounded border"
-                  [style.border-color]="model.colors.ink"
-                  [style.color]="model.colors.ink"
-                  style="background-color: transparent"
-                >
-                  Outline Action
-                </button>
+                <label class="ios-toggle shrink-0">
+                  <input type="checkbox" [(ngModel)]="model.maintenance_mode" />
+                  <span class="ios-toggle-slider"></span>
+                </label>
               </div>
             </div>
           </div>
 
+          <!-- Section 2: Palette Presets -->
+          <div>
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Curated Palette Presets</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Click any harmonious preset to quickly restyle the store.</p>
+            </div>
+
+            <div class="admin-card space-y-2">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                @for (preset of colorPresets; track preset.name) {
+                  <button
+                    type="button"
+                    (click)="applyPreset(preset)"
+                    class="p-2.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 hover:border-slate-300 transition-all flex items-center justify-between group cursor-pointer"
+                  >
+                    <span class="text-xs font-bold text-slate-800 truncate group-hover:text-slate-950">{{ preset.name }}</span>
+                    <div class="flex items-center gap-1 shrink-0">
+                      <span class="w-3 h-3 rounded-full border border-black/10 shrink-0" [style.background-color]="preset.colors.primary"></span>
+                      <span class="w-3 h-3 rounded-full border border-black/10 shrink-0" [style.background-color]="preset.colors.paper"></span>
+                      <span class="w-3 h-3 rounded-full border border-black/10 shrink-0" [style.background-color]="preset.colors.terracotta"></span>
+                      <span class="w-3 h-3 rounded-full border border-black/10 shrink-0" [style.background-color]="preset.colors.ink"></span>
+                    </div>
+                  </button>
+                }
+              </div>
+            </div>
+          </div>
         </div>
 
-        <!-- Typography Specimens -->
-        <div class="admin-card">
-          <h2 class="text-base font-bold text-slate-900 tracking-tight mb-4">Typography Hierarchy</h2>
-          <div class="space-y-4">
-            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <span class="text-2xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Headline Font (Anton)</span>
-              <p class="font-big text-2xl uppercase text-slate-900">THE WINEHOUSE — CELLAR &amp; STORIES</p>
+        <!-- Row 2: Custom Color Swatches & Live Atelier Preview (2 columns) -->
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start pt-2 border-t border-slate-200/80">
+          <!-- Section 3: Custom Color Swatches -->
+          <div>
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Custom Color Swatches</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Granular HSL &amp; Hex swatch overrides for UI tokens.</p>
             </div>
-            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <span class="text-2xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Editorial Serif (Cormorant Garamond / Cinzel)</span>
-              <p class="font-serif text-xl text-slate-800" style="font-family: var(--font-serif)">A glass poured with care, told with love</p>
-            </div>
-            <div class="p-3 bg-slate-50 rounded-xl border border-slate-100">
-              <span class="text-2xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Monospace Labels (Space Mono)</span>
-              <p class="text-xs font-mono text-slate-700">/ MANIFESTO • SMALL-BATCH INDEPENDENT GROWERS</p>
+
+            <div class="admin-card space-y-3">
+              <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                <!-- Primary Brand -->
+                <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="text-2xs font-bold text-slate-800">Primary</span>
+                    <input type="color" [(ngModel)]="model.colors.primary" (ngModelChange)="onColorChange()" class="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent" />
+                  </div>
+                  <input class="admin-field-input font-mono text-xs uppercase !py-1" [(ngModel)]="model.colors.primary" (ngModelChange)="onColorChange()" placeholder="#C84B31" />
+                </div>
+
+                <!-- Canvas Paper -->
+                <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="text-2xs font-bold text-slate-800">Paper</span>
+                    <input type="color" [(ngModel)]="model.colors.paper" (ngModelChange)="onColorChange()" class="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent" />
+                  </div>
+                  <input class="admin-field-input font-mono text-xs uppercase !py-1" [(ngModel)]="model.colors.paper" (ngModelChange)="onColorChange()" placeholder="#ECE7E1" />
+                </div>
+
+                <!-- Dark Ink / Text -->
+                <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="text-2xs font-bold text-slate-800">Ink</span>
+                    <input type="color" [(ngModel)]="model.colors.ink" (ngModelChange)="onColorChange()" class="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent" />
+                  </div>
+                  <input class="admin-field-input font-mono text-xs uppercase !py-1" [(ngModel)]="model.colors.ink" (ngModelChange)="onColorChange()" placeholder="#111111" />
+                </div>
+
+                <!-- Terracotta Highlight -->
+                <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="text-2xs font-bold text-slate-800">Terracotta</span>
+                    <input type="color" [(ngModel)]="model.colors.terracotta" (ngModelChange)="onColorChange()" class="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent" />
+                  </div>
+                  <input class="admin-field-input font-mono text-xs uppercase !py-1" [(ngModel)]="model.colors.terracotta" (ngModelChange)="onColorChange()" placeholder="#C84B31" />
+                </div>
+
+                <!-- Gold Amber Highlight -->
+                <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="text-2xs font-bold text-slate-800">Gold Accent</span>
+                    <input type="color" [(ngModel)]="model.colors.accent" (ngModelChange)="onColorChange()" class="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent" />
+                  </div>
+                  <input class="admin-field-input font-mono text-xs uppercase !py-1" [(ngModel)]="model.colors.accent" (ngModelChange)="onColorChange()" placeholder="#C9A227" />
+                </div>
+
+                <!-- Dark Sections -->
+                <div class="p-2.5 rounded-xl border border-slate-200 bg-slate-50/50 space-y-1">
+                  <div class="flex items-center justify-between">
+                    <span class="text-2xs font-bold text-slate-900">Dark Card</span>
+                    <input type="color" [(ngModel)]="model.colors.card_dark" (ngModelChange)="onColorChange()" class="w-5 h-5 rounded cursor-pointer border-0 p-0 bg-transparent" />
+                  </div>
+                  <input class="admin-field-input font-mono text-xs uppercase !py-1" [(ngModel)]="model.colors.card_dark" (ngModelChange)="onColorChange()" placeholder="#111111" />
+                </div>
+              </div>
             </div>
           </div>
+
+          <!-- Section 4: Live Theme Preview -->
+          <div>
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Live Theme Preview</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Real-time simulation of canvas colors and contrast.</p>
+            </div>
+
+            <div class="admin-card space-y-3">
+              <div
+                class="p-4 rounded-xl border transition-all"
+                [style.background-color]="model.colors.paper"
+                [style.color]="model.colors.ink"
+                [style.border-color]="model.colors.ink"
+              >
+                <div class="flex items-center justify-between gap-4 mb-2">
+                  <span
+                    class="px-2 py-0.5 text-[10px] font-mono font-bold uppercase"
+                    [style.background-color]="model.colors.terracotta"
+                    style="color: #ffffff"
+                  >
+                    WINE ATELIER
+                  </span>
+                  <span class="text-xs font-mono font-bold uppercase" [style.color]="model.colors.primary">
+                    EXPLORE SELECTION →
+                  </span>
+                </div>
+                <h4 class="text-base font-bold uppercase tracking-tight mb-1" [style.color]="model.colors.ink">
+                  Good Wine Isn't Decoration. It's Direction.
+                </h4>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="flex justify-end pt-2">
+          <button type="button" class="btn btn-primary btn-sm" [disabled]="saving()" (click)="saveSettings()">
+            {{ saving() ? 'Saving…' : 'Save Appearance & Colors' }}
+          </button>
         </div>
       </div>
     }
 
     <!-- Tab: Security (Password & Sessions) -->
     @if (activeTab() === 'security') {
-      <div class="w-full grid gap-6 md:grid-cols-2">
-        <div class="admin-card">
-          <h2 class="text-base font-bold text-slate-900 tracking-tight mb-4">Update Administrator Password</h2>
-
-          <form class="space-y-4" (ngSubmit)="savePassword()">
-            <div>
-              <label class="admin-field-label" for="current-pwd">Current Password</label>
-              <input id="current-pwd" class="admin-field-input" type="password" name="current" [(ngModel)]="currentPassword" required autocomplete="current-password" />
+      <div class="space-y-6">
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start">
+          <!-- Section 1: Change Administrator Password -->
+          <div>
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Change Password</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Update login credentials for your administrator profile.</p>
             </div>
 
-            <div>
-              <label class="admin-field-label" for="new-pwd">New Password <span class="text-slate-400 font-normal normal-case">(min 10 characters)</span></label>
-              <input id="new-pwd" class="admin-field-input" type="password" name="new" [(ngModel)]="newPassword" required minlength="10" autocomplete="new-password" />
-              @if (newPassword) {
-                <div class="mt-2 flex items-center gap-2">
-                  <div class="flex-1 h-1.5 rounded-full bg-slate-200 overflow-hidden">
-                    <div
-                      class="h-full rounded-full transition-all duration-300"
-                      [style.width]="passwordStrength + '%'"
-                      [style.background-color]="passwordStrength >= 75 ? '#10b981' : passwordStrength >= 40 ? '#f59e0b' : '#ef4444'"
-                    ></div>
-                  </div>
-                  <span class="text-xs font-semibold text-slate-500">{{ passwordStrengthLabel }}</span>
+            <div class="admin-card">
+              <form class="space-y-4" (ngSubmit)="savePassword()">
+                <div>
+                  <label class="admin-field-label" for="current-pwd">Current Password</label>
+                  <input id="current-pwd" class="admin-field-input" type="password" name="current" [(ngModel)]="currentPassword" required autocomplete="current-password" />
                 </div>
-              }
+
+                <div>
+                  <label class="admin-field-label" for="new-pwd">New Password</label>
+                  <input id="new-pwd" class="admin-field-input" type="password" name="new" [(ngModel)]="newPassword" required minlength="10" autocomplete="new-password" />
+                  @if (newPassword) {
+                    <div class="mt-1.5 flex items-center gap-2">
+                      <div class="flex-1 h-1 rounded-full bg-slate-200 overflow-hidden">
+                        <div
+                          class="h-full rounded-full transition-all duration-300"
+                          [style.width]="passwordStrength + '%'"
+                          [style.background-color]="passwordStrength >= 75 ? '#10b981' : passwordStrength >= 40 ? '#f59e0b' : '#ef4444'"
+                        ></div>
+                      </div>
+                      <span class="text-[10px] font-semibold text-slate-500">{{ passwordStrengthLabel }}</span>
+                    </div>
+                  }
+                </div>
+
+                <div>
+                  <label class="admin-field-label" for="confirm-pwd">Confirm New Password</label>
+                  <input id="confirm-pwd" class="admin-field-input" type="password" name="confirm" [(ngModel)]="confirmPassword" required autocomplete="new-password" />
+                  @if (newPassword && confirmPassword && newPassword !== confirmPassword) {
+                    <p class="text-2xs text-red-600 font-semibold mt-1">Passwords do not match</p>
+                  }
+                </div>
+
+                @if (passwordError()) {
+                  <p class="text-xs text-red-600 font-semibold">{{ passwordError() }}</p>
+                }
+                @if (passwordSaved()) {
+                  <p class="text-xs text-emerald-600 font-semibold flex items-center gap-1">
+                    <span>✓</span> Password updated successfully
+                  </p>
+                }
+
+                <div class="pt-2 flex justify-end">
+                  <button class="btn btn-primary btn-sm" type="submit" [disabled]="savingPassword()">
+                    {{ savingPassword() ? 'Saving…' : 'Update Password' }}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+
+          <!-- Section 2: Session & Security Status -->
+          <div>
+            <div class="mb-3">
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Active Session Status</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Authentication state and security guidelines.</p>
             </div>
 
-            <div>
-              <label class="admin-field-label" for="confirm-pwd">Confirm New Password</label>
-              <input id="confirm-pwd" class="admin-field-input" type="password" name="confirm" [(ngModel)]="confirmPassword" required autocomplete="new-password" />
-              @if (newPassword && confirmPassword && newPassword !== confirmPassword) {
-                <p class="text-xs text-red-600 font-semibold mt-1">Passwords do not match</p>
-              }
+            <div class="admin-card space-y-4">
+              <div class="flex items-center gap-2 text-xs font-semibold text-slate-700 p-3 bg-slate-50 rounded-xl border border-slate-200/80">
+                <span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>
+                <span>Current browser session — Authenticated &amp; Active</span>
+              </div>
+
+              <div class="space-y-2 text-xs text-slate-500 leading-relaxed">
+                <p>• Your session token is stored with HttpOnly authentication protection.</p>
+                <p>• We recommend using a unique password with at least 10 characters combining numbers, letters, and symbols.</p>
+              </div>
             </div>
-
-            @if (passwordError()) {
-              <p class="text-sm text-red-600 font-semibold">{{ passwordError() }}</p>
-            }
-            @if (passwordSaved()) {
-              <p class="text-sm text-emerald-600 font-semibold flex items-center gap-1">
-                <span>✓</span> Password updated successfully
-              </p>
-            }
-
-            <button class="btn btn-primary btn-sm" type="submit" [disabled]="savingPassword()">
-              {{ savingPassword() ? 'Saving…' : 'Change Password' }}
-            </button>
-          </form>
-        </div>
-
-        <div class="admin-card">
-          <h2 class="text-base font-bold text-slate-900 tracking-tight mb-2">Active Session Security</h2>
-          <p class="text-xs text-slate-500">Your current browser is securely authenticated with Sanctum Bearer tokens.</p>
-          <div class="mt-3 flex items-center gap-2 text-xs font-semibold text-slate-700">
-            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
-            <span>Current browser session — Authenticated & active</span>
           </div>
         </div>
       </div>

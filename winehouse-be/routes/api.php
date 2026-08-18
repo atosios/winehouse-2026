@@ -8,10 +8,12 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\SettingController;
+use App\Http\Controllers\SitemapController;
 use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 // Public content & e-Shop endpoints.
+Route::get('/sitemap.xml', [SitemapController::class, 'index']);
 Route::get('/settings', [SettingController::class, 'publicIndex']);
 Route::get('/posts', [PostController::class, 'publicIndex']);
 Route::get('/posts/{slug}', [PostController::class, 'publicShow']);

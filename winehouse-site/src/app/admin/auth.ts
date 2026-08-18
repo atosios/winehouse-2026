@@ -18,6 +18,7 @@ export class AdminAuth {
   readonly user = signal<{ name: string; email: string } | null>(null);
 
   get token(): string | null {
+    if (typeof localStorage === 'undefined') return null;
     return localStorage.getItem(TOKEN_KEY);
   }
 
@@ -33,7 +34,9 @@ export class AdminAuth {
       )
       .pipe(
         tap((res) => {
-          localStorage.setItem(TOKEN_KEY, res.token);
+          if (typeof localStorage !== 'undefined') {
+            localStorage.setItem(TOKEN_KEY, res.token);
+          }
           this.user.set(res.user);
         }),
       );
@@ -47,7 +50,9 @@ export class AdminAuth {
   }
 
   clear() {
-    localStorage.removeItem(TOKEN_KEY);
+    if (typeof localStorage !== 'undefined') {
+      localStorage.removeItem(TOKEN_KEY);
+    }
     this.user.set(null);
     this.router.navigateByUrl('/admin/login');
   }

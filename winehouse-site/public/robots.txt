@@ -1,0 +1,8 @@
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /admin/*
+
+# Dynamic Sitemap Locations
+Sitemap: https://api.winehouse.gr/sitemap.xml
+Sitemap: https://winehouse.gr/sitemap.xml

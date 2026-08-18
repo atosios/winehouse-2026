@@ -1,6 +1,6 @@
-import { Component, inject, signal, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { WhMediaPicker } from './media-picker';
 import { WhI18nInput } from './i18n-input';
 import { AdminConfirm } from './confirm-dialog';
@@ -38,137 +38,302 @@ import { I18nService, Language, I18nText, normalizeI18n } from '../core/i18n.ser
 
 export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenance';
 
+export interface PageLibraryCard {
+  key: EditablePageKey;
+  number: string;
+  label: string;
+  categoryTag: string;
+  badgeBg: string;
+  route: string;
+  description: string;
+  sectionsCount: number;
+  sectionHighlights: string[];
+  coverGradient: string;
+  iconPath: string;
+}
+
 @Component({
   selector: 'wh-admin-homepage-editor',
   imports: [FormsModule, RouterLink, WhMediaPicker, WhI18nInput],
   template: `
-    <!-- Top Action Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
-      <div>
-        <div class="flex items-center gap-2 mb-1">
-          <span class="px-2 py-0.5 text-2xs font-bold uppercase rounded bg-wine-100 text-wine-800 font-mono">Global Studio</span>
-          <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Page Content Editor</h1>
-        </div>
-        <p class="text-xs text-slate-500">Select any page below to modify its content, headlines, images, and translations live.</p>
-      </div>
+    <!-- ========================================================================================= -->
+    <!-- VIEW 1: PAGES LIBRARY / CATALOG (1ST VIEW)                                                -->
+    <!-- ========================================================================================= -->
+    @if (!activePage()) {
+      <div class="space-y-6">
+        <!-- Top Action Header -->
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <span class="px-2 py-0.5 text-2xs font-bold uppercase rounded bg-wine-100 text-wine-800 font-mono">Pages Architecture</span>
+              <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">Page Content Studio</h1>
+            </div>
+            <p class="text-xs text-slate-500">Select a page from the library below to customize its headlines, visual sections, hero assets, and bilingual copy.</p>
+          </div>
 
-      <div class="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
-        <!-- Minimalist Editorial Language Switcher (Homepage Style) -->
-        <div
-          class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-2xs font-mono font-bold tracking-widest uppercase transition-all duration-300 border border-slate-200/80 bg-white shadow-2xs select-none text-slate-700"
-        >
-          <button
-            type="button"
-            (click)="i18n.setLang('en')"
-            class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
-            [class.opacity-100]="i18n.currentLang() === 'en'"
-            [class.opacity-35]="i18n.currentLang() !== 'en'"
-            title="English"
-          >
-            EN
-          </button>
-          <span class="opacity-25 text-[10px] font-normal">/</span>
-          <button
-            type="button"
-            (click)="i18n.setLang('el')"
-            class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
-            [class.opacity-100]="i18n.currentLang() === 'el'"
-            [class.opacity-35]="i18n.currentLang() !== 'el'"
-            title="Ελληνικά"
-          >
-            GR
-          </button>
+          <div class="flex items-center gap-2.5">
+            <!-- Minimalist Editorial Language Switcher -->
+            <div
+              class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-2xs font-mono font-bold tracking-widest uppercase transition-all duration-300 border border-slate-200/80 bg-white shadow-2xs select-none text-slate-700"
+            >
+              <button
+                type="button"
+                (click)="i18n.setLang('en')"
+                class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
+                [class.opacity-100]="i18n.currentLang() === 'en'"
+                [class.opacity-35]="i18n.currentLang() !== 'en'"
+                title="English"
+              >
+                EN
+              </button>
+              <span class="opacity-25 text-[10px] font-normal">/</span>
+              <button
+                type="button"
+                (click)="i18n.setLang('el')"
+                class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
+                [class.opacity-100]="i18n.currentLang() === 'el'"
+                [class.opacity-35]="i18n.currentLang() !== 'el'"
+                title="Ελληνικά"
+              >
+                GR
+              </button>
+            </div>
+          </div>
         </div>
 
-        <a
-          [routerLink]="activePreviewPath"
-          target="_blank"
-          class="btn btn-secondary btn-sm"
-          [title]="'Open live ' + activePageLabel + ' in a new tab'"
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
-          <span>Preview {{ activePageLabel }}</span>
-        </a>
-        <button
-          type="button"
-          class="btn btn-secondary btn-sm"
-          (click)="resetActivePageToDefaults()"
-          [title]="'Reset ' + activePageLabel + ' content back to defaults'"
-        >
-          <span>Reset Defaults</span>
-        </button>
-        <button
-          type="button"
-          class="btn btn-primary btn-sm"
-          [disabled]="saving()"
-          (click)="saveActivePage()"
-        >
-          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
-          <span>{{ saving() ? 'Saving…' : 'Save ' + activePageLabel }}</span>
-        </button>
-      </div>
-    </div>
+        <!-- Library Filter & Search Toolbar -->
+        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div class="relative flex-1">
+            <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            <input
+              type="text"
+              class="admin-field-input !pl-9 !py-1.5 text-xs"
+              placeholder="Search pages by title, route (/about, /shop), or section keyword..."
+              [(ngModel)]="searchLibraryQuery"
+            />
+          </div>
 
-    <!-- Alert / Toast Messages -->
-    @if (savedMessage()) {
-      <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span>✓</span>
-          <span>{{ savedMessage() }}</span>
+          <div class="flex items-center gap-2 px-2 text-xs font-mono text-slate-400">
+            <span class="font-bold text-slate-700">{{ filteredPagesLibrary().length }}</span> core storefront pages
+          </div>
         </div>
-        <button type="button" (click)="savedMessage.set('')" class="text-emerald-600 hover:text-emerald-900 font-bold cursor-pointer">✕</button>
+
+        <!-- Library Pages Cards Grid (Compact, Title on Top) -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          @for (page of filteredPagesLibrary(); track page.key) {
+            <div
+              class="group relative bg-white rounded-2xl border border-slate-200/90 hover:border-wine-600 hover:shadow-md transition-all duration-200 p-4 sm:p-5 flex flex-col justify-between cursor-pointer"
+              (click)="selectPage(page.key)"
+            >
+              <!-- Card Header: Title on Top & Category Badge -->
+              <div class="space-y-3">
+                <div class="flex items-start justify-between gap-2.5">
+                  <div class="flex items-start gap-2.5 min-w-0">
+                    <div class="w-8 h-8 rounded-lg bg-slate-100 border border-slate-200/80 flex items-center justify-center text-slate-700 shrink-0 group-hover:bg-wine-50 group-hover:text-wine-800 group-hover:border-wine-200 transition-colors mt-0.5">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" [innerHTML]="page.iconPath"></svg>
+                    </div>
+                    <div class="min-w-0">
+                      <h3 class="text-sm font-bold text-slate-900 group-hover:text-wine-800 transition-colors leading-snug">
+                        {{ page.label }}
+                      </h3>
+                      <div class="flex items-center gap-1.5 text-2xs font-mono text-slate-500 mt-0.5">
+                        <span class="font-bold text-slate-700 bg-slate-100 px-1 py-0.2 rounded">{{ page.route }}</span>
+                        <span>·</span>
+                        <span class="text-emerald-700 font-semibold">{{ page.sectionsCount }} sections</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <span class="px-2 py-0.5 rounded text-[9px] font-mono font-bold tracking-wider uppercase {{ page.badgeBg }} shrink-0 border">
+                    {{ page.categoryTag }}
+                  </span>
+                </div>
+
+                <!-- Description -->
+                <p class="text-xs text-slate-500 line-clamp-2 leading-relaxed">
+                  {{ page.description }}
+                </p>
+
+                <!-- Section highlights tags -->
+                <div class="pt-2.5 border-t border-slate-100/80 flex flex-wrap gap-1.5">
+                  @for (tag of page.sectionHighlights; track tag) {
+                    <span class="px-1.5 py-0.5 rounded bg-slate-50 border border-slate-200/60 text-slate-600 text-[10px] font-mono">
+                      {{ tag }}
+                    </span>
+                  }
+                </div>
+              </div>
+
+              <!-- Action Buttons Strip at bottom -->
+              <div class="pt-3 mt-3.5 border-t border-slate-100 flex items-center justify-between gap-2" (click)="$event.stopPropagation()">
+                <button
+                  type="button"
+                  (click)="selectPage(page.key)"
+                  class="btn btn-primary btn-sm flex-1 !py-1.5 flex items-center justify-center gap-1.5 cursor-pointer font-semibold text-xs"
+                >
+                  <span>Edit Page Content</span>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>
+                </button>
+
+                <a
+                  [routerLink]="page.route"
+                  target="_blank"
+                  class="btn btn-secondary btn-sm !py-1.5 !px-2.5 text-slate-600 hover:text-slate-900 cursor-pointer shrink-0"
+                  title="Preview Live Page in New Tab"
+                >
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+                </a>
+              </div>
+            </div>
+          }
+        </div>
       </div>
     }
-    @if (error()) {
-      <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold flex items-center justify-between">
-        <div class="flex items-center gap-2">
-          <span>⚠</span>
-          <span>{{ error() }}</span>
-        </div>
-        <button type="button" (click)="error.set('')" class="text-red-600 hover:text-red-900 font-bold cursor-pointer">✕</button>
-      </div>
-    }
 
-    <!-- ============================================================ PAGE SELECTOR BAR -->
-    <div class="bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs mb-6 flex flex-wrap items-center gap-2">
-      <span class="text-2xs font-mono font-bold uppercase tracking-wider text-slate-400 px-3 py-1">Select Page:</span>
-      @for (page of pages; track page.key) {
-        <button
-          type="button"
-          (click)="selectPage(page.key)"
-          class="flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold font-mono tracking-tight transition-all duration-200 cursor-pointer"
-          [class.bg-slate-900]="activePage() === page.key"
-          [class.text-white]="activePage() === page.key"
-          [class.shadow-sm]="activePage() === page.key"
-          [class.bg-slate-50]="activePage() !== page.key"
-          [class.text-slate-600]="activePage() !== page.key"
-          [class.hover:bg-slate-100]="activePage() !== page.key"
-          [class.hover:text-slate-900]="activePage() !== page.key"
-        >
-          <span class="text-sm">{{ page.icon }}</span>
-          <span>{{ page.label }}</span>
-          <span class="text-2xs opacity-60 font-mono font-normal">({{ page.route }})</span>
-        </button>
+    <!-- ========================================================================================= -->
+    <!-- VIEW 2: INDIVIDUAL PAGE CONTENT EDITOR (WHEN A PAGE IS SELECTED)                          -->
+    <!-- ========================================================================================= -->
+    @if (activePage()) {
+      <!-- Top Action Header with Back to Library button -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+        <div class="flex items-center gap-3">
+          <button
+            type="button"
+            (click)="backToLibrary()"
+            class="btn btn-secondary btn-sm flex items-center gap-1.5 cursor-pointer !py-1.5"
+            title="Return to Pages Library Overview"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span>All Pages</span>
+          </button>
+          
+          <div class="h-6 w-px bg-slate-200 hidden sm:block"></div>
+
+          <div>
+            <div class="flex items-center gap-2 mb-0.5">
+              <span class="px-2 py-0.5 text-2xs font-bold uppercase rounded bg-wine-100 text-wine-800 font-mono">{{ activePageLabel }}</span>
+              <span class="text-xs font-mono text-slate-400 font-medium">{{ activePreviewPath }}</span>
+            </div>
+            <h1 class="text-lg sm:text-xl font-bold tracking-tight text-slate-900">Editing {{ activePageLabel }} Content</h1>
+          </div>
+        </div>
+
+        <div class="flex flex-wrap items-center gap-2.5 self-start sm:self-auto">
+          <!-- Minimalist Editorial Language Switcher -->
+          <div
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-2xs font-mono font-bold tracking-widest uppercase transition-all duration-300 border border-slate-200/80 bg-white shadow-2xs select-none text-slate-700"
+          >
+            <button
+              type="button"
+              (click)="i18n.setLang('en')"
+              class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
+              [class.opacity-100]="i18n.currentLang() === 'en'"
+              [class.opacity-35]="i18n.currentLang() !== 'en'"
+              title="English"
+            >
+              EN
+            </button>
+            <span class="opacity-25 text-[10px] font-normal">/</span>
+            <button
+              type="button"
+              (click)="i18n.setLang('el')"
+              class="transition-opacity duration-200 cursor-pointer hover:opacity-100"
+              [class.opacity-100]="i18n.currentLang() === 'el'"
+              [class.opacity-35]="i18n.currentLang() !== 'el'"
+              title="Ελληνικά"
+            >
+              GR
+            </button>
+          </div>
+
+          <a
+            [routerLink]="activePreviewPath"
+            target="_blank"
+            class="btn btn-secondary btn-sm"
+            [title]="'Open live ' + activePageLabel + ' in a new tab'"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg>
+            <span>Preview {{ activePageLabel }}</span>
+          </a>
+          <button
+            type="button"
+            class="btn btn-secondary btn-sm"
+            (click)="resetActivePageToDefaults()"
+            [title]="'Reset ' + activePageLabel + ' content back to defaults'"
+          >
+            <span>Reset Defaults</span>
+          </button>
+          <button
+            type="button"
+            class="btn btn-primary btn-sm"
+            [disabled]="saving()"
+            (click)="saveActivePage()"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+            <span>{{ saving() ? 'Saving…' : 'Save ' + activePageLabel }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Alert / Toast Messages -->
+      @if (savedMessage()) {
+        <div class="mb-6 p-4 rounded-xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <span>✓</span>
+            <span>{{ savedMessage() }}</span>
+          </div>
+          <button type="button" (click)="savedMessage.set('')" class="text-emerald-600 hover:text-emerald-900 font-bold cursor-pointer">✕</button>
+        </div>
       }
-    </div>
+      @if (error()) {
+        <div class="mb-6 p-4 rounded-xl bg-red-50 border border-red-200 text-red-800 text-xs font-semibold flex items-center justify-between">
+          <div class="flex items-center gap-2">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-amber-500 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+            <span>{{ error() }}</span>
+          </div>
+          <button type="button" (click)="error.set('')" class="text-red-600 hover:text-red-900 font-bold cursor-pointer">✕</button>
+        </div>
+      }
 
-    <!-- ========================================================================================= -->
-    <!-- 1. HOMEPAGE EDITOR                                                                        -->
-    <!-- ========================================================================================= -->
-    @if (activePage() === 'home') {
-      <!-- Segmented Section Tabs (Named by Section Tag) -->
-      <div class="admin-tabs overflow-x-auto pb-1 mb-6">
-        @for (tab of homeSectionTabs; track tab.id) {
+      <!-- Fast Page Switcher Strip -->
+      <div class="bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs mb-6 flex flex-wrap items-center gap-2">
+        <span class="text-2xs font-mono font-bold uppercase tracking-wider text-slate-400 px-3 py-1">Switch Page:</span>
+        @for (page of pages; track page.key) {
           <button
             type="button"
-            class="admin-tab whitespace-nowrap font-mono text-xs font-bold"
-            [class.active]="activeHomeTab() === tab.id"
-            (click)="activeHomeTab.set(tab.id)"
+            (click)="selectPage(page.key)"
+            class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono tracking-tight transition-all duration-200 cursor-pointer"
+            [class.bg-slate-900]="activePage() === page.key"
+            [class.text-white]="activePage() === page.key"
+            [class.shadow-sm]="activePage() === page.key"
+            [class.bg-slate-50]="activePage() !== page.key"
+            [class.text-slate-600]="activePage() !== page.key"
+            [class.hover:bg-slate-100]="activePage() !== page.key"
+            [class.hover:text-slate-900]="activePage() !== page.key"
           >
-            <span>{{ getHomeSectionTag(tab.id) }}</span>
+            <span class="text-xs opacity-75">{{ page.icon }}</span>
+            <span>{{ page.label }}</span>
           </button>
         }
       </div>
+
+      <!-- ========================================================================================= -->
+      <!-- 1. HOMEPAGE EDITOR                                                                        -->
+      <!-- ========================================================================================= -->
+      @if (activePage() === 'home') {
+        <!-- Segmented Section Tabs (Named by Section Tag) -->
+        <div class="admin-tabs overflow-x-auto pb-1 mb-6">
+          @for (tab of homeSectionTabs; track tab.id) {
+            <button
+              type="button"
+              class="admin-tab whitespace-nowrap font-mono text-xs font-bold"
+              [class.active]="activeHomeTab() === tab.id"
+              (click)="activeHomeTab.set(tab.id)"
+            >
+              <span>{{ getHomeSectionTag(tab.id) }}</span>
+            </button>
+          }
+        </div>
 
       <!-- TAB: HERO -->
       @if (activeHomeTab() === 'hero') {
@@ -227,7 +392,7 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               <div class="lg:col-span-5 flex flex-col gap-3.5">
                 <div class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3.5">
                   <span class="admin-field-label !mb-0 font-bold text-slate-900 flex items-center gap-1.5">
-                    <span>🖼️</span> Intro Showcase Portrait
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> <span>Intro Showcase Portrait</span>
                   </span>
                   <wh-media-picker label="Showcase Photo" [(value)]="content.intro.image_url" helperText="Editorial fashion &amp; ritual portrait" accept="image" />
                   <wh-i18n-input label="Image Tag Pill" [(value)]="content.intro.image_tag" [globalLang]="globalEditingLang()" helperText="e.g. / CELLAR RITUAL" />
@@ -301,7 +466,7 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
               <wh-i18n-input label="Section Tag" [(value)]="content.manifesto.tag" [globalLang]="globalEditingLang()" />
               <div>
-                <label class="admin-field-label">Stamp Center Icon (e.g. 🍇)</label>
+                <label class="admin-field-label">Stamp Center Icon / Character</label>
                 <input type="text" [(ngModel)]="content.manifesto.stamp_icon" class="admin-field-input" />
               </div>
               <div class="md:col-span-2">
@@ -339,32 +504,30 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               <wh-i18n-input label="Section Tag" [(value)]="content.services.tag" [globalLang]="globalEditingLang()" />
             </div>
 
-            <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               @for (srv of content.services.items; track $index) {
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 relative space-y-4">
-                  <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
-                    <span class="font-mono text-xs font-bold text-wine-700">Pillar #{{ srv.num }}</span>
-                    <div class="flex items-center gap-1.5">
-                      <button type="button" (click)="moveServiceUp($index)" [disabled]="$index === 0" class="btn btn-secondary btn-xs">↑</button>
-                      <button type="button" (click)="moveServiceDown($index)" [disabled]="$index === content.services.items.length - 1" class="btn btn-secondary btn-xs">↓</button>
-                      <button type="button" (click)="removeServiceItem($index)" class="text-red-500 hover:text-red-700 px-2 text-xs font-bold cursor-pointer">✕ Delete</button>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 relative space-y-3 flex flex-col justify-between">
+                  <div class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                      <span class="font-mono text-xs font-bold text-wine-700">Pillar #{{ srv.num }}</span>
+                      <div class="flex items-center gap-1.5">
+                        <button type="button" (click)="moveServiceUp($index)" [disabled]="$index === 0" class="btn btn-secondary btn-xs !py-0.5 !px-1.5">↑</button>
+                        <button type="button" (click)="moveServiceDown($index)" [disabled]="$index === content.services.items.length - 1" class="btn btn-secondary btn-xs !py-0.5 !px-1.5">↓</button>
+                        <button type="button" (click)="removeServiceItem($index)" class="text-red-500 hover:text-red-700 px-1 text-xs font-bold cursor-pointer">✕</button>
+                      </div>
                     </div>
-                  </div>
 
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label class="admin-field-label">Number Code</label>
-                      <input type="text" [(ngModel)]="srv.num" class="admin-field-input" />
-                    </div>
-                    <div class="sm:col-span-2">
+                    <div class="space-y-2.5">
+                      <div>
+                        <label class="admin-field-label">Number Code</label>
+                        <input type="text" [(ngModel)]="srv.num" class="admin-field-input font-mono" />
+                      </div>
                       <wh-i18n-input label="Service Title" [(value)]="srv.title" [globalLang]="globalEditingLang()" />
-                    </div>
-                    <div class="sm:col-span-3">
                       <wh-i18n-input label="Subtitle / Capabilities" [(value)]="srv.subtitle" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
-                    </div>
-                    <div class="sm:col-span-3">
-                      <label class="admin-field-label">Target Link / Route</label>
-                      <input type="text" [(ngModel)]="srv.link" class="admin-field-input" />
+                      <div>
+                        <label class="admin-field-label">Target Link / Route</label>
+                        <input type="text" [(ngModel)]="srv.link" class="admin-field-input font-mono text-xs" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -389,27 +552,29 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
               <wh-i18n-input label="Section Tag" [(value)]="content.craft.tag" [globalLang]="globalEditingLang()" />
               <wh-i18n-input label="Asterisk Banner Tape" [(value)]="content.craft.asterisk_tape" [globalLang]="globalEditingLang()" />
-              <wh-i18n-input label="Terracotta Kraft Note" [(value)]="content.craft.kraft_note" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
+              <div class="md:col-span-2">
+                <wh-i18n-input label="Terracotta Kraft Note" [(value)]="content.craft.kraft_note" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
+              </div>
             </div>
 
             <!-- Metrics -->
             <div class="pt-4 border-t border-slate-100">
               <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">Skill & Terroir Progress Bars</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">Skill &amp; Terroir Progress Bars</span>
                 <button type="button" class="btn btn-secondary btn-xs" (click)="addCraftMetric()">+ Add Metric</button>
               </div>
 
-              <div class="space-y-3">
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 @for (m of content.craft.metrics; track $index) {
-                  <div class="flex flex-col sm:flex-row items-start sm:items-center gap-3 bg-slate-50 p-3 rounded-xl border border-slate-200/80">
-                    <input type="text" [(ngModel)]="m.num" class="admin-input font-mono text-xs w-16" placeholder="01" />
-                    <div class="flex-1 w-full">
+                  <div class="flex items-center gap-2.5 bg-slate-50 p-3 rounded-xl border border-slate-200/80">
+                    <input type="text" [(ngModel)]="m.num" class="admin-field-input font-mono text-xs w-12 text-center shrink-0" placeholder="01" />
+                    <div class="flex-1 min-w-0">
                       <wh-i18n-input label="Metric Name" [(value)]="m.name" [globalLang]="globalEditingLang()" />
                     </div>
-                    <div class="flex items-center gap-2">
-                      <input type="number" [(ngModel)]="m.pct" min="0" max="100" class="admin-input font-mono text-xs w-20 text-right" />
+                    <div class="flex items-center gap-1 shrink-0">
+                      <input type="number" [(ngModel)]="m.pct" min="0" max="100" class="admin-field-input font-mono text-xs w-14 text-right" />
                       <span class="text-xs font-mono font-bold text-slate-500">%</span>
-                      <button type="button" (click)="removeCraftMetric($index)" class="text-red-500 hover:text-red-700 p-2 text-xs font-bold cursor-pointer">✕</button>
+                      <button type="button" (click)="removeCraftMetric($index)" class="text-red-500 hover:text-red-700 p-1 text-xs font-bold cursor-pointer">✕</button>
                     </div>
                   </div>
                 }
@@ -439,34 +604,34 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               <wh-i18n-input label="Bottom Link Label" [(value)]="content.cellar.view_all_text" [globalLang]="globalEditingLang()" />
               <div>
                 <label class="admin-field-label">View All Route</label>
-                <input type="text" [(ngModel)]="content.cellar.view_all_link" class="admin-field-input" />
+                <input type="text" [(ngModel)]="content.cellar.view_all_link" class="admin-field-input font-mono" />
               </div>
             </div>
 
-            <!-- Bottle Cards (2-Column Live Site Card Layout) -->
-            <div class="space-y-5">
+            <!-- Bottle Cards (2-Column Grid Layout) -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
               @for (card of content.cellar.items; track $index) {
-                <div class="bg-slate-50/80 p-5 rounded-2xl border border-slate-200/80 space-y-4">
-                  <div class="flex items-center justify-between border-b border-slate-200/60 pb-2.5">
-                    <span class="font-mono text-xs font-bold text-wine-700">Bottle Showcase Card #{{ $index + 1 }}</span>
-                    <div class="flex items-center gap-1.5">
-                      <button type="button" (click)="moveCellarUp($index)" [disabled]="$index === 0" class="btn btn-secondary btn-xs">↑</button>
-                      <button type="button" (click)="moveCellarDown($index)" [disabled]="$index === content.cellar.items.length - 1" class="btn btn-secondary btn-xs">↓</button>
-                      <button type="button" (click)="removeCellarItem($index)" class="text-red-500 hover:text-red-700 px-2 text-xs font-bold cursor-pointer">✕ Delete</button>
+                <div class="bg-slate-50/80 p-4 rounded-xl border border-slate-200/80 space-y-3">
+                  <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                    <span class="font-mono text-xs font-bold text-wine-700">Card #{{ $index + 1 }}</span>
+                    <div class="flex items-center gap-1">
+                      <button type="button" (click)="moveCellarUp($index)" [disabled]="$index === 0" class="btn btn-secondary btn-xs !py-0.5 !px-1.5">↑</button>
+                      <button type="button" (click)="moveCellarDown($index)" [disabled]="$index === content.cellar.items.length - 1" class="btn btn-secondary btn-xs !py-0.5 !px-1.5">↓</button>
+                      <button type="button" (click)="removeCellarItem($index)" class="text-red-500 hover:text-red-700 px-1 text-xs font-bold cursor-pointer">✕</button>
                     </div>
                   </div>
 
-                  <!-- 2-Column Split: Image on Left (Never full width), Details on Right -->
-                  <div class="grid grid-cols-1 sm:grid-cols-12 gap-5 items-start">
-                    <div class="sm:col-span-4">
-                      <wh-media-picker label="Bottle Cover Image" [(value)]="card.img" helperText="Square bottle image" accept="image" />
+                  <!-- 2-Column Split inside bottle card -->
+                  <div class="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-start">
+                    <div class="sm:col-span-5">
+                      <wh-media-picker label="Cover Image" [(value)]="card.img" helperText="Square bottle image" accept="image" />
                     </div>
 
-                    <div class="sm:col-span-8 space-y-3.5">
+                    <div class="sm:col-span-7 space-y-2.5">
                       <wh-i18n-input label="Bottle Name" [(value)]="card.name" [globalLang]="globalEditingLang()" />
                       <div>
-                        <label class="admin-field-label">Target Link / Route</label>
-                        <input type="text" [(ngModel)]="card.link" class="admin-field-input font-mono" placeholder="/shop or /contact" />
+                        <label class="admin-field-label">Target Route</label>
+                        <input type="text" [(ngModel)]="card.link" class="admin-field-input font-mono text-xs" placeholder="/shop or /contact" />
                       </div>
                       <div>
                         <label class="admin-field-label">Tags (comma separated)</label>
@@ -474,7 +639,7 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
                           type="text"
                           [ngModel]="getCellarTagsString(card)"
                           (ngModelChange)="updateCellarTags(card, $event)"
-                          class="admin-field-input uppercase font-mono"
+                          class="admin-field-input uppercase font-mono text-xs"
                           placeholder="e.g. BRANDING, XINOMAVRO, 2021"
                         />
                       </div>
@@ -506,19 +671,21 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
             <!-- Press Quotes -->
             <div class="mb-8">
               <div class="flex items-center justify-between mb-3">
-                <span class="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">Giant Critic Acclaim Quotes</span>
+                <span class="text-xs font-bold uppercase tracking-wider text-slate-700 font-mono">Critic Acclaim Quotes</span>
                 <button type="button" class="btn btn-secondary btn-xs" (click)="addPressQuote()">+ Add Quote</button>
               </div>
 
-              <div class="space-y-4">
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                 @for (q of content.press.quotes; track $index) {
-                  <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
-                    <div class="flex items-center justify-between">
-                      <span class="font-mono text-xs font-bold text-slate-600">Quote #{{ $index + 1 }}</span>
-                      <button type="button" (click)="removePressQuote($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕ Delete</button>
+                  <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2.5 flex flex-col justify-between">
+                    <div class="space-y-2.5">
+                      <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5">
+                        <span class="font-mono text-xs font-bold text-slate-600">Quote #{{ $index + 1 }}</span>
+                        <button type="button" (click)="removePressQuote($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕</button>
+                      </div>
+                      <wh-i18n-input label="Quote Text" [(value)]="q.quote" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
+                      <wh-i18n-input label="Author / Publication" [(value)]="q.author" [globalLang]="globalEditingLang()" />
                     </div>
-                    <wh-i18n-input label="Quote Text" [(value)]="q.quote" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
-                    <wh-i18n-input label="Author / Publication" [(value)]="q.author" [globalLang]="globalEditingLang()" />
                   </div>
                 }
               </div>
@@ -663,19 +830,21 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               <wh-i18n-input label="Section Tag" [(value)]="aboutContent.benchmarks.tag" [globalLang]="globalEditingLang()" />
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               @for (item of aboutContent.benchmarks.items; track $index) {
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
-                  <div class="flex items-center justify-between">
-                    <span class="font-mono text-xs font-bold text-wine-700">Metric Card #{{ $index + 1 }}</span>
-                    <button type="button" (click)="removeAboutBenchmark($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕ Delete</button>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2.5 flex flex-col justify-between">
+                  <div class="space-y-2.5">
+                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5">
+                      <span class="font-mono text-xs font-bold text-wine-700">Metric Card #{{ $index + 1 }}</span>
+                      <button type="button" (click)="removeAboutBenchmark($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕</button>
+                    </div>
+                    <div>
+                      <label class="admin-field-label">Value (e.g. 120+, 100%, 18 yrs)</label>
+                      <input type="text" [(ngModel)]="item.num" class="admin-field-input font-bold" />
+                    </div>
+                    <wh-i18n-input label="Metric Title" [(value)]="item.label" [globalLang]="globalEditingLang()" />
+                    <wh-i18n-input label="Metric Subtext / Note" [(value)]="item.note" [globalLang]="globalEditingLang()" />
                   </div>
-                  <div>
-                    <label class="admin-field-label">Number / Metric Value (e.g. 120+, 100%, 18 yrs)</label>
-                    <input type="text" [(ngModel)]="item.num" class="admin-field-input" />
-                  </div>
-                  <wh-i18n-input label="Metric Title" [(value)]="item.label" [globalLang]="globalEditingLang()" />
-                  <wh-i18n-input label="Metric Subtext / Note" [(value)]="item.note" [globalLang]="globalEditingLang()" />
                 </div>
               }
             </div>
@@ -698,28 +867,26 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               <wh-i18n-input label="Subtext / Badge" [(value)]="aboutContent.values.subtext" [globalLang]="globalEditingLang()" />
             </div>
 
-            <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               @for (val of aboutContent.values.items; track $index) {
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
-                  <div class="flex items-center justify-between">
-                    <span class="font-mono text-xs font-bold text-wine-700">Principle #{{ val.num }}</span>
-                    <button type="button" (click)="removeAboutValue($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕ Delete</button>
-                  </div>
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    <div>
-                      <label class="admin-field-label">Number (e.g. 01)</label>
-                      <input type="text" [(ngModel)]="val.num" class="admin-field-input" />
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2.5 flex flex-col justify-between">
+                  <div class="space-y-2.5">
+                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5">
+                      <span class="font-mono text-xs font-bold text-wine-700">Principle #{{ val.num }}</span>
+                      <button type="button" (click)="removeAboutValue($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕</button>
                     </div>
-                    <div>
-                      <label class="admin-field-label">Pill Tag (e.g. / ORIGIN)</label>
-                      <input type="text" [(ngModel)]="val.tag" class="admin-field-input" />
+                    <div class="grid grid-cols-2 gap-2">
+                      <div>
+                        <label class="admin-field-label">Number</label>
+                        <input type="text" [(ngModel)]="val.num" class="admin-field-input font-mono" />
+                      </div>
+                      <div>
+                        <label class="admin-field-label">Pill Tag</label>
+                        <input type="text" [(ngModel)]="val.tag" class="admin-field-input font-mono text-xs" />
+                      </div>
                     </div>
-                    <div class="sm:col-span-3">
-                      <wh-i18n-input label="Principle Title" [(value)]="val.title" [globalLang]="globalEditingLang()" />
-                    </div>
-                    <div class="sm:col-span-3">
-                      <wh-i18n-input label="Principle Narrative" [(value)]="val.text" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
-                    </div>
+                    <wh-i18n-input label="Principle Title" [(value)]="val.title" [globalLang]="globalEditingLang()" />
+                    <wh-i18n-input label="Principle Narrative" [(value)]="val.text" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
                   </div>
                 </div>
               }
@@ -741,24 +908,20 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               <wh-i18n-input label="Section Tag" [(value)]="aboutContent.protocols.tag" [globalLang]="globalEditingLang()" />
             </div>
 
-            <div class="space-y-4">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               @for (prot of aboutContent.protocols.items; track $index) {
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
-                  <div class="flex items-center justify-between">
-                    <span class="font-mono text-xs font-bold text-wine-700">Protocol #{{ prot.num }}</span>
-                    <button type="button" (click)="removeAboutProtocol($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕ Delete</button>
-                  </div>
-                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2.5 flex flex-col justify-between">
+                  <div class="space-y-2.5">
+                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5">
+                      <span class="font-mono text-xs font-bold text-wine-700">Protocol #{{ prot.num }}</span>
+                      <button type="button" (click)="removeAboutProtocol($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕</button>
+                    </div>
                     <div>
-                      <label class="admin-field-label">Protocol Key (e.g. A, B, C)</label>
-                      <input type="text" [(ngModel)]="prot.num" class="admin-field-input" />
+                      <label class="admin-field-label">Protocol Key</label>
+                      <input type="text" [(ngModel)]="prot.num" class="admin-field-input font-mono" />
                     </div>
-                    <div class="sm:col-span-2">
-                      <wh-i18n-input label="Protocol Title" [(value)]="prot.title" [globalLang]="globalEditingLang()" />
-                    </div>
-                    <div class="sm:col-span-3">
-                      <wh-i18n-input label="Protocol Description" [(value)]="prot.desc" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
-                    </div>
+                    <wh-i18n-input label="Protocol Title" [(value)]="prot.title" [globalLang]="globalEditingLang()" />
+                    <wh-i18n-input label="Protocol Description" [(value)]="prot.desc" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
                   </div>
                 </div>
               }
@@ -829,18 +992,20 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               <button type="button" class="btn btn-secondary btn-xs" (click)="addShopCategory()">+ Add Category</button>
             </div>
 
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               @for (cat of shopContent.categories; track $index) {
-                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
-                  <div class="flex items-center justify-between">
-                    <span class="font-mono text-xs font-bold text-wine-700">Category Filter #{{ $index + 1 }}</span>
-                    <button type="button" (click)="removeShopCategory($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕ Delete</button>
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-2.5 flex flex-col justify-between">
+                  <div class="space-y-2.5">
+                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-1.5">
+                      <span class="font-mono text-xs font-bold text-wine-700">Filter #{{ $index + 1 }}</span>
+                      <button type="button" (click)="removeShopCategory($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕</button>
+                    </div>
+                    <div>
+                      <label class="admin-field-label">Filter Key Code</label>
+                      <input type="text" [(ngModel)]="cat.key" class="admin-field-input uppercase font-mono" />
+                    </div>
+                    <wh-i18n-input label="Category Display Label" [(value)]="cat.label" [globalLang]="globalEditingLang()" />
                   </div>
-                  <div>
-                    <label class="admin-field-label">Filter Key Code (e.g. ALL, VOLCANIC, NATURAL)</label>
-                    <input type="text" [(ngModel)]="cat.key" class="admin-field-input uppercase" />
-                  </div>
-                  <wh-i18n-input label="Category Display Label" [(value)]="cat.label" [globalLang]="globalEditingLang()" />
                 </div>
               }
             </div>
@@ -860,82 +1025,84 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               <button type="button" class="btn btn-secondary btn-xs" (click)="addShopBottle()">+ Add New Bottle</button>
             </div>
 
-            <div class="space-y-5">
+            <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
               @for (bottle of shopContent.bottles; track bottle.id; let idx = $index) {
-                <div class="bg-slate-50 p-5 rounded-2xl border border-slate-200/80 space-y-4">
-                  <div class="flex items-center justify-between border-b border-slate-200/60 pb-3">
-                    <div class="flex items-center gap-3">
-                      <span class="px-2.5 py-1 rounded bg-slate-900 text-white font-mono text-xs font-bold">{{ bottle.name }} ({{ bottle.vintage }})</span>
-                      <span class="font-mono text-xs text-wine-700 font-bold">{{ bottle.price }}</span>
+                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3.5 flex flex-col justify-between">
+                  <div class="space-y-3">
+                    <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
+                      <div class="flex items-center gap-2">
+                        <span class="px-2 py-0.5 rounded bg-slate-900 text-white font-mono text-xs font-bold">{{ bottle.name }} ({{ bottle.vintage }})</span>
+                        <span class="font-mono text-xs text-wine-700 font-bold">{{ bottle.price }}</span>
+                      </div>
+                      <div class="flex items-center gap-1">
+                        <button type="button" (click)="moveShopBottleUp(idx)" [disabled] his="$index === 0" class="btn btn-secondary btn-xs !py-0.5 !px-1.5">↑</button>
+                        <button type="button" (click)="moveShopBottleDown(idx)" [disabled]="idx === shopContent.bottles.length - 1" class="btn btn-secondary btn-xs !py-0.5 !px-1.5">↓</button>
+                        <button type="button" (click)="removeShopBottle(idx)" class="text-red-500 hover:text-red-700 px-1 text-xs font-bold cursor-pointer">✕</button>
+                      </div>
                     </div>
-                    <div class="flex items-center gap-1.5">
-                      <button type="button" (click)="moveShopBottleUp(idx)" [disabled]="idx === 0" class="btn btn-secondary btn-xs">↑</button>
-                      <button type="button" (click)="moveShopBottleDown(idx)" [disabled]="idx === shopContent.bottles.length - 1" class="btn btn-secondary btn-xs">↓</button>
-                      <button type="button" (click)="removeShopBottle(idx)" class="text-red-500 hover:text-red-700 px-2 text-xs font-bold cursor-pointer">✕ Delete</button>
-                    </div>
-                  </div>
 
-                  <!-- 2-Column Split: Image on Left (Never full width), Details on Right -->
-                  <div class="grid grid-cols-1 lg:grid-cols-12 gap-5 items-start">
-                    
-                    <!-- Left: Bottle Media Frame & Specs -->
-                    <div class="lg:col-span-4 space-y-3.5">
-                      <wh-media-picker label="Bottle Photo" [(value)]="bottle.img" helperText="Card bottle photo" accept="image" />
+                    <!-- 2-Column Split inside bottle card -->
+                    <div class="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-start">
                       
-                      <div class="grid grid-cols-2 gap-2.5">
-                        <div>
-                          <label class="admin-field-label">Vintage</label>
-                          <input type="text" [(ngModel)]="bottle.vintage" class="admin-field-input font-mono" placeholder="2024" />
+                      <!-- Left: Bottle Media Frame & Specs -->
+                      <div class="sm:col-span-5 space-y-2.5">
+                        <wh-media-picker label="Bottle Photo" [(value)]="bottle.img" helperText="Card bottle photo" accept="image" />
+                        
+                        <div class="grid grid-cols-2 gap-2">
+                          <div>
+                            <label class="admin-field-label">Vintage</label>
+                            <input type="text" [(ngModel)]="bottle.vintage" class="admin-field-input font-mono text-xs" placeholder="2024" />
+                          </div>
+                          <div>
+                            <label class="admin-field-label">Alcohol</label>
+                            <input type="text" [(ngModel)]="bottle.alcohol" class="admin-field-input font-mono text-xs" placeholder="13.5%" />
+                          </div>
                         </div>
-                        <div>
-                          <label class="admin-field-label">Alcohol (ABV)</label>
-                          <input type="text" [(ngModel)]="bottle.alcohol" class="admin-field-input font-mono" placeholder="13.5%" />
+
+                        <div class="space-y-1.5">
+                          <wh-i18n-input label="Status Pill Label" [(value)]="bottle.status" [globalLang]="globalEditingLang()" />
+                          <div>
+                            <label class="admin-field-label">Badge Color CSS</label>
+                            <input type="text" [(ngModel)]="bottle.statusBg" class="admin-field-input font-mono text-2xs" placeholder="bg-[#922e1b]" />
+                          </div>
                         </div>
                       </div>
 
-                      <div class="space-y-2">
-                        <wh-i18n-input label="Status Pill Label" [(value)]="bottle.status" [globalLang]="globalEditingLang()" helperText="e.g. LIMITED ALLOCATION" />
-                        <div>
-                          <label class="admin-field-label">Badge Color CSS</label>
-                          <input type="text" [(ngModel)]="bottle.statusBg" class="admin-field-input font-mono text-2xs" placeholder="bg-[#922e1b]" />
+                      <!-- Right: Commercial & Terroir Dossier -->
+                      <div class="sm:col-span-7 space-y-2.5">
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <div class="sm:col-span-2">
+                            <label class="admin-field-label">Bottle Name</label>
+                            <input type="text" [(ngModel)]="bottle.name" class="admin-field-input uppercase font-bold text-xs" />
+                          </div>
+                          <div>
+                            <label class="admin-field-label">Price</label>
+                            <input type="text" [(ngModel)]="bottle.price" class="admin-field-input font-mono font-bold text-wine-800 text-xs" placeholder="€45.00" />
+                          </div>
                         </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                          <div>
+                            <label class="admin-field-label">Category</label>
+                            <select [(ngModel)]="bottle.category" class="admin-field-input font-semibold text-xs">
+                              @for (c of shopContent.categories; track c.key) {
+                                <option [value]="c.key">{{ c.key }}</option>
+                              }
+                            </select>
+                          </div>
+                          <div>
+                            <wh-i18n-input label="Region" [(value)]="bottle.region" [globalLang]="globalEditingLang()" />
+                          </div>
+                          <div>
+                            <wh-i18n-input label="Varietal" [(value)]="bottle.varietal" [globalLang]="globalEditingLang()" />
+                          </div>
+                        </div>
+
+                        <wh-i18n-input label="Soil Composition" [(value)]="bottle.soil" [globalLang]="globalEditingLang()" />
+                        <wh-i18n-input label="Sommelier Tasting Notes" [(value)]="bottle.tastingNote" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
                       </div>
+
                     </div>
-
-                    <!-- Right: Commercial & Terroir Dossier -->
-                    <div class="lg:col-span-8 space-y-3.5">
-                      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div class="sm:col-span-2">
-                          <label class="admin-field-label">Bottle Name</label>
-                          <input type="text" [(ngModel)]="bottle.name" class="admin-field-input uppercase font-bold" />
-                        </div>
-                        <div>
-                          <label class="admin-field-label">Price (Formatted)</label>
-                          <input type="text" [(ngModel)]="bottle.price" class="admin-field-input font-mono font-bold text-wine-800" placeholder="€45.00" />
-                        </div>
-                      </div>
-
-                      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
-                        <div>
-                          <label class="admin-field-label">Category Match</label>
-                          <select [(ngModel)]="bottle.category" class="admin-field-input font-semibold">
-                            @for (c of shopContent.categories; track c.key) {
-                              <option [value]="c.key">{{ c.key }}</option>
-                            }
-                          </select>
-                        </div>
-                        <div>
-                          <wh-i18n-input label="Region / Origin" [(value)]="bottle.region" [globalLang]="globalEditingLang()" />
-                        </div>
-                        <div>
-                          <wh-i18n-input label="Grape Varietal" [(value)]="bottle.varietal" [globalLang]="globalEditingLang()" />
-                        </div>
-                      </div>
-
-                      <wh-i18n-input label="Terroir Soil Composition" [(value)]="bottle.soil" [globalLang]="globalEditingLang()" />
-                      <wh-i18n-input label="Sommelier Tasting Notes" [(value)]="bottle.tastingNote" [isTextarea]="true" [rows]="2" [globalLang]="globalEditingLang()" />
-                    </div>
-
                   </div>
                 </div>
               }
@@ -1010,18 +1177,18 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
               <wh-i18n-input label="Submit Button Label" [(value)]="contactContent.form.button_text" [globalLang]="globalEditingLang()" />
             </div>
 
-            <div class="space-y-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               @for (opt of contactContent.form.subjects; track $index) {
-                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                  <div class="w-full sm:w-1/3">
-                    <label class="admin-field-label">Value (Identifier)</label>
-                    <input type="text" [(ngModel)]="opt.value" class="admin-field-input" />
+                <div class="bg-slate-50 p-3 rounded-xl border border-slate-200/80 flex items-center gap-2.5">
+                  <div class="w-1/3">
+                    <label class="admin-field-label">Value</label>
+                    <input type="text" [(ngModel)]="opt.value" class="admin-field-input text-xs" />
                   </div>
-                  <div class="flex-1 w-full">
-                    <label class="admin-field-label">Dropdown Display Text</label>
-                    <input type="text" [(ngModel)]="opt.label" class="admin-field-input uppercase" />
+                  <div class="flex-1 min-w-0">
+                    <label class="admin-field-label">Dropdown Label</label>
+                    <input type="text" [(ngModel)]="opt.label" class="admin-field-input uppercase text-xs" />
                   </div>
-                  <button type="button" (click)="removeContactSubject($index)" class="text-red-500 hover:text-red-700 p-2 text-xs font-bold cursor-pointer mt-4 sm:mt-0">✕</button>
+                  <button type="button" (click)="removeContactSubject($index)" class="text-red-500 hover:text-red-700 p-1 text-xs font-bold cursor-pointer mt-4">✕</button>
                 </div>
               }
             </div>
@@ -1092,14 +1259,46 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
         </div>
       </div>
     }
+
+    <!-- Bottom Page Navigation Bar in Edit Mode -->
+    <div class="mt-8 pt-5 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/50 p-4 rounded-2xl">
+      <button
+        type="button"
+        (click)="backToLibrary()"
+        class="btn btn-secondary btn-sm flex items-center gap-1.5 cursor-pointer self-start sm:self-auto"
+      >
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+        <span>← Back to Pages Library</span>
+      </button>
+
+      <div class="flex items-center gap-2.5 self-end sm:self-auto">
+        <a [routerLink]="activePreviewPath" target="_blank" class="btn btn-secondary btn-sm">
+          <span>Preview {{ activePageLabel }} ↗</span>
+        </a>
+        <button
+          type="button"
+          class="btn btn-primary btn-sm"
+          [disabled]="saving()"
+          (click)="saveActivePage()"
+        >
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+          <span>{{ saving() ? 'Saving…' : 'Save ' + activePageLabel + ' Changes' }}</span>
+        </button>
+      </div>
+    </div>
+  }
   `,
 })
 export class AdminHomepageEditor implements OnInit {
   private settingsService = inject(SiteSettingsService);
   private confirmDialog = inject(AdminConfirm);
+  private route = inject(ActivatedRoute);
+  private router = inject(Router);
   readonly i18n = inject(I18nService);
 
-  readonly activePage = signal<EditablePageKey>('home');
+  readonly activePage = signal<EditablePageKey | null>(null);
+  searchLibraryQuery = '';
+
   readonly globalEditingLang = this.i18n.currentLang;
   readonly saving = signal(false);
   readonly savedMessage = signal('');
@@ -1119,6 +1318,87 @@ export class AdminHomepageEditor implements OnInit {
     { key: 'contact', label: 'Contact', route: '/contact', icon: '04' },
     { key: 'maintenance', label: 'Maintenance Mode', route: '/maintenance', icon: '05' },
   ];
+
+  readonly pagesLibrary: PageLibraryCard[] = [
+    {
+      key: 'home',
+      number: '01',
+      label: 'Homepage (Main Landing)',
+      categoryTag: 'PRIMARY STOREFRONT',
+      badgeBg: 'bg-wine-100 text-wine-900 border-wine-200',
+      route: '/',
+      description: 'Main storefront landing with full-bleed hero video loop, atelier manifesto, sommelier feature bottle, terroir services, and press accolades.',
+      sectionsCount: 8,
+      sectionHighlights: ['Hero Ambient Loop', 'Atelier Manifesto', 'Terroir Services', 'Craft Metrics', 'Cellar Reserve', 'Press Accolades', 'Concierge & Footer'],
+      coverGradient: 'from-stone-900 via-slate-900 to-wine-950',
+      iconPath: '<path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>',
+    },
+    {
+      key: 'about',
+      number: '02',
+      label: 'About Us (The Atelier Story)',
+      categoryTag: 'EDITORIAL HERITAGE',
+      badgeBg: 'bg-amber-100 text-amber-900 border-amber-200',
+      route: '/about',
+      description: 'Editorial chronicle of The Winehouse atelier, historical cellar milestones, winemaking philosophy pillars, and biodynamic protocols.',
+      sectionsCount: 6,
+      sectionHighlights: ['Hero & Atelier Story', 'Cellar Benchmarks', 'Philosophy Pillars', 'Winemaking Protocols', 'Bottom Invitation'],
+      coverGradient: 'from-slate-900 via-stone-900 to-amber-950',
+      iconPath: '<path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>',
+    },
+    {
+      key: 'shop',
+      number: '03',
+      label: 'e-Shop (Cellar Allocations)',
+      categoryTag: 'COMMERCE STORE',
+      badgeBg: 'bg-emerald-100 text-emerald-900 border-emerald-200',
+      route: '/shop',
+      description: 'Dedicated cellar shop catalog with vintage allocations, volcanic soil filters, grape varietals, allocation badges, and sommelier concierge.',
+      sectionsCount: 4,
+      sectionHighlights: ['Shop Header & Story', 'Category Filters', 'Vintage Allocations', 'Private Concierge'],
+      coverGradient: 'from-slate-900 via-emerald-950 to-slate-950',
+      iconPath: '<path d="M8 2h8v4a4 4 0 0 1-4 4 4 4 0 0 1-4-4V2z"/><path d="M12 10v10"/><path d="M7 22h10"/>',
+    },
+    {
+      key: 'contact',
+      number: '04',
+      label: 'Contact & Cellar Visits',
+      categoryTag: 'GUEST CONCIERGE',
+      badgeBg: 'bg-blue-100 text-blue-900 border-blue-200',
+      route: '/contact',
+      description: 'Private estate cellar tasting visits, visiting schedule & location coordinates, inquiry topics selection, and dispatch concierge card.',
+      sectionsCount: 4,
+      sectionHighlights: ['Contact Header', 'Inquiry Topics Form', 'Concierge Dispatch', 'Visiting Hours & Map'],
+      coverGradient: 'from-slate-900 via-blue-950 to-slate-950',
+      iconPath: '<path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/>',
+    },
+    {
+      key: 'maintenance',
+      number: '05',
+      label: 'Maintenance & Private Access',
+      categoryTag: 'SYSTEM GATEWAY',
+      badgeBg: 'bg-slate-200 text-slate-900 border-slate-300',
+      route: '/maintenance',
+      description: 'Private cellar lockdown gate, scheduled reopening announcement, and exclusive direct contact for allocation holders.',
+      sectionsCount: 2,
+      sectionHighlights: ['Lockdown Notice', 'Direct Sommelier Contact'],
+      coverGradient: 'from-slate-950 via-red-950 to-black',
+      iconPath: '<rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/>',
+    },
+  ];
+
+  readonly filteredPagesLibrary = computed(() => {
+    const query = this.searchLibraryQuery.trim().toLowerCase();
+    if (!query) return this.pagesLibrary;
+    return this.pagesLibrary.filter(
+      (p) =>
+        p.label.toLowerCase().includes(query) ||
+        p.route.toLowerCase().includes(query) ||
+        p.description.toLowerCase().includes(query) ||
+        p.categoryTag.toLowerCase().includes(query) ||
+        p.sectionHighlights.some((h) => h.toLowerCase().includes(query))
+    );
+  });
 
   /* Sub-tabs */
   readonly homeSectionTabs = [
@@ -1165,6 +1445,14 @@ export class AdminHomepageEditor implements OnInit {
 
   ngOnInit(): void {
     this.syncFromSettings();
+    this.route.queryParams.subscribe((params) => {
+      const pageParam = params['page'];
+      if (pageParam && this.pagesLibrary.some((p) => p.key === pageParam)) {
+        this.activePage.set(pageParam as EditablePageKey);
+      } else {
+        this.activePage.set(null);
+      }
+    });
   }
 
   syncFromSettings(): void {
@@ -1195,6 +1483,14 @@ export class AdminHomepageEditor implements OnInit {
     this.activePage.set(key);
     this.savedMessage.set('');
     this.error.set('');
+    this.router.navigate([], { relativeTo: this.route, queryParams: { page: key }, replaceUrl: true });
+  }
+
+  backToLibrary(): void {
+    this.activePage.set(null);
+    this.savedMessage.set('');
+    this.error.set('');
+    this.router.navigate([], { relativeTo: this.route, queryParams: {}, replaceUrl: true });
   }
 
   get activePreviewPath(): string {

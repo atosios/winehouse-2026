@@ -1,0 +1,5 @@
+/
+/about
+/shop
+/contact
+/maintenance

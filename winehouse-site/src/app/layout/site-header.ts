@@ -45,7 +45,7 @@ export class SiteHeader implements OnInit {
   }
 
   private checkScroll(): void {
-    if (typeof document === 'undefined') return;
+    if (typeof window === 'undefined' || typeof document === 'undefined') return;
     this.scrolled.set(window.scrollY > 20);
 
     const headerHeight = 70;

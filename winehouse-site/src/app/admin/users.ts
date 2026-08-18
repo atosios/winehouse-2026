@@ -33,7 +33,7 @@ import { AdminConfirm } from './confirm-dialog';
       </div>
     } @else if (filteredUsers().length === 0) {
       <div class="admin-card admin-empty-state">
-        <div class="admin-empty-state-icon">👤</div>
+        <div class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 mx-auto flex items-center justify-center text-slate-400 mb-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg></div>
         <p>
           @if (searchQuery) {
             No users match your search query.
@@ -121,113 +121,136 @@ export class AdminUsers implements OnInit {
   selector: 'wh-admin-user-edit',
   imports: [FormsModule, RouterLink],
   template: `
-    <a routerLink="/admin/users" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors mb-4">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-      <span>Back to Users</span>
-    </a>
-
-    <div class="flex items-center gap-4 mb-6">
-      <span class="admin-avatar admin-avatar-lg shadow-sm">{{ initials }}</span>
-      <div>
+    <div class="flex items-center justify-between gap-4 mb-6">
+      <div class="flex items-center gap-3">
+        <a routerLink="/admin/users" class="btn btn-secondary btn-sm flex items-center gap-1.5 cursor-pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          <span>All Users</span>
+        </a>
         <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">{{ isNew ? 'Add Administrator' : 'Edit User Profile' }}</h1>
-        <p class="text-xs text-slate-500 mt-0.5">{{ isNew ? 'Grant dashboard access to a new team member.' : email }}</p>
       </div>
     </div>
 
-    <form class="space-y-6 w-full max-w-2xl" (ngSubmit)="save()">
-      <div class="admin-card space-y-5">
-        <div>
-          <label class="admin-field-label" for="user-name">Full Name</label>
-          <input id="user-name" class="admin-field-input" name="name" [(ngModel)]="name" required placeholder="e.g. Maria Papadaki" />
-        </div>
+    <form class="space-y-6" (ngSubmit)="save()">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Sidebar Column (4 cols) -->
+        <div class="lg:col-span-4 space-y-4">
+          <div class="admin-card text-center p-6 space-y-3">
+            <span class="admin-avatar admin-avatar-lg shadow-sm mx-auto text-base">{{ initials }}</span>
+            <div>
+              <h2 class="text-sm font-bold text-slate-900">{{ name || 'New Administrator' }}</h2>
+              <p class="text-xs text-slate-500 mt-0.5">{{ email || 'No email assigned' }}</p>
+            </div>
+            <span class="inline-block px-2.5 py-0.5 text-2xs font-mono font-bold uppercase rounded-md bg-slate-100 text-slate-700">
+              Administrator Role
+            </span>
+          </div>
 
-        <div>
-          <label class="admin-field-label" for="user-email">Email Address</label>
-          <input
-            id="user-email"
-            class="admin-field-input"
-            type="email"
-            name="email"
-            [(ngModel)]="email"
-            required
-            autocomplete="off"
-            placeholder="maria@thewinehouse.gr"
-          />
-        </div>
-
-        <div>
-          <label class="admin-field-label" for="user-password">
-            Password
-            @if (!isNew) {
-              <span class="text-slate-400 font-normal normal-case">(leave blank to keep current)</span>
-            }
-            @if (isNew) {
-              <span class="text-slate-400 font-normal normal-case">(min 10 characters)</span>
-            }
-          </label>
-          <input
-            id="user-password"
-            class="admin-field-input"
-            type="password"
-            name="password"
-            [(ngModel)]="password"
-            [required]="isNew"
-            minlength="10"
-            autocomplete="new-password"
-          />
-          @if (password) {
-            <div class="mt-2 flex items-center gap-2">
-              <div class="flex-1 h-1.5 rounded-full bg-slate-200 overflow-hidden">
-                <div
-                  class="h-full rounded-full transition-all duration-300"
-                  [style.width]="passwordStrength + '%'"
-                  [style.background-color]="passwordStrength >= 75 ? '#10b981' : passwordStrength >= 40 ? '#f59e0b' : '#ef4444'"
-                ></div>
-              </div>
-              <span class="text-xs font-semibold text-slate-500">{{ passwordStrengthLabel }}</span>
+          @if (!isNew) {
+            <div class="admin-danger-zone">
+              <h3 class="text-xs font-bold text-red-900 uppercase tracking-wider">Danger Zone</h3>
+              <p class="text-2xs text-slate-500 my-2">Permanently delete this administrator account. This user will immediately lose access.</p>
+              <button type="button" class="btn btn-danger w-full justify-center text-xs" (click)="deleteUser()">Delete User Account</button>
             </div>
           }
         </div>
 
-        <div>
-          <label class="admin-field-label" for="user-password-confirm">Confirm Password</label>
-          <input
-            id="user-password-confirm"
-            class="admin-field-input"
-            type="password"
-            name="password_confirmation"
-            [(ngModel)]="passwordConfirmation"
-            [required]="isNew || !!password"
-            autocomplete="new-password"
-          />
-          @if (password && passwordConfirmation && password !== passwordConfirmation) {
-            <p class="text-xs text-red-600 font-semibold mt-1">Passwords do not match</p>
-          }
+        <!-- Form Fields Column (8 cols) -->
+        <div class="lg:col-span-8 space-y-4">
+          <div class="admin-card space-y-4">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono border-b border-slate-100 pb-2">Profile Credentials</h2>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label class="admin-field-label" for="user-name">Full Name</label>
+                <input id="user-name" class="admin-field-input" name="name" [(ngModel)]="name" required placeholder="e.g. Maria Papadaki" />
+              </div>
+
+              <div>
+                <label class="admin-field-label" for="user-email">Email Address</label>
+                <input
+                  id="user-email"
+                  class="admin-field-input"
+                  type="email"
+                  name="email"
+                  [(ngModel)]="email"
+                  required
+                  autocomplete="off"
+                  placeholder="maria@thewinehouse.gr"
+                />
+              </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-2 border-t border-slate-100">
+              <div>
+                <label class="admin-field-label" for="user-password">
+                  Password
+                  @if (!isNew) {
+                    <span class="text-slate-400 font-normal normal-case">(leave blank to keep current)</span>
+                  }
+                  @if (isNew) {
+                    <span class="text-slate-400 font-normal normal-case">(min 10 chars)</span>
+                  }
+                </label>
+                <input
+                  id="user-password"
+                  class="admin-field-input"
+                  type="password"
+                  name="password"
+                  [(ngModel)]="password"
+                  [required]="isNew"
+                  minlength="10"
+                  autocomplete="new-password"
+                />
+                @if (password) {
+                  <div class="mt-1.5 flex items-center gap-2">
+                    <div class="flex-1 h-1 rounded-full bg-slate-200 overflow-hidden">
+                      <div
+                        class="h-full rounded-full transition-all duration-300"
+                        [style.width]="passwordStrength + '%'"
+                        [style.background-color]="passwordStrength >= 75 ? '#10b981' : passwordStrength >= 40 ? '#f59e0b' : '#ef4444'"
+                      ></div>
+                    </div>
+                    <span class="text-[10px] font-semibold text-slate-500">{{ passwordStrengthLabel }}</span>
+                  </div>
+                }
+              </div>
+
+              <div>
+                <label class="admin-field-label" for="user-password-confirm">Confirm Password</label>
+                <input
+                  id="user-password-confirm"
+                  class="admin-field-input"
+                  type="password"
+                  name="password_confirmation"
+                  [(ngModel)]="passwordConfirmation"
+                  [required]="isNew || !!password"
+                  autocomplete="new-password"
+                />
+                @if (password && passwordConfirmation && password !== passwordConfirmation) {
+                  <p class="text-2xs text-red-600 font-semibold mt-1">Passwords do not match</p>
+                }
+              </div>
+            </div>
+
+            @if (error()) {
+              <p class="text-xs text-red-600 font-semibold">{{ error() }}</p>
+            }
+            @if (saved()) {
+              <div class="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold flex items-center gap-1">
+                <span>✓</span> {{ isNew ? 'Account created successfully' : 'Profile updated' }}
+              </div>
+            }
+
+            <div class="pt-2 flex justify-end">
+              <button class="btn btn-primary btn-sm" type="submit" [disabled]="busy()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span>{{ busy() ? 'Saving…' : (isNew ? 'Create Administrator' : 'Save Changes') }}</span>
+              </button>
+            </div>
+          </div>
         </div>
       </div>
-
-      @if (error()) {
-        <p class="text-xs text-red-600 font-semibold px-1">{{ error() }}</p>
-      }
-      @if (saved()) {
-        <p class="text-xs text-emerald-600 font-semibold px-1 flex items-center gap-1">
-          <span>✓</span> {{ isNew ? 'Account created successfully' : 'Profile updated' }}
-        </p>
-      }
-
-      <div class="flex items-center gap-3">
-        <button class="btn btn-primary" type="submit" [disabled]="busy()">
-          {{ busy() ? 'Saving…' : (isNew ? 'Create Administrator' : 'Save Changes') }}
-        </button>
-      </div>
-
-      @if (!isNew) {
-        <div class="admin-danger-zone mt-8">
-          <h3>Danger Zone</h3>
-          <p class="text-xs text-slate-500 mb-3">Permanently delete this administrator account. This user will immediately lose access.</p>
-          <button type="button" class="btn btn-danger" (click)="deleteUser()">Delete Account</button>
-        </div>
-      }
     </form>
   `,
 })

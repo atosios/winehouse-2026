@@ -1,4 +1,4 @@
-import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, ViewChild, inject, signal, computed, HostListener } from '@angular/core';
+import { AfterViewInit, ChangeDetectionStrategy, Component, ElementRef, ViewChild, inject, signal, computed, HostListener, OnInit } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { SiteSettingsService } from '../../core/site-settings.service';
@@ -6,6 +6,7 @@ import { I18nService, I18nText, isExternalUrl } from '../../core/i18n.service';
 import { WhReveal } from '../../shared/reveal';
 import { resolveMediaUrl } from '../../core/media.utils';
 import { AdminApi } from '../../admin/api';
+import { SeoService } from '../../core/seo.service';
 
 @Component({
   selector: 'wh-home',
@@ -13,13 +14,25 @@ import { AdminApi } from '../../admin/api';
   templateUrl: './home.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Home implements AfterViewInit {
+export class Home implements OnInit, AfterViewInit {
   private settingsService = inject(SiteSettingsService);
   private i18n = inject(I18nService);
   private api = inject(AdminApi);
+  private seo = inject(SeoService);
 
   readonly hp = computed(() => this.settingsService.homepage());
   readonly videoReady = signal(false);
+
+  ngOnInit(): void {
+    this.seo.setMeta({
+      title: '',
+      description:
+        'The Winehouse — Curated artisanal wines, rare volcanic bottles, tastings, cellar consulting and private tours.',
+      keywords: 'wine cellar, artisanal wine, greek wine, sommelier, wine tasting, volcanic wine',
+      type: 'website',
+    });
+    this.seo.setOrganizationStructuredData();
+  }
 
   readonly heroFallbackImage = computed(() => {
     const hero = this.hp().hero;
@@ -82,8 +95,9 @@ export class Home implements AfterViewInit {
   };
 
   ngAfterViewInit(): void {
+    if (typeof window === 'undefined') return;
     const video = this.heroVideoRef?.nativeElement;
-    if (video) {
+    if (video && typeof video.play === 'function') {
       video.muted = true;
       if (video.readyState >= 2) {
         this.videoReady.set(true);

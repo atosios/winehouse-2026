@@ -66,26 +66,26 @@ import { resolveMediaUrl } from '../core/media.utils';
             <div class="flex items-center gap-1.5 shrink-0">
               <button
                 type="button"
-                class="btn btn-secondary btn-xs !py-1"
+                class="btn btn-secondary btn-xs !py-1 flex items-center gap-1 cursor-pointer"
                 (click)="openModal()"
                 title="Change or select another media file"
               >
                 <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-                <span>Replace</span>
+                <span>Change Media</span>
               </button>
               <button
                 type="button"
-                class="btn btn-secondary btn-xs !text-red-500 hover:!bg-red-50 !py-1"
+                class="btn btn-secondary btn-xs !text-red-600 hover:!bg-red-50 !py-1 cursor-pointer"
                 (click)="clear()"
                 title="Remove selection"
               >
-                ✕
+                Remove
               </button>
             </div>
           </div>
         </div>
       } @else {
-        <!-- Empty State Drop/Select Area (Compact, constrained width) -->
+        <!-- Empty State Drop/Select Area (Single Unified Action Button) -->
         <div
           class="p-4 rounded-2xl border-2 border-dashed border-slate-200 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-50 transition-all flex flex-col items-center justify-center text-center gap-2.5 cursor-pointer group max-w-sm"
           (click)="openModal()"
@@ -107,23 +107,15 @@ import { resolveMediaUrl } from '../core/media.utils';
             </p>
           </div>
 
-          <div class="flex items-center gap-1.5" (click)="$event.stopPropagation()">
+          <div class="flex items-center justify-center">
             <button
               type="button"
-              class="btn btn-secondary btn-xs !py-1"
+              class="btn btn-secondary btn-xs !py-1 flex items-center gap-1.5 cursor-pointer"
               (click)="openModal()"
             >
-              📁 Browse
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span>Choose / Upload {{ accept === 'video' ? 'Video' : accept === 'image' ? 'Image' : 'Media' }}</span>
             </button>
-            <label class="btn btn-primary btn-xs cursor-pointer !py-1">
-              <span>⬆ Upload</span>
-              <input
-                type="file"
-                class="hidden"
-                [accept]="fileAcceptFilter"
-                (change)="onDirectUpload($event)"
-              />
-            </label>
           </div>
         </div>
       }
@@ -146,13 +138,13 @@ import { resolveMediaUrl } from '../core/media.utils';
               <h3 class="text-base font-bold text-slate-900">
                 Select {{ accept === 'video' ? 'Video' : accept === 'image' ? 'Image' : 'Media' }}
               </h3>
-              <p class="text-xs text-slate-500">Pick from existing uploaded media or upload a new file from your computer.</p>
+              <p class="text-xs text-slate-500">Pick from existing media library or upload a new file from your computer.</p>
             </div>
 
             <div class="flex items-center gap-2">
               <button
                 type="button"
-                class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm transition-colors"
+                class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
                 (click)="closeModal()"
               >
                 ✕
@@ -166,27 +158,30 @@ import { resolveMediaUrl } from '../core/media.utils';
               <div class="admin-tabs !mb-0">
                 <button
                   type="button"
-                  class="admin-tab"
+                  class="admin-tab flex items-center gap-1.5 cursor-pointer"
                   [class.active]="activeTab() === 'library'"
                   (click)="activeTab.set('library')"
                 >
-                  📁 Media Library ({{ filteredAssets().length }})
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  <span>Media Library ({{ filteredAssets().length }})</span>
                 </button>
                 <button
                   type="button"
-                  class="admin-tab"
+                  class="admin-tab flex items-center gap-1.5 cursor-pointer"
                   [class.active]="activeTab() === 'upload'"
                   (click)="activeTab.set('upload')"
                 >
-                  ⬆ Upload New
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                  <span>Upload New</span>
                 </button>
                 <button
                   type="button"
-                  class="admin-tab"
+                  class="admin-tab flex items-center gap-1.5 cursor-pointer"
                   [class.active]="activeTab() === 'url'"
                   (click)="activeTab.set('url')"
                 >
-                  🔗 Direct Name / URL
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                  <span>Direct URL / Name</span>
                 </button>
               </div>
             </div>
@@ -214,10 +209,12 @@ import { resolveMediaUrl } from '../core/media.utils';
                 </div>
               } @else if (filteredAssets().length === 0) {
                 <div class="py-16 text-center text-slate-400">
-                  <div class="text-3xl mb-2">🖼️</div>
+                  <div class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 mx-auto flex items-center justify-center text-slate-400 mb-2">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                  </div>
                   <p class="text-sm font-semibold text-slate-700">No matching media found</p>
                   <p class="text-xs text-slate-400 mt-1">Upload a file or switch tabs to add content.</p>
-                  <button type="button" class="btn btn-primary btn-xs mt-4" (click)="activeTab.set('upload')">
+                  <button type="button" class="btn btn-primary btn-xs mt-4 cursor-pointer" (click)="activeTab.set('upload')">
                     + Upload New File
                   </button>
                 </div>
@@ -241,14 +238,14 @@ import { resolveMediaUrl } from '../core/media.utils';
                           />
                         } @else if (isVideoAsset(asset)) {
                           <div class="w-full h-full flex flex-col items-center justify-center text-white bg-slate-950 p-2 text-center">
-                            <span class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center text-lg mb-1 group-hover:bg-wine-600 transition-colors">
-                              ▶
+                            <span class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-1 group-hover:bg-wine-600 transition-colors">
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                             </span>
                             <span class="text-2xs font-mono uppercase text-slate-400 font-semibold">Video</span>
                           </div>
                         } @else {
                           <div class="text-center p-3 text-slate-400">
-                            <span class="text-2xl block mb-1">📄</span>
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mx-auto mb-1"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
                             <span class="text-2xs uppercase font-mono font-bold">{{ asset.name.split('.').pop() }}</span>
                           </div>
                         }
@@ -285,8 +282,8 @@ import { resolveMediaUrl } from '../core/media.utils';
                   (dragleave)="isDragging.set(false)"
                   (drop)="onDrop($event)"
                 >
-                  <div class="w-16 h-16 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-2xl text-wine-700">
-                    {{ uploading() ? '⏳' : '⬆️' }}
+                  <div class="w-14 h-14 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-500">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                   </div>
 
                   <div>

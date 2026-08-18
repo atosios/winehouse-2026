@@ -1,9 +1,10 @@
-import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { SiteSettingsService } from '../../core/site-settings.service';
 import { I18nService, I18nText } from '../../core/i18n.service';
 import { WhReveal } from '../../shared/reveal';
 import { AdminApi } from '../../admin/api';
+import { SeoService } from '../../core/seo.service';
 
 @Component({
   selector: 'wh-contact',
@@ -11,10 +12,11 @@ import { AdminApi } from '../../admin/api';
   templateUrl: './contact.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class Contact {
+export class Contact implements OnInit {
   private settingsService = inject(SiteSettingsService);
   private i18n = inject(I18nService);
   private api = inject(AdminApi);
+  private seo = inject(SeoService);
 
   readonly page = computed(() => this.settingsService.contactPage());
 
@@ -24,6 +26,20 @@ export class Contact {
 
   t(val: I18nText | string): string {
     return this.i18n.t(val as I18nText);
+  }
+
+  ngOnInit(): void {
+    this.seo.setMeta({
+      title: 'Contact & Cellar Inquiries',
+      description:
+        'Connect with The Winehouse for sommelier consultations, private tasting bookings, cellar acquisitions, and direct inquiries.',
+      keywords: 'contact the winehouse, cellar visit, sommelier booking, wine tastings contact',
+      type: 'website',
+    });
+    this.seo.setBreadcrumbStructuredData([
+      { name: 'Home', url: this.seo.getSiteOrigin() },
+      { name: 'Contact', url: `${this.seo.getSiteOrigin()}/contact` },
+    ]);
   }
 
   name = '';

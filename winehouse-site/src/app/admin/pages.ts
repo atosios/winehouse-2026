@@ -47,7 +47,7 @@ import { AdminConfirm } from './confirm-dialog';
       </div>
     } @else if (filteredPages().length === 0) {
       <div class="admin-card admin-empty-state">
-        <div class="admin-empty-state-icon">📄</div>
+        <div class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 mx-auto flex items-center justify-center text-slate-400 mb-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg></div>
         <p>
           @if (searchQuery || activeFilter() !== 'all') {
             No pages match your filter criteria.
@@ -202,13 +202,15 @@ export class AdminPages implements OnInit {
   selector: 'wh-admin-page-edit',
   imports: [FormsModule, RouterLink],
   template: `
-    <a routerLink="/admin/pages" class="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-500 hover:text-slate-900 transition-colors mb-4">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>
-      <span>Back to Pages</span>
-    </a>
-
     <div class="flex items-center justify-between gap-4 mb-6">
-      <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">{{ isNew ? 'Create New Page' : 'Edit Page' }}</h1>
+      <div class="flex items-center gap-3">
+        <a routerLink="/admin/pages" class="btn btn-secondary btn-sm flex items-center gap-1.5 cursor-pointer">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+          <span>All Pages</span>
+        </a>
+        <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">{{ isNew ? 'Create New Page' : 'Edit Page' }}</h1>
+      </div>
+
       @if (!isNew && hasChanges) {
         <span class="inline-flex items-center gap-1.5 text-xs text-amber-600 font-semibold px-2.5 py-1 bg-amber-50 rounded-full border border-amber-200">
           <span class="w-1.5 h-1.5 rounded-full bg-amber-500 animate-pulse"></span>
@@ -217,63 +219,65 @@ export class AdminPages implements OnInit {
       }
     </div>
 
-    <!-- Segmented Tabs -->
-    <div class="admin-tabs mb-6">
-      <button type="button" class="admin-tab" [class.active]="editorTab() === 'content'" (click)="editorTab.set('content')">Page Content</button>
-      <button type="button" class="admin-tab" [class.active]="editorTab() === 'settings'" (click)="editorTab.set('settings')">Route & Status</button>
-    </div>
-
-    <form class="w-full space-y-6" (ngSubmit)="save()">
-      <div class="admin-card space-y-5">
-        @if (editorTab() === 'content') {
-          <div>
-            <label class="admin-field-label" for="page-title">Page Title</label>
-            <input id="page-title" class="admin-field-input text-base font-semibold" name="title" [(ngModel)]="model.title" required placeholder="e.g. Private Cellar Tastings" (ngModelChange)="hasChanges = true" />
-          </div>
-
-          <div>
-            <label class="admin-field-label" for="page-body">Page Body (HTML / Markdown supported)</label>
-            <textarea id="page-body" class="admin-field-input min-h-80 font-mono text-xs leading-relaxed" name="body" [(ngModel)]="model.body" placeholder="Write page content here..." (ngModelChange)="hasChanges = true"></textarea>
-          </div>
-        }
-
-        @if (editorTab() === 'settings') {
-          <div>
-            <label class="admin-field-label" for="slug">Web Address Slug</label>
-            <input id="slug" class="admin-field-input font-mono text-xs" name="slug" [(ngModel)]="model.slug" placeholder="e.g. private-tastings" (ngModelChange)="hasChanges = true" />
-            <p class="text-xs text-slate-500 mt-1.5 font-mono">Public URL: <span class="font-bold text-slate-900">/{{ model.slug || slugPreview || '…' }}</span></p>
-          </div>
-
-          <!-- iOS Toggle for Published state -->
-          <div class="flex items-center justify-between p-4 bg-slate-50 border border-slate-200/80 rounded-xl">
+    <form (ngSubmit)="save()" class="space-y-6">
+      <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+        <!-- Main Content Column (8 cols) -->
+        <div class="lg:col-span-8 space-y-4">
+          <div class="admin-card space-y-4">
             <div>
-              <span class="text-xs font-semibold text-slate-900 block">Publication State</span>
-              <span class="text-2xs text-slate-500">
-                {{ model.published ? 'Page is accessible at its URL.' : 'Page is hidden and returns 404.' }}
-              </span>
+              <label class="admin-field-label" for="page-title">Page Title</label>
+              <input id="page-title" class="admin-field-input text-base font-semibold" name="title" [(ngModel)]="model.title" required placeholder="e.g. Private Cellar Tastings" (ngModelChange)="hasChanges = true" />
             </div>
-            <label class="ios-toggle">
-              <input type="checkbox" name="published" [(ngModel)]="model.published" (ngModelChange)="hasChanges = true" />
-              <span class="ios-toggle-slider"></span>
-            </label>
+
+            <div>
+              <label class="admin-field-label" for="page-body">Page Content (HTML / Markdown supported)</label>
+              <textarea id="page-body" class="admin-field-input min-h-96 font-mono text-xs leading-relaxed" name="body" [(ngModel)]="model.body" placeholder="Write page content here..." (ngModelChange)="hasChanges = true"></textarea>
+            </div>
           </div>
-        }
-      </div>
+        </div>
 
-      @if (error()) {
-        <p class="text-xs text-red-600 font-semibold px-1">{{ error() }}</p>
-      }
+        <!-- Meta & Publishing Sidebar (4 cols) -->
+        <div class="lg:col-span-4 space-y-4">
+          <div class="admin-card space-y-4">
+            <h2 class="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono border-b border-slate-100 pb-2">Publishing &amp; Route</h2>
 
-      <div class="flex items-center gap-3">
-        <button class="btn btn-primary" type="submit" [disabled]="busy()">
-          {{ busy() ? 'Saving…' : (isNew ? 'Create Page' : 'Save Changes') }}
-        </button>
-        @if (saved()) {
-          <span class="text-xs text-emerald-600 font-semibold flex items-center gap-1">
-            <span>✓</span> Saved successfully
-          </span>
-        }
-        <span class="text-2xs text-slate-400 ml-auto hidden sm:block">Shortcut: ⌘S / Ctrl+S</span>
+            <div>
+              <label class="admin-field-label" for="slug">Web Address Slug</label>
+              <input id="slug" class="admin-field-input font-mono text-xs" name="slug" [(ngModel)]="model.slug" placeholder="e.g. private-tastings" (ngModelChange)="hasChanges = true" />
+              <p class="text-2xs text-slate-500 mt-1.5 font-mono">Public URL: <span class="font-bold text-slate-900">/{{ model.slug || slugPreview || '…' }}</span></p>
+            </div>
+
+            <div class="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200/80 rounded-xl">
+              <div>
+                <span class="text-xs font-semibold text-slate-900 block">Published</span>
+                <span class="text-2xs text-slate-500">
+                  {{ model.published ? 'Live to visitors' : 'Hidden draft' }}
+                </span>
+              </div>
+              <label class="ios-toggle">
+                <input type="checkbox" name="published" [(ngModel)]="model.published" (ngModelChange)="hasChanges = true" />
+                <span class="ios-toggle-slider"></span>
+              </label>
+            </div>
+
+            @if (error()) {
+              <p class="text-xs text-red-600 font-semibold">{{ error() }}</p>
+            }
+
+            <div class="pt-2">
+              <button class="btn btn-primary w-full justify-center" type="submit" [disabled]="busy()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg>
+                <span>{{ busy() ? 'Saving…' : (isNew ? 'Create Page' : 'Save Changes') }}</span>
+              </button>
+            </div>
+
+            @if (saved()) {
+              <div class="p-2.5 rounded-lg bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-semibold text-center flex items-center justify-center gap-1">
+                <span>✓</span> Saved successfully
+              </div>
+            }
+          </div>
+        </div>
       </div>
     </form>
   `,

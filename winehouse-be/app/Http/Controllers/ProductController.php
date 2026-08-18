@@ -98,9 +98,11 @@ class ProductController extends Controller
         ]);
 
         if (empty($validated['slug'])) {
-            $base = Str::slug($validated['name'] . (!empty($validated['vintage']) ? '-' . $validated['vintage'] : ''));
+            $validated['slug'] = Product::buildSlug($validated['name'], $validated['category'] ?? 'VOLCANIC', $validated['vintage'] ?? null);
+        } else {
+            $base = Str::slug($validated['slug']);
             if (empty($base)) {
-                $base = 'bottle-' . time();
+                $base = Product::buildSlug($validated['name'], $validated['category'] ?? 'VOLCANIC', $validated['vintage'] ?? null);
             }
             $slug = $base;
             $counter = 1;
@@ -172,17 +174,27 @@ class ProductController extends Controller
             'sort_order' => ['nullable', 'integer'],
         ]);
 
-        if (empty($validated['slug']) && !empty($validated['name'])) {
-            $base = Str::slug($validated['name'] . (!empty($validated['vintage']) ? '-' . $validated['vintage'] : ''));
-            if (empty($base)) {
-                $base = 'bottle-' . time();
+        if (isset($validated['slug'])) {
+            if (!empty($validated['slug'])) {
+                $base = Str::slug($validated['slug']);
+                if (empty($base)) {
+                    $base = Product::buildSlug($validated['name'] ?? $product->name, $validated['category'] ?? $product->category, $validated['vintage'] ?? $product->vintage, $product->id);
+                }
+                $slug = $base;
+                $counter = 1;
+                while (Product::where('slug', $slug)->where('id', '!=', $product->id)->exists()) {
+                    $slug = $base . '-' . $counter++;
+                }
+                $validated['slug'] = $slug;
+            } else {
+                // If explicitly cleared/empty, auto-generate from name, category, vintage
+                $validated['slug'] = Product::buildSlug(
+                    $validated['name'] ?? $product->name,
+                    $validated['category'] ?? $product->category,
+                    $validated['vintage'] ?? $product->vintage,
+                    $product->id
+                );
             }
-            $slug = $base;
-            $counter = 1;
-            while (Product::where('slug', $slug)->where('id', '!=', $product->id)->exists()) {
-                $slug = $base . '-' . $counter++;
-            }
-            $validated['slug'] = $slug;
         }
 
         if (isset($validated['price'])) {
@@ -454,15 +466,9 @@ class ProductController extends Controller
                 }
 
                 // Slug generation
-                $base = Str::slug($name . ($vintage ? '-' . $vintage : ''));
-                if (empty($base)) {
-                    $base = 'bottle-' . time();
-                }
-                $slug = $base;
-                $counter = 1;
-                while (Product::where('slug', $slug)->exists()) {
-                    $slug = $base . '-' . $counter++;
-                }
+                $slug = !empty($rowData['slug']) 
+                    ? Str::slug($rowData['slug']) 
+                    : Product::buildSlug($name, $category, $vintage);
 
                 $product = Product::create([
                     'name' => $name,

@@ -4,9 +4,11 @@ import { Observable } from 'rxjs';
 
 /** Local dev talks to the Docker API; production talks to the api. subdomain. */
 export const API_BASE =
-  location.hostname === 'localhost' || location.hostname === '127.0.0.1'
-    ? 'http://localhost:8080/api'
-    : `https://api.${location.hostname.replace(/^www\./, '')}/api`;
+  typeof location !== 'undefined'
+    ? (location.hostname === 'localhost' || location.hostname === '127.0.0.1'
+        ? 'http://localhost:8080/api'
+        : `https://api.${location.hostname.replace(/^www\./, '')}/api`)
+    : 'http://localhost:8080/api';
 
 export type PostType = 'story' | 'tasting_notes' | 'maker_spotlight' | 'pairing' | 'event' | 'gallery';
 export type LayoutStyle = 'editorial' | 'hero_bleed' | 'split_cover' | 'minimal';
@@ -416,6 +418,7 @@ export interface StoreConfig {
   bank_bic: string;
   bank_beneficiary: string;
   categories: StoreCategory[];
+  low_stock_threshold?: number;
 }
 
 export interface MailConfig {
@@ -464,6 +467,11 @@ export interface SiteSettings {
   mail_config?: MailConfig;
 }
 
+export interface GrapeVarietyItem {
+  variety: I18nText;
+  percentage?: number | null;
+}
+
 export interface Product {
   id: number;
   name: string;
@@ -471,6 +479,7 @@ export interface Product {
   vintage: string;
   region: I18nText;
   varietal: I18nText;
+  varieties?: GrapeVarietyItem[];
   category: string;
   price: number;
   compare_at_price?: number | null;

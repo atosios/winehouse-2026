@@ -16,11 +16,11 @@ export class WhReveal implements OnInit, OnDestroy {
 
   ngOnInit(): void {
     const node = this.el.nativeElement;
-    if (this.revealDelay()) {
+    if (this.revealDelay() && node?.style) {
       node.style.setProperty('--reveal-delay', `${this.revealDelay()}ms`);
     }
-    if (!('IntersectionObserver' in window)) {
-      node.classList.add('in-view');
+    if (typeof window === 'undefined' || !('IntersectionObserver' in window)) {
+      node?.classList?.add('in-view');
       return;
     }
     this.observer = new IntersectionObserver(

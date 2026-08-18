@@ -176,8 +176,8 @@ import { AdminApi } from './api';
           </div>
         </header>
 
-        <!-- Page Canvas with full-width consistency -->
-        <main class="flex-1 p-6 md:p-8 w-full min-w-0">
+        <!-- Page Canvas with balanced structured width -->
+        <main class="flex-1 p-6 md:p-8 w-full min-w-0 max-w-[1600px] mx-auto">
           <router-outlet />
         </main>
       </div>

@@ -47,17 +47,41 @@ class Product extends Model
         'sort_order' => 'integer',
     ];
 
+    /**
+     * Build an automatic slug combining name, category, and vintage.
+     */
+    public static function buildSlug(?string $name, ?string $category = null, ?string $vintage = null, ?int $ignoreId = null): string
+    {
+        $parts = array_values(array_filter([$name, $category, $vintage], function ($val) {
+            return !empty($val) && trim((string) $val) !== '';
+        }));
+
+        $raw = implode('-', $parts);
+        $base = Str::slug($raw);
+        if (empty($base)) {
+            $base = 'bottle-' . time();
+        }
+
+        $slug = $base;
+        $counter = 1;
+        while (static::where('slug', $slug)->when($ignoreId, fn($q) => $q->where('id', '!=', $ignoreId))->exists()) {
+            $slug = $base . '-' . $counter++;
+        }
+
+        return $slug;
+    }
+
     protected static function booted()
     {
         static::creating(function ($product) {
             if (empty($product->slug)) {
-                $base = Str::slug($product->name . ($product->vintage ? '-' . $product->vintage : ''));
-                $slug = $base;
-                $counter = 1;
-                while (static::where('slug', $slug)->exists()) {
-                    $slug = $base . '-' . $counter++;
-                }
-                $product->slug = $slug;
+                $product->slug = static::buildSlug($product->name, $product->category, $product->vintage);
+            }
+        });
+
+        static::updating(function ($product) {
+            if (empty($product->slug)) {
+                $product->slug = static::buildSlug($product->name, $product->category, $product->vintage, $product->id);
             }
         });
     }

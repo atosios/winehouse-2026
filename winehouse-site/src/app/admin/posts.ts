@@ -110,7 +110,7 @@ export interface EditorBlock {
       </div>
     } @else if (filteredPosts().length === 0) {
       <div class="admin-card admin-empty-state">
-        <div class="admin-empty-state-icon">📝</div>
+        <div class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 mx-auto flex items-center justify-center text-slate-400 mb-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></div>
         <p>
           @if (searchQuery || activeFilter() !== 'all') {
             No articles match your filter or search query.
@@ -153,9 +153,7 @@ export interface EditorBlock {
                     @if (post.cover_image) {
                       <img [src]="mediaUrl(post.cover_image)" alt="" class="w-10 h-10 rounded-lg object-cover border border-slate-200 shrink-0" />
                     } @else {
-                      <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-sm shrink-0">
-                        📖
-                      </div>
+                      <div class="w-10 h-10 rounded-lg bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 shrink-0"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg></div>
                     }
                     <div class="min-w-0">
                       <a [routerLink]="[post.id]" class="font-semibold text-slate-900 hover:text-slate-700 hover:underline block truncate max-w-xs sm:max-w-md">
@@ -472,31 +470,31 @@ export class AdminPosts implements OnInit {
 
                     <div class="grid grid-cols-2 gap-1.5">
                       <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(idx, 'heading')">
-                        <span>🏷️</span> Heading
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="shrink-0"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg> Heading
                       </button>
                       <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(idx, 'paragraph')">
-                        <span>📝</span> Text
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="shrink-0"><line x1="21" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="15" y1="18" x2="3" y2="18"></line></svg> Text
                       </button>
                       <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(idx, 'image')">
-                        <span>🖼️</span> Image
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Image
                       </button>
                       <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(idx, 'video')">
-                        <span>🎥</span> Video
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> Video
                       </button>
                       <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(idx, 'quote')">
-                        <span>💬</span> Quote
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Quote
                       </button>
                       <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(idx, 'wine_card')">
-                        <span>🍷</span> Wine Card
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M8 22h8M12 11v11M17 3H7c0 4.5 3 8 5 8s5-3.5 5-8z"/></svg> Wine Card
                       </button>
                       <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(idx, 'pairing_box')">
-                        <span>🍽️</span> Pairing
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg> Pairing
                       </button>
                       <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(idx, 'event_box')">
-                        <span>🎟️</span> Event
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Event
                       </button>
                       <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start col-span-2" (click)="pickInsertBlock(idx, 'divider')">
-                        <span>➖</span> Divider
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="shrink-0"><line x1="5" y1="12" x2="19" y2="12"></line></svg> Divider
                       </button>
                     </div>
                   </div>
@@ -544,7 +542,7 @@ export class AdminPosts implements OnInit {
                       (click)="openMediaPicker({ blockIdx: idx, field: 'image' })"
                       title="Replace Image"
                     >
-                      📁
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                     </button>
                   }
                   @if (block.type === 'video') {
@@ -554,7 +552,7 @@ export class AdminPosts implements OnInit {
                       (click)="openMediaPicker({ blockIdx: idx, field: 'video' })"
                       title="Replace Video"
                     >
-                      🎥
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
                     </button>
                   }
                   <button
@@ -662,12 +660,12 @@ export class AdminPosts implements OnInit {
                         <img [src]="mediaUrl(block.imageUrl)" alt="" class="w-full object-cover max-h-96" />
                       } @else {
                         <div class="h-44 flex flex-col items-center justify-center text-slate-400 text-xs">
-                          <span class="text-3xl mb-1">🖼️</span>
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="mb-1 text-slate-400"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                           <span class="font-semibold text-slate-600">Select or Upload Image</span>
                         </div>
                       }
                       <div class="absolute inset-0 bg-black/40 opacity-0 group-hover/img:opacity-100 flex items-center justify-center text-white text-xs font-semibold transition-opacity">
-                        <span class="bg-black/70 px-3 py-1.5 rounded-full border border-white/20">📷 Choose / Upload Image</span>
+                        <span class="bg-black/70 px-3 py-1.5 rounded-full border border-white/20 flex items-center gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Choose / Upload Image</span>
                       </div>
                     </div>
                     <input
@@ -692,7 +690,7 @@ export class AdminPosts implements OnInit {
                           class="h-44 flex flex-col items-center justify-center text-slate-400 text-xs"
                           (click)="openMediaPicker({ blockIdx: idx, field: 'video' })"
                         >
-                          <span class="text-3xl mb-1">🎥</span>
+                          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="mb-1 text-slate-400"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
                           <span class="font-semibold text-slate-300">Select or Upload Video (.mp4)</span>
                         </div>
                       }
@@ -744,7 +742,7 @@ export class AdminPosts implements OnInit {
                 @if (block.type === 'wine_card') {
                   <div class="my-3 p-5 sm:p-6 rounded-2xl bg-[#faf7f2] border border-[#e8ded0] space-y-3.5 shadow-2xs">
                     <div class="flex items-center justify-between border-b border-[#e8ded0]/80 pb-2">
-                      <span class="text-2xs font-bold uppercase tracking-wider text-[#701423]">🍷 Wine Tasting Highlight</span>
+                      <span class="text-2xs font-bold uppercase tracking-wider text-[#701423] flex items-center gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 22h8M12 11v11M17 3H7c0 4.5 3 8 5 8s5-3.5 5-8z"/></svg> <span>Wine Tasting Highlight</span></span>
                       <input
                         class="text-2xs font-bold px-2.5 py-0.5 bg-[#701423]/10 text-[#701423] rounded-full border-none outline-none text-right w-44 font-mono"
                         placeholder="Rating Badge / 95 pts..."
@@ -770,7 +768,7 @@ export class AdminPosts implements OnInit {
                             </div>
                           } @else {
                             <div class="flex flex-col items-center justify-center text-slate-400 p-2 text-center">
-                              <span class="text-xl mb-0.5">🍾</span>
+                              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" class="mb-1 text-slate-400"><path d="M8 22h8M12 11v11M17 3H7c0 4.5 3 8 5 8s5-3.5 5-8z"/></svg>
                               <span class="text-[10px] font-bold text-slate-500">+ Bottle Photo</span>
                             </div>
                           }
@@ -848,7 +846,7 @@ export class AdminPosts implements OnInit {
                 <!-- 7. PAIRING BOX BLOCK -->
                 @if (block.type === 'pairing_box') {
                   <div class="my-2 p-5 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-2">
-                    <span class="text-2xs font-bold uppercase tracking-wider text-amber-800">🍽️ Pairing Suggestion</span>
+                    <span class="text-2xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg> <span>Pairing Suggestion</span></span>
                     <div class="space-y-1">
                       <input
                         class="w-full font-bold text-sm text-slate-900 bg-transparent border-none outline-none focus:ring-0 p-0 placeholder:text-slate-400"
@@ -893,7 +891,7 @@ export class AdminPosts implements OnInit {
                 <!-- 8. EVENT BOX BLOCK -->
                 @if (block.type === 'event_box') {
                   <div class="my-2 p-5 rounded-2xl bg-slate-900 text-white space-y-2">
-                    <span class="text-2xs font-bold uppercase tracking-wider text-amber-300">🎟️ Cellar Experience</span>
+                    <span class="text-2xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> <span>Cellar Experience</span></span>
                     <input
                       class="w-full font-bold text-sm text-white bg-transparent border-none outline-none focus:ring-0 p-0 placeholder:text-slate-500"
                       placeholder="Event Title..."
@@ -920,7 +918,7 @@ export class AdminPosts implements OnInit {
                 <!-- 9. DIVIDER BLOCK -->
                 @if (block.type === 'divider') {
                   <div class="py-4 text-center text-slate-300 text-xs">
-                    ─────── 🍷 ───────
+                    ──────────
                   </div>
                 }
 
@@ -951,31 +949,31 @@ export class AdminPosts implements OnInit {
 
                   <div class="grid grid-cols-2 gap-1.5">
                     <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(blocks.length, 'heading')">
-                      <span>🏷️</span> Heading
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="shrink-0"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg> Heading
                     </button>
                     <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(blocks.length, 'paragraph')">
-                      <span>📝</span> Text
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="shrink-0"><line x1="21" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="15" y1="18" x2="3" y2="18"></line></svg> Text
                     </button>
                     <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(blocks.length, 'image')">
-                      <span>🖼️</span> Image
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Image
                     </button>
                     <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(blocks.length, 'video')">
-                      <span>🎥</span> Video
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> Video
                     </button>
                     <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(blocks.length, 'quote')">
-                      <span>💬</span> Quote
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Quote
                     </button>
                     <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(blocks.length, 'wine_card')">
-                      <span>🍷</span> Wine Card
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M8 22h8M12 11v11M17 3H7c0 4.5 3 8 5 8s5-3.5 5-8z"/></svg> Wine Card
                     </button>
                     <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(blocks.length, 'pairing_box')">
-                      <span>🍽️</span> Pairing
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg> Pairing
                     </button>
                     <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start" (click)="pickInsertBlock(blocks.length, 'event_box')">
-                      <span>🎟️</span> Event
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Event
                     </button>
                     <button type="button" class="admin-block-btn text-2xs !p-1.5 justify-start col-span-2" (click)="pickInsertBlock(blocks.length, 'divider')">
-                      <span>➖</span> Divider
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="shrink-0"><line x1="5" y1="12" x2="19" y2="12"></line></svg> Divider
                     </button>
                   </div>
                 </div>
@@ -995,7 +993,7 @@ export class AdminPosts implements OnInit {
         <div class="admin-card space-y-3.5">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <span class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-              <span>⚙️</span> Post Metadata
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> <span>Post Metadata</span>
             </span>
           </div>
 
@@ -1021,7 +1019,7 @@ export class AdminPosts implements OnInit {
                   class="absolute inset-0 bg-black/50 opacity-0 group-hover/cover:opacity-100 flex items-center justify-center transition-opacity cursor-pointer text-white text-xs font-semibold"
                   (click)="openMediaPicker('cover')"
                 >
-                  <span>📷 Change Photo</span>
+                  <span class="flex items-center gap-1.5"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Change Photo</span>
                 </div>
               </div>
             } @else {
@@ -1030,7 +1028,7 @@ export class AdminPosts implements OnInit {
                 class="w-full py-2.5 px-2 border-2 border-dashed border-slate-200 hover:border-slate-400 rounded-xl text-center text-slate-500 hover:text-slate-800 bg-slate-50 transition-colors cursor-pointer block mb-1.5"
                 (click)="openMediaPicker('cover')"
               >
-                <span class="text-sm block mb-0.5">🖼️</span>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mx-auto mb-1 text-slate-400"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                 <span class="text-2xs font-semibold">Select / Upload Cover Photo</span>
               </button>
             }
@@ -1052,7 +1050,7 @@ export class AdminPosts implements OnInit {
                 class="text-2xs font-semibold text-slate-700 hover:text-slate-900 flex items-center gap-1 hover:underline cursor-pointer"
                 (click)="categoryManagerOpen = true"
               >
-                <span>⚙️</span> Manage / New
+                <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg> <span>Manage / New</span>
               </button>
             </div>
 
@@ -1105,7 +1103,7 @@ export class AdminPosts implements OnInit {
         <div class="admin-card space-y-3">
           <div class="flex items-center justify-between pb-2 border-b border-slate-100">
             <span class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-              <span>🧱</span> Block Palette
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg> <span>Block Palette</span>
             </span>
           </div>
 
@@ -1116,7 +1114,7 @@ export class AdminPosts implements OnInit {
                 class="admin-block-btn justify-start col-span-2 !bg-amber-50/80 !border-amber-200 text-amber-900 font-semibold"
                 (click)="restoreTitle()"
               >
-                <span>🏷️</span> + Add Title
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="shrink-0"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg> + Add Title
               </button>
             }
             @if (!showExcerpt) {
@@ -1125,7 +1123,7 @@ export class AdminPosts implements OnInit {
                 class="admin-block-btn justify-start col-span-2 !bg-amber-50/80 !border-amber-200 text-amber-900 font-semibold"
                 (click)="restoreExcerpt()"
               >
-                <span>📝</span> + Add Subtitle
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="shrink-0"><line x1="21" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="15" y1="18" x2="3" y2="18"></line></svg> + Add Subtitle
               </button>
             }
             <button
@@ -1135,7 +1133,7 @@ export class AdminPosts implements OnInit {
               (dragstart)="onPaletteDragStart('heading', $event)"
               (click)="addBlock('heading')"
             >
-              <span>🏷️</span> Heading
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="shrink-0"><polyline points="4 7 4 4 20 4 20 7"></polyline><line x1="9" y1="20" x2="15" y2="20"></line><line x1="12" y1="4" x2="12" y2="20"></line></svg> Heading
             </button>
             <button
               type="button"
@@ -1144,7 +1142,7 @@ export class AdminPosts implements OnInit {
               (dragstart)="onPaletteDragStart('paragraph', $event)"
               (click)="addBlock('paragraph')"
             >
-              <span>📝</span> Text
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" class="shrink-0"><line x1="21" y1="10" x2="3" y2="10"></line><line x1="21" y1="6" x2="3" y2="6"></line><line x1="21" y1="14" x2="3" y2="14"></line><line x1="15" y1="18" x2="3" y2="18"></line></svg> Text
             </button>
             <button
               type="button"
@@ -1153,7 +1151,7 @@ export class AdminPosts implements OnInit {
               (dragstart)="onPaletteDragStart('image', $event)"
               (click)="addBlock('image')"
             >
-              <span>🖼️</span> Image
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> Image
             </button>
             <button
               type="button"
@@ -1162,7 +1160,7 @@ export class AdminPosts implements OnInit {
               (dragstart)="onPaletteDragStart('video', $event)"
               (click)="addBlock('video')"
             >
-              <span>🎥</span> Video
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg> Video
             </button>
             <button
               type="button"
@@ -1171,7 +1169,7 @@ export class AdminPosts implements OnInit {
               (dragstart)="onPaletteDragStart('quote', $event)"
               (click)="addBlock('quote')"
             >
-              <span>💬</span> Quote
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg> Quote
             </button>
             <button
               type="button"
@@ -1180,7 +1178,7 @@ export class AdminPosts implements OnInit {
               (dragstart)="onPaletteDragStart('wine_card', $event)"
               (click)="addBlock('wine_card')"
             >
-              <span>🍷</span> Wine Card
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><path d="M8 22h8M12 11v11M17 3H7c0 4.5 3 8 5 8s5-3.5 5-8z"/></svg> Wine Card
             </button>
             <button
               type="button"
@@ -1189,7 +1187,7 @@ export class AdminPosts implements OnInit {
               (dragstart)="onPaletteDragStart('pairing_box', $event)"
               (click)="addBlock('pairing_box')"
             >
-              <span>🍽️</span> Pairing
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg> Pairing
             </button>
             <button
               type="button"
@@ -1198,7 +1196,7 @@ export class AdminPosts implements OnInit {
               (dragstart)="onPaletteDragStart('event_box', $event)"
               (click)="addBlock('event_box')"
             >
-              <span>🎟️</span> Event
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="shrink-0"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Event
             </button>
             <button
               type="button"
@@ -1207,7 +1205,7 @@ export class AdminPosts implements OnInit {
               (dragstart)="onPaletteDragStart('divider', $event)"
               (click)="addBlock('divider')"
             >
-              <span>➖</span> Divider
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="shrink-0"><line x1="5" y1="12" x2="19" y2="12"></line></svg> Divider
             </button>
           </div>
         </div>
@@ -1216,7 +1214,7 @@ export class AdminPosts implements OnInit {
         <div class="admin-card space-y-2">
           <div class="flex items-center justify-between pb-1 border-b border-slate-100">
             <span class="text-xs font-bold text-slate-900 flex items-center gap-1.5">
-              <span>📑</span> Article Outline
+              <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg> <span>Article Outline</span>
             </span>
             <span class="text-2xs text-slate-400 font-semibold">{{ blocks.length }} blocks</span>
           </div>
@@ -1309,10 +1307,12 @@ export class AdminPosts implements OnInit {
                     } @else if (isAssetVideo(asset)) {
                       <div class="w-full aspect-video bg-slate-950 rounded-lg flex items-center justify-center relative">
                         <video [src]="asset.url" class="w-full h-full object-cover rounded-lg opacity-75" preload="metadata"></video>
-                        <span class="absolute w-6 h-6 rounded-full bg-white/90 text-slate-900 flex items-center justify-center text-xs shadow">▶</span>
+                        <span class="absolute w-6 h-6 rounded-full bg-white/90 text-slate-900 flex items-center justify-center text-xs shadow">
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+                        </span>
                       </div>
                     } @else {
-                      <div class="w-full aspect-video bg-slate-200 rounded-lg flex items-center justify-center text-base">📄</div>
+                      <div class="w-full aspect-video bg-slate-200 rounded-lg flex items-center justify-center text-slate-400"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg></div>
                     }
                     <div class="p-1 min-w-0">
                       <p class="text-2xs font-semibold text-slate-800 truncate">{{ asset.name }}</p>
@@ -1520,7 +1520,7 @@ export class AdminPosts implements OnInit {
           <div class="px-5 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
             <div>
               <h3 class="font-bold text-slate-900 text-sm flex items-center gap-2">
-                <span>🏷️</span> Category Manager
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z"></path><line x1="7" y1="7" x2="7.01" y2="7"></line></svg> <span>Category Manager</span>
               </h3>
               <p class="text-2xs text-slate-500 mt-0.5">
                 Create new categories or delete existing ones across all posts.
@@ -1588,7 +1588,7 @@ export class AdminPosts implements OnInit {
                       [class.hover:border-slate-300]="model.category !== cat"
                     >
                       <div class="flex items-center gap-2.5 min-w-0">
-                        <span class="text-sm shrink-0">🍷</span>
+                        
                         <span class="text-xs font-semibold truncate">{{ cat }}</span>
                         @if (model.category === cat) {
                           <span class="text-3xs px-1.5 py-0.5 rounded bg-white/20 text-white font-medium shrink-0">
@@ -1628,7 +1628,7 @@ export class AdminPosts implements OnInit {
             @if (categoryToDelete) {
               <div class="bg-red-50 border border-red-200 rounded-xl p-3 space-y-2 text-xs">
                 <div class="flex items-start gap-2 text-red-800">
-                  <span class="text-base leading-none">⚠️</span>
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-amber-500 shrink-0"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
                   <div>
                     <span class="font-bold">Delete "{{ categoryToDelete }}"?</span>
                     <p class="text-2xs text-red-700 mt-0.5">
@@ -2242,7 +2242,7 @@ export class AdminPostEdit implements OnInit {
         newBlock.region = '';
         newBlock.grape = '';
         newBlock.tastingNotes = '';
-        newBlock.sommelierRating = '★★★★★ Sommelier Pick';
+        newBlock.sommelierRating = 'Sommelier Reserve Selection';
         break;
       case 'pairing_box':
         newBlock.dishName = '';
@@ -2278,15 +2278,15 @@ export class AdminPostEdit implements OnInit {
 
   getBlockIcon(type: EditorBlockType): string {
     switch (type) {
-      case 'heading': return '🏷️';
-      case 'paragraph': return '📝';
-      case 'image': return '🖼️';
-      case 'video': return '🎥';
-      case 'quote': return '💬';
-      case 'wine_card': return '🍷';
-      case 'pairing_box': return '🍽️';
-      case 'event_box': return '🎟️';
-      case 'divider': return '➖';
+      case 'heading': return 'H';
+      case 'paragraph': return '¶';
+      case 'image': return 'IMG';
+      case 'video': return 'VID';
+      case 'quote': return '“';
+      case 'wine_card': return 'WINE';
+      case 'pairing_box': return 'PAIR';
+      case 'event_box': return 'EVENT';
+      case 'divider': return '—';
     }
   }
 
@@ -2362,17 +2362,17 @@ export class AdminPostEdit implements OnInit {
           break;
         case 'wine_card':
           parts.push(
-            `### 🍷 ${block.wineName || 'Wine'} (${block.vintage || 'NV'})\n**Producer:** ${block.winery || '—'}\n**Region:** ${block.region || '—'} · **Grape:** ${block.grape || '—'}\n*${block.tastingNotes || ''}*`
+            `### ${block.wineName || 'Wine'} (${block.vintage || 'NV'})\n**Producer:** ${block.winery || '—'}\n**Region:** ${block.region || '—'} · **Grape:** ${block.grape || '—'}\n*${block.tastingNotes || ''}*`
           );
           break;
         case 'pairing_box':
           parts.push(
-            `> **🍽️ Pairing:** ${block.dishName || ''}\n> **Matched Wine:** ${block.matchedWine || ''}\n> ${block.pairingNotes || ''}`
+            `> **Pairing:** ${block.dishName || ''}\n> **Matched Wine:** ${block.matchedWine || ''}\n> ${block.pairingNotes || ''}`
           );
           break;
         case 'event_box':
           parts.push(
-            `### 🎟️ ${block.eventTitle || 'Event'}\n**Date:** ${block.eventDate || ''} · **Location:** ${block.eventLocation || ''}`
+            `### ${block.eventTitle || 'Event'}\n**Date:** ${block.eventDate || ''} · **Location:** ${block.eventLocation || ''}`
           );
           break;
         case 'divider':

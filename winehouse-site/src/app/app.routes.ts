@@ -16,27 +16,41 @@ const maintenanceGate: CanMatchFn = () => {
 export const routes: Routes = [
   {
     path: '',
-    canMatch: [maintenanceGate],
+    pathMatch: 'full',
     title: `${SITE.name} — ${SITE.tagline}`,
     loadComponent: () => import('./pages/home/home').then((m) => m.Home),
   },
   {
     path: 'about',
-    canMatch: [maintenanceGate],
     title: title('About Us'),
     loadComponent: () => import('./pages/about/about').then((m) => m.About),
   },
   {
     path: 'shop',
-    canMatch: [maintenanceGate],
     title: title('e-Shop'),
     loadComponent: () => import('./pages/shop/shop').then((m) => m.Shop),
   },
   {
+    path: 'shop/:slug',
+    title: title('Bottle Reference'),
+    loadComponent: () =>
+      import('./pages/product-detail/product-detail').then((m) => m.ProductDetail),
+  },
+  {
+    path: 'product/:slug',
+    title: title('Bottle Reference'),
+    loadComponent: () =>
+      import('./pages/product-detail/product-detail').then((m) => m.ProductDetail),
+  },
+  {
     path: 'contact',
-    canMatch: [maintenanceGate],
     title: title('Contact'),
     loadComponent: () => import('./pages/contact/contact').then((m) => m.Contact),
+  },
+  {
+    path: 'maintenance',
+    title: title('Under maintenance'),
+    loadComponent: () => import('./pages/maintenance/maintenance').then((m) => m.Maintenance),
   },
   {
     path: 'admin/login',
@@ -117,11 +131,5 @@ export const routes: Routes = [
       },
     ],
   },
-  {
-    /* visitors during maintenance: every public URL ends up here */
-    path: '',
-    title: title('Under maintenance'),
-    loadComponent: () => import('./pages/maintenance/maintenance').then((m) => m.Maintenance),
-  },
-  { path: '**', redirectTo: '' },
+  { path: '**', redirectTo: '/' },
 ];

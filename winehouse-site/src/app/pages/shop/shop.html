@@ -171,7 +171,7 @@
         (click)="cart.openDrawer()"
         class="font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-primary)] hover:underline flex items-center gap-1 cursor-pointer"
       >
-        <span>BASKET ({{ cart.totalCount() }})</span>
+        <span>CART ({{ cart.totalCount() }})</span>
         <span>→</span>
       </button>
     }
@@ -240,14 +240,18 @@
             </button>
 
             <!-- Main High-Res Bottle Photograph -->
-            <img
-              [src]="getCardImage(bottle)"
-              [alt]="bottle.name + ' ' + (bottle.vintage || '')"
-              (click)="openBottleModal(bottle, $event)"
-              class="bottle-img-interactive cursor-pointer"
-              loading="lazy"
-              decoding="async"
-            />
+            <a
+              [routerLink]="['/shop', bottle.slug || bottle.id]"
+              class="w-full h-full flex items-center justify-center cursor-pointer"
+            >
+              <img
+                [src]="getCardImage(bottle)"
+                [alt]="bottle.name + ' ' + (bottle.vintage || '')"
+                class="bottle-img-interactive"
+                loading="lazy"
+                decoding="async"
+              />
+            </a>
 
             <!-- Vintage Foil Stamp Badge (Bottom Left) -->
             @if (bottle.vintage) {
@@ -301,11 +305,13 @@
 
               <!-- Bottle Title & Price Row -->
               <div class="flex items-baseline justify-between gap-2 mb-2">
-                <h2
-                  (click)="openBottleModal(bottle, $event)"
-                  class="font-big text-2xl sm:text-3xl uppercase tracking-tight text-[var(--color-foreground)] group-hover:text-[var(--color-primary)] transition-colors cursor-pointer leading-[0.95]"
-                >
-                  {{ bottle.name }}
+                <h2 class="font-big text-2xl sm:text-3xl uppercase tracking-tight text-[var(--color-foreground)] leading-[0.95]">
+                  <a
+                    [routerLink]="['/shop', bottle.slug || bottle.id]"
+                    class="hover:text-[var(--color-primary)] transition-colors"
+                  >
+                    {{ bottle.name }}
+                  </a>
                 </h2>
                 <span class="font-mono text-base sm:text-lg font-bold text-[var(--color-primary)] shrink-0">
                   {{ bottle.price }}
@@ -320,11 +326,16 @@
               }
             </div>
 
-            <!-- Smart In-Card Basket Actions -->
+            <!-- Smart In-Card Cart Actions -->
             <div class="pt-3 border-t border-[var(--color-foreground)]/15">
               
-              @if (getItemQtyInCart(bottle.id) > 0) {
-                <!-- Item already in basket: Precision Stepper & Cart Indicator -->
+              @if (bottle.stock_quantity !== undefined && bottle.stock_quantity <= 0) {
+                <!-- Out of Stock Badge -->
+                <div class="w-full py-2.5 px-3 bg-stone-100 border border-[var(--color-foreground)]/20 text-[var(--color-foreground)]/50 font-mono text-[11px] font-bold uppercase tracking-wider text-center rounded-xs">
+                  OUT OF STOCK
+                </div>
+              } @else if (getItemQtyInCart(bottle.id) > 0) {
+                <!-- Item already in cart: Precision Stepper & Cart Indicator -->
                 <div class="flex items-center justify-between gap-2">
                   
                   <div class="shop-stepper">
@@ -350,7 +361,7 @@
                   </div>
 
                   <span class="font-mono text-[10px] uppercase font-bold text-[var(--color-primary)] tracking-wider">
-                    IN BASKET
+                    IN CART
                   </span>
 
                   <button
@@ -363,13 +374,13 @@
 
                 </div>
               } @else {
-                <!-- Item not yet in basket: Direct Add Button -->
+                <!-- Item not yet in cart: Direct Add Button -->
                 <button
                   type="button"
                   (click)="addToBasket(bottle, $event)"
                   class="w-full py-2.5 px-4 bg-[var(--color-foreground)] hover:bg-[var(--color-primary)] text-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between rounded-xs transition-all duration-200 cursor-pointer shadow-xs hover:shadow-sm"
                 >
-                  <span>+ ADD TO BASKET</span>
+                  <span>+ ADD TO CART</span>
                   <span class="font-mono text-sm">→</span>
                 </button>
               }
@@ -530,42 +541,56 @@
             }
           </div>
 
-          <!-- Bottom Actions: Modal Quantity Stepper + Add to Basket -->
+          <!-- Bottom Actions: Modal Quantity Stepper + Add to Cart -->
           <div class="pt-4 border-t border-[var(--color-foreground)]/15 space-y-3">
-            <div class="flex items-center gap-3">
-              
-              <!-- Quantity Stepper -->
-              <div class="shop-stepper">
+            @if (b.stock_quantity !== undefined && b.stock_quantity <= 0) {
+              <div class="p-3 bg-stone-100 border border-[var(--color-foreground)]/20 text-center font-mono text-xs uppercase font-bold text-[var(--color-foreground)]/60 rounded-xs">
+                ALLOCATION CURRENTLY EXHAUSTED (OUT OF STOCK)
+              </div>
+            } @else {
+              <div class="flex items-center gap-3">
+                <!-- Quantity Stepper -->
+                <div class="shop-stepper">
+                  <button
+                    type="button"
+                    (click)="setModalQty(-1)"
+                    class="shop-stepper-btn"
+                  >
+                    —
+                  </button>
+                  <span class="shop-stepper-val">
+                    {{ modalQty() }}
+                  </span>
+                  <button
+                    type="button"
+                    (click)="setModalQty(1)"
+                    class="shop-stepper-btn"
+                  >
+                    +
+                  </button>
+                </div>
+
+                <!-- Add to Cart Button -->
                 <button
                   type="button"
-                  (click)="setModalQty(-1)"
-                  class="shop-stepper-btn"
+                  (click)="addModalBottleToBasket(b)"
+                  class="flex-1 py-3 px-6 bg-[var(--color-foreground)] hover:bg-[var(--color-primary)] text-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-xs transition-all cursor-pointer shadow-sm"
                 >
-                  —
-                </button>
-                <span class="shop-stepper-val">
-                  {{ modalQty() }}
-                </span>
-                <button
-                  type="button"
-                  (click)="setModalQty(1)"
-                  class="shop-stepper-btn"
-                >
-                  +
+                  <span>+ ADD TO CART</span>
+                  <span>→</span>
                 </button>
               </div>
+            }
 
-              <!-- Add to Basket Button -->
-              <button
-                type="button"
-                (click)="addModalBottleToBasket(b)"
-                class="flex-1 py-3 px-6 bg-[var(--color-foreground)] hover:bg-[var(--color-primary)] text-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-xs transition-all cursor-pointer shadow-sm"
-              >
-                <span>+ ADD TO BASKET</span>
-                <span>→</span>
-              </button>
-
-            </div>
+            <!-- View Dedicated Product Page Link -->
+            <a
+              [routerLink]="['/shop', b.slug || b.id]"
+              (click)="closeBottleModal()"
+              class="w-full py-2.5 px-4 bg-[var(--color-paper-light)] hover:bg-[var(--color-foreground)] text-[var(--color-foreground)] hover:text-white border-[1.5px] border-[var(--color-foreground)] font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-between rounded-xs transition-colors cursor-pointer text-center"
+            >
+              <span>VIEW FULL PRODUCT DOSSIER & STORIES</span>
+              <span class="font-mono text-sm">→</span>
+            </a>
           </div>
 
         </div>

@@ -1,0 +1,748 @@
+<div class="min-h-screen bg-[var(--color-paper-light)] text-[var(--color-foreground)] pt-24 md:pt-32 pb-24 selection:bg-[var(--color-primary)] selection:text-white">
+
+  <!-- Toast Notification: Link Copied -->
+  @if (copiedToast()) {
+    <div class="fixed bottom-6 right-6 z-50 bg-[var(--color-foreground)] text-white px-5 py-3.5 rounded-xs shadow-2xl border-[1.5px] border-[var(--color-terracotta)] flex items-center gap-3 animate-fade-in font-mono text-xs tracking-wider uppercase">
+      <span class="text-[var(--color-accent)] font-bold text-sm">✓</span>
+      <span>Bottle link copied to clipboard</span>
+    </div>
+  }
+
+  <!-- Loading State -->
+  @if (loading()) {
+    <div class="shell py-24 flex flex-col items-center justify-center min-h-[50vh]">
+      <div class="w-12 h-12 border-2 border-[var(--color-foreground)]/20 border-t-[var(--color-primary)] rounded-full animate-spin mb-6"></div>
+      <p class="font-serif italic text-xl text-[var(--color-foreground)]/70 tracking-wider">Uncorking bottle ledger & tasting archives...</p>
+    </div>
+  }
+
+  <!-- Error / Not Found State -->
+  @else if (error() || !product()) {
+    <div class="shell py-24 text-center min-h-[50vh] flex flex-col items-center justify-center">
+      <div class="w-16 h-16 rounded-full bg-[var(--color-terracotta)]/15 border-[1.5px] border-[var(--color-terracotta)] flex items-center justify-center mb-6 text-[var(--color-terracotta)] font-mono text-2xl font-bold">
+        !
+      </div>
+      <h1 class="font-big text-4xl uppercase tracking-tight text-[var(--color-foreground)] mb-3">Bottle Not Found</h1>
+      <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/70 mb-8 max-w-md">
+        {{ error() || 'The requested bottle may be temporarily allocated or archived in private vaults.' }}
+      </p>
+      <button
+        type="button"
+        (click)="goBack()"
+        class="py-3.5 px-8 bg-[var(--color-foreground)] hover:bg-[var(--color-primary)] text-white font-mono text-xs font-bold uppercase tracking-widest transition-colors border-[1.5px] border-[var(--color-foreground)] cursor-pointer"
+      >
+        ← Return to Cellar Collection
+      </button>
+    </div>
+  }
+
+  <!-- Product Detail Showcase -->
+  @else if (product(); as p) {
+    <div class="shell space-y-12">
+
+      <!-- Top Utility Navigation: Back Button & Breadcrumbs -->
+      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b-[1.5px] border-[var(--color-foreground)]">
+        
+        <!-- Smart Back Button: Restores exact previous shop filter state -->
+        <button
+          type="button"
+          (click)="goBack()"
+          class="group inline-flex items-center gap-2 font-mono text-xs uppercase font-bold tracking-widest text-[var(--color-foreground)] hover:text-[var(--color-primary)] transition-colors cursor-pointer py-1.5 px-3 rounded-xs border border-[var(--color-foreground)]/20 hover:border-[var(--color-foreground)] bg-white/70 shadow-2xs hover:shadow-xs w-fit"
+          title="Return to catalog and preserve active filters"
+        >
+          <span class="inline-block transition-transform duration-200 group-hover:-translate-x-1 font-bold">←</span>
+          <span>BACK TO CELLAR COLLECTION</span>
+        </button>
+
+        <!-- Breadcrumbs -->
+        <nav class="flex items-center flex-wrap gap-2 text-[11px] font-mono tracking-wider text-[var(--color-foreground)]/60 uppercase" aria-label="Breadcrumb">
+          <a routerLink="/" class="hover:text-[var(--color-primary)] hover:underline transition-colors">Home</a>
+          <span>/</span>
+          <a routerLink="/shop" class="hover:text-[var(--color-primary)] hover:underline transition-colors">e-Shop</a>
+          @if (p.category) {
+            <span>/</span>
+            <a [routerLink]="['/shop']" [queryParams]="{ category: p.category }" class="hover:text-[var(--color-primary)] hover:underline transition-colors">
+              {{ p.category }}
+            </a>
+          }
+          <span>/</span>
+          <span class="text-[var(--color-primary)] font-bold truncate max-w-[220px] sm:max-w-none">{{ p.name }}</span>
+        </nav>
+
+      </div>
+
+      <!-- Main Editorial Showcase Card -->
+      <div class="border-[1.5px] border-[var(--color-foreground)] bg-white rounded-xs overflow-hidden shadow-[8px_8px_0px_0px_var(--color-foreground)]">
+        
+        <!-- Card Dossier Header Ribbon -->
+        <div class="p-4 sm:p-5 border-b-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)]/80 flex flex-wrap items-center justify-between gap-4">
+          <div class="flex items-center gap-3">
+            <span class="editorial-tag">WINEHOUSE CELLAR DOSSIER</span>
+            <span class="hidden sm:inline font-mono text-[11px] uppercase tracking-wider text-[var(--color-foreground)]/60 font-semibold">
+              / LEDGER #{{ p.id }}
+            </span>
+          </div>
+
+          <div class="flex items-center gap-2">
+            @if (p.is_allocated || p.status_label) {
+              @if (p.status_label) {
+                <span class="tape-sticker {{ p.status_bg || 'bg-[var(--color-primary)]' }} text-white text-[10px] py-1 px-3">
+                  {{ t(p.status_label) }}
+                </span>
+              } @else if (p.is_allocated) {
+                <span class="tape-sticker bg-[var(--color-terracotta)] text-white text-[10px] py-1 px-3">
+                  ALLOCATED RELEASE
+                </span>
+              }
+            }
+          </div>
+        </div>
+
+        <!-- 2-Column Split: Visual Stage & Technical Dossier -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 items-stretch">
+          
+          <!-- Left Column: Full-Bleed Cover Image Stage (100% Height Cover) -->
+          <div class="lg:col-span-5 relative overflow-hidden bg-[#fbf9f6] border-b lg:border-b-0 lg:border-r-[1.5px] border-[var(--color-foreground)] min-h-[480px] sm:min-h-[580px] lg:min-h-full group">
+            
+            <!-- Full Bleed Image Covering 100% of the Left Column -->
+            <img
+              [src]="activeImage() || getPrimaryImage(p)"
+              [alt]="p.name + (p.vintage ? ' ' + p.vintage : '')"
+              class="absolute inset-0 w-full h-full object-cover object-center transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+              loading="eager"
+            />
+
+            <!-- Subtle Vignette / Contrast Overlay for Watermarks -->
+            <div class="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-black/20 pointer-events-none"></div>
+
+            <!-- Top Discreet Ledger Watermark -->
+            <div class="absolute top-4 left-5 right-5 flex items-center justify-between pointer-events-none z-10 text-white drop-shadow-sm">
+              <span class="font-mono text-[10px] uppercase font-bold tracking-widest bg-black/40 backdrop-blur-xs py-1 px-2.5 rounded-2xs border border-white/20">
+                / WH-ARCHIVE #{{ p.id }}
+              </span>
+              @if (p.vintage) {
+                <span class="font-mono text-[10px] uppercase font-bold tracking-widest bg-black/40 backdrop-blur-xs py-1 px-2.5 rounded-2xs border border-white/20">
+                  EST. {{ p.vintage }}
+                </span>
+              }
+            </div>
+
+            <!-- Bottom Discreet Estate Mark -->
+            <div class="absolute bottom-4 left-5 pointer-events-none z-10 text-white drop-shadow-sm">
+              <span class="font-mono text-[9px] uppercase tracking-widest font-bold bg-black/40 backdrop-blur-xs py-1 px-2 rounded-2xs border border-white/20">
+                750 ML • CELLAR RESERVE
+              </span>
+            </div>
+
+            <!-- Multi-Image Gallery Floating Pill (if multiple images exist) -->
+            @if (getAllImages().length > 1) {
+              <div class="absolute bottom-4 right-4 z-10 flex items-center gap-1.5 p-1 bg-black/60 backdrop-blur-md border border-white/20 rounded-xs shadow-lg">
+                @for (img of getAllImages(); track img; let gIdx = $index) {
+                  <button
+                    type="button"
+                    (click)="setActiveImage(img)"
+                    class="w-10 h-10 sm:w-12 sm:h-12 rounded-2xs border shrink-0 overflow-hidden cursor-pointer transition-all p-0.5 bg-black/40"
+                    [class.border-[var(--color-accent)]]="activeImage() === img"
+                    [class.ring-1]="activeImage() === img"
+                    [class.ring-[var(--color-accent)]]="activeImage() === img"
+                    [class.border-white/30]="activeImage() !== img"
+                    [class.opacity-60]="activeImage() !== img"
+                    [class.hover:opacity-100]="activeImage() !== img"
+                    [title]="'View visual ' + (gIdx + 1)"
+                  >
+                    <img [src]="img" [alt]="p.name" class="w-full h-full object-cover rounded-3xs" />
+                  </button>
+                }
+              </div>
+            }
+
+          </div>
+
+          <!-- Right Column: Cellar Story, Refined Price & Purchase Center -->
+          <div class="lg:col-span-7 p-6 sm:p-10 flex flex-col justify-between gap-8 bg-white">
+            
+            <div class="space-y-6">
+              
+              <!-- Header Category & Terroir Badge -->
+              <div class="flex items-center flex-wrap gap-2.5">
+                <span class="editorial-tag text-[var(--color-primary)]">
+                  / {{ p.category || 'TERROIR SELECTION' }}
+                </span>
+                @if (p.region) {
+                  <span class="text-[var(--color-foreground)]/30 font-bold">•</span>
+                  <span class="font-mono text-xs uppercase tracking-wider font-bold text-[var(--color-foreground)]/70">
+                    {{ t(p.region) }}
+                  </span>
+                }
+              </div>
+
+              <!-- Main Bottle Title & Minimalist Varietal Subtitle -->
+              <div>
+                <h1 class="font-big text-[clamp(2.2rem,4.5vw,3.8rem)] uppercase leading-[0.95] tracking-tight text-[var(--color-foreground)]">
+                  {{ p.name }}
+                </h1>
+
+                <!-- Minimalist Subtitle with Grape Variety -->
+                @if (p.varietal) {
+                  <p class="font-mono text-xs sm:text-sm uppercase tracking-widest text-[var(--color-foreground)]/65 font-medium mt-2">
+                    {{ t(p.varietal) }}
+                  </p>
+                }
+              </div>
+
+              <!-- Refined Price & Stock Status Bar -->
+              <div class="p-3.5 sm:p-4 bg-[var(--color-paper-light)]/50 border-[1.5px] border-[var(--color-foreground)] rounded-xs flex flex-wrap items-center justify-between gap-4">
+                <div class="flex items-baseline gap-2.5">
+                  <span class="font-mono text-xl sm:text-2xl font-bold text-[var(--color-primary)]">
+                    {{ cart.formatPrice(p.price) }}
+                  </span>
+                  @if (p.compare_at_price && p.compare_at_price > p.price) {
+                    <span class="font-mono text-xs sm:text-sm line-through text-[var(--color-foreground)]/40">
+                      {{ cart.formatPrice(p.compare_at_price) }}
+                    </span>
+                  }
+                </div>
+
+                <!-- Stock Status: Never show exact numeric count, only status states -->
+                @if (isOutOfStock(p)) {
+                  <div class="font-mono text-xs uppercase tracking-wider font-bold flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-red-600"></span>
+                    <span class="text-red-700">OUT OF STOCK</span>
+                  </div>
+                } @else if (isLowStock(p)) {
+                  <div class="font-mono text-xs uppercase tracking-wider font-bold flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse"></span>
+                    <span class="text-amber-800">LOW STOCK</span>
+                  </div>
+                } @else {
+                  <div class="font-mono text-xs uppercase tracking-wider font-bold flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                    <span class="text-emerald-800">IN STOCK</span>
+                  </div>
+                }
+              </div>
+
+              <!-- Sommelier Tasting Pull-Quote -->
+              @if (p.tasting_note) {
+                <div class="p-4 bg-stone-50 border-l-3 border-[var(--color-primary)] rounded-xs">
+                  <span class="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--color-foreground)]/60 block mb-1">
+                    SOMMELIER PROFILE:
+                  </span>
+                  <p class="font-serif italic text-base leading-relaxed text-[var(--color-foreground)]/90">
+                    “{{ t(p.tasting_note) }}”
+                  </p>
+                </div>
+              }
+
+              <!-- Technical Dossier Specs Grid (Only shown if at least some specs are filled) -->
+              @if (hasExtraSpecs(p)) {
+                <div class="p-4 bg-[var(--color-paper-light)]/30 border border-[var(--color-foreground)]/20 rounded-xs font-mono text-xs space-y-2">
+                  @if (p.varietal) {
+                    <div class="flex justify-between border-b border-[var(--color-foreground)]/10 pb-1.5">
+                      <span class="text-[var(--color-foreground)]/60 uppercase">GRAPE VARIETAL:</span>
+                      <span class="font-bold text-right uppercase text-[var(--color-foreground)]">{{ t(p.varietal) }}</span>
+                    </div>
+                  }
+                  @if (p.soil) {
+                    <div class="flex justify-between border-b border-[var(--color-foreground)]/10 pb-1.5">
+                      <span class="text-[var(--color-foreground)]/60 uppercase">TERROIR & SOIL:</span>
+                      <span class="font-bold text-right uppercase text-[var(--color-foreground)]">{{ t(p.soil) }}</span>
+                    </div>
+                  }
+                  @if (p.vintage) {
+                    <div class="flex justify-between border-b border-[var(--color-foreground)]/10 pb-1.5">
+                      <span class="text-[var(--color-foreground)]/60 uppercase">VINTAGE HARVEST:</span>
+                      <span class="font-bold text-right uppercase text-[var(--color-foreground)]">{{ p.vintage }}</span>
+                    </div>
+                  }
+                  @if (p.alcohol) {
+                    <div class="flex justify-between border-b border-[var(--color-foreground)]/10 pb-1.5">
+                      <span class="text-[var(--color-foreground)]/60 uppercase">ALCOHOL STRENGTH:</span>
+                      <span class="font-bold text-right text-[var(--color-foreground)]">{{ p.alcohol }} ABV</span>
+                    </div>
+                  }
+                  <div class="flex justify-between">
+                    <span class="text-[var(--color-foreground)]/60 uppercase">DISPATCH:</span>
+                    <span class="font-bold text-emerald-900 uppercase">CELLAR DIRECT • TEMPERATURE CONTROLLED</span>
+                  </div>
+                </div>
+              }
+
+            </div>
+
+            <!-- Bottom Purchasing Action Panel -->
+            <div class="pt-6 border-t-[1.5px] border-[var(--color-foreground)]/20 space-y-4">
+              
+              @if (!isOutOfStock(p)) {
+                <div class="flex flex-col sm:flex-row items-stretch gap-3">
+                  
+                  <!-- Precision Quantity Stepper -->
+                  <div class="shop-stepper justify-between shrink-0">
+                    <button
+                      type="button"
+                      (click)="setQty(-1)"
+                      [disabled]="qty() <= 1"
+                      class="shop-stepper-btn disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Decrease quantity"
+                    >
+                      —
+                    </button>
+                    <span class="shop-stepper-val font-mono text-sm">
+                      {{ qty() }}
+                    </span>
+                    <button
+                      type="button"
+                      (click)="setQty(1)"
+                      [disabled]="qty() >= p.stock_quantity"
+                      class="shop-stepper-btn disabled:opacity-30 disabled:cursor-not-allowed"
+                      title="Increase quantity"
+                    >
+                      +
+                    </button>
+                  </div>
+
+                  <!-- Primary Add to Cart Button -->
+                  <button
+                    type="button"
+                    (click)="addToBasket()"
+                    class="flex-1 py-3.5 px-6 bg-[var(--color-foreground)] hover:bg-[var(--color-primary)] text-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-3 rounded-xs transition-all duration-200 cursor-pointer shadow-xs hover:shadow-md"
+                  >
+                    <span>+ ADD TO CART</span>
+                    <span class="font-mono text-sm">→</span>
+                  </button>
+
+                  <!-- Instant Buy Now Button -->
+                  <button
+                    type="button"
+                    (click)="buyNow()"
+                    class="py-3.5 px-5 bg-white hover:bg-[var(--color-paper-light)] text-[var(--color-foreground)] border-[1.5px] border-[var(--color-foreground)] font-mono text-xs font-bold uppercase tracking-wider flex items-center justify-center gap-2 rounded-xs transition-colors cursor-pointer shadow-xs"
+                    title="Proceed directly to checkout drawer"
+                  >
+                    <span>CHECKOUT</span>
+                    <span class="font-mono text-xs">⚡</span>
+                  </button>
+
+                </div>
+
+                <!-- Shipping Guarantee Bar -->
+                <div class="flex items-center gap-2 font-mono text-[11px] uppercase tracking-wider text-[var(--color-foreground)]/70">
+                  <span class="text-[var(--color-primary)] font-bold">●</span>
+                  <span>Temperature-controlled courier dispatch • Free delivery over {{ cart.formatPrice(storeConfig().free_shipping_threshold) }}</span>
+                </div>
+
+              } @else {
+                <!-- Out of stock notice -->
+                <div class="p-6 bg-stone-100 border-[1.5px] border-dashed border-[var(--color-foreground)]/30 rounded-xs text-center space-y-3">
+                  <p class="font-big text-2xl uppercase tracking-tight text-[var(--color-foreground)]">
+                    ALLOCATION CURRENTLY EXHAUSTED
+                  </p>
+                  <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/60 max-w-md mx-auto">
+                    This vintage allocation has been exhausted. Contact our cellar master to request notification for subsequent library releases.
+                  </p>
+                  <a
+                    routerLink="/contact"
+                    class="inline-block py-2.5 px-6 bg-[var(--color-foreground)] text-white font-mono text-xs uppercase font-bold tracking-wider rounded-xs hover:bg-[var(--color-primary)] transition-colors"
+                  >
+                    INQUIRE FOR CELLAR ALLOCATION →
+                  </a>
+                </div>
+              }
+
+              <!-- Social Media Sharing with Monochrome Icons -->
+              <div class="pt-4 border-t border-[var(--color-foreground)]/10 flex flex-wrap items-center justify-between gap-3">
+                <span class="font-mono text-[10px] uppercase font-bold tracking-widest text-[var(--color-foreground)]/60">
+                  SHARE BOTTLE:
+                </span>
+
+                <div class="flex items-center gap-2">
+                  
+                  <!-- WhatsApp (Monochrome Icon) -->
+                  <button
+                    type="button"
+                    (click)="shareOnWhatsApp()"
+                    class="w-8 h-8 rounded-xs border border-[var(--color-foreground)]/25 flex items-center justify-center text-[var(--color-foreground)] hover:bg-[var(--color-foreground)] hover:text-white transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+                    title="Share on WhatsApp"
+                    aria-label="Share on WhatsApp"
+                  >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/>
+                    </svg>
+                  </button>
+
+                  <!-- Viber (Monochrome Icon) -->
+                  <button
+                    type="button"
+                    (click)="shareOnViber()"
+                    class="w-8 h-8 rounded-xs border border-[var(--color-foreground)]/25 flex items-center justify-center text-[var(--color-foreground)] hover:bg-[var(--color-foreground)] hover:text-white transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+                    title="Share on Viber"
+                    aria-label="Share on Viber"
+                  >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M12.012 2C6.48 2 2 6.48 2 12.012c0 1.91.536 3.693 1.464 5.213L2.2 21.8l4.723-1.237c1.472.85 3.177 1.349 5.089 1.349 5.532 0 10.012-4.48 10.012-10.012C22.024 6.48 17.544 2 12.012 2zm5.727 13.916c-.24.673-1.393 1.282-1.944 1.365-.527.08-1.217.114-1.97-.132-.455-.148-1.037-.342-1.782-.67-3.13-1.378-5.176-4.544-5.333-4.754-.154-.21-1.267-1.687-1.267-3.218 0-1.53.803-2.285 1.088-2.6.284-.316.621-.395.828-.395.207 0 .414.002.595.011.192.01.448-.073.701.535.263.633.896 2.188.974 2.348.077.16.129.347.026.557-.104.21-.155.342-.31.523-.155.18-.326.404-.466.543-.155.155-.316.326-.135.637.181.31 8.04 1.32 1.928 2.32 1.455 1.298 2.683 1.701 3.064 1.888.382.186.606.155.832-.104.226-.26.968-1.127 1.226-1.514.258-.388.517-.326.864-.197.348.13 2.203 1.038 2.582 1.227.378.188.631.284.723.44.092.155.092.905-.148 1.578z"/>
+                    </svg>
+                  </button>
+
+                  <!-- Facebook (Monochrome Icon) -->
+                  <button
+                    type="button"
+                    (click)="shareOnFacebook()"
+                    class="w-8 h-8 rounded-xs border border-[var(--color-foreground)]/25 flex items-center justify-center text-[var(--color-foreground)] hover:bg-[var(--color-foreground)] hover:text-white transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+                    title="Share on Facebook"
+                    aria-label="Share on Facebook"
+                  >
+                    <svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                  </button>
+
+                  <!-- X / Twitter (Monochrome Icon) -->
+                  <button
+                    type="button"
+                    (click)="shareOnTwitter()"
+                    class="w-8 h-8 rounded-xs border border-[var(--color-foreground)]/25 flex items-center justify-center text-[var(--color-foreground)] hover:bg-[var(--color-foreground)] hover:text-white transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+                    title="Share on X"
+                    aria-label="Share on X"
+                  >
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="currentColor">
+                      <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                  </button>
+
+                  <!-- Copy Direct Link (Monochrome Icon) -->
+                  <button
+                    type="button"
+                    (click)="copyProductLink()"
+                    class="w-8 h-8 rounded-xs border border-[var(--color-foreground)]/25 flex items-center justify-center text-[var(--color-foreground)] hover:bg-[var(--color-foreground)] hover:text-white transition-all cursor-pointer shadow-2xs hover:shadow-xs"
+                    title="Copy direct bottle link"
+                    aria-label="Copy bottle link"
+                  >
+                    <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                      <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/>
+                      <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/>
+                    </svg>
+                  </button>
+
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ============================================================ 02: TECHNICAL ARCHIVES & CELLAR TABS -->
+      <section class="border-[1.5px] border-[var(--color-foreground)] bg-white rounded-xs overflow-hidden shadow-md reveal" whReveal>
+        
+        <!-- Tab Switcher Bar -->
+        <div class="border-b-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)]/60 flex overflow-x-auto">
+          <button
+            type="button"
+            (click)="activeTab.set('notes')"
+            class="py-3.5 px-6 font-mono text-xs font-bold uppercase tracking-wider transition-colors border-r-[1.5px] border-[var(--color-foreground)] cursor-pointer whitespace-nowrap"
+            [class.bg-[var(--color-foreground)]]="activeTab() === 'notes'"
+            [class.text-white]="activeTab() === 'notes'"
+            [class.text-[var(--color-foreground)]]="activeTab() !== 'notes'"
+          >
+            / SOMMELIER PROFILE
+          </button>
+          <button
+            type="button"
+            (click)="activeTab.set('specs')"
+            class="py-3.5 px-6 font-mono text-xs font-bold uppercase tracking-wider transition-colors border-r-[1.5px] border-[var(--color-foreground)] cursor-pointer whitespace-nowrap"
+            [class.bg-[var(--color-foreground)]]="activeTab() === 'specs'"
+            [class.text-white]="activeTab() === 'specs'"
+            [class.text-[var(--color-foreground)]]="activeTab() !== 'specs'"
+          >
+            / TERROIR & VINIFICATION
+          </button>
+          <button
+            type="button"
+            (click)="activeTab.set('sommelier')"
+            class="py-3.5 px-6 font-mono text-xs font-bold uppercase tracking-wider transition-colors border-r-[1.5px] border-[var(--color-foreground)] cursor-pointer whitespace-nowrap"
+            [class.bg-[var(--color-foreground)]]="activeTab() === 'sommelier'"
+            [class.text-white]="activeTab() === 'sommelier'"
+            [class.text-[var(--color-foreground)]]="activeTab() !== 'sommelier'"
+          >
+            / CELLAR SERVICE & PAIRING
+          </button>
+          <button
+            type="button"
+            (click)="activeTab.set('shipping')"
+            class="py-3.5 px-6 font-mono text-xs font-bold uppercase tracking-wider transition-colors cursor-pointer whitespace-nowrap"
+            [class.bg-[var(--color-foreground)]]="activeTab() === 'shipping'"
+            [class.text-white]="activeTab() === 'shipping'"
+            [class.text-[var(--color-foreground)]]="activeTab() !== 'shipping'"
+          >
+            / DISPATCH & CARE
+          </button>
+        </div>
+
+        <!-- Tab Panel Content -->
+        <div class="p-6 sm:p-10">
+          
+          <!-- Tab 1: Sommelier Tasting Notes -->
+          @if (activeTab() === 'notes') {
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-fade-in">
+              <div class="lg:col-span-8 space-y-4">
+                <span class="editorial-tag text-[var(--color-primary)]">SENSORY EVALUATION</span>
+                <h3 class="font-big text-3xl uppercase tracking-tight text-[var(--color-foreground)]">
+                  The Cellar Master's Impression
+                </h3>
+                <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/80 leading-relaxed whitespace-pre-line">
+                  {{ t(p.tasting_note) || 'Expressive aromas of crushed volcanic rock, preserved citrus, sea breeze, and wild Mediterranean herbs. On the palate, focused minerality and refined acidity deliver longevity, depth, and unmistakable terroir precision.' }}
+                </p>
+              </div>
+
+              <div class="lg:col-span-4 p-5 bg-[var(--color-paper-light)]/60 border border-[var(--color-foreground)]/20 rounded-xs font-mono text-xs space-y-2">
+                <span class="font-bold text-[var(--color-foreground)] block mb-2 uppercase">TASTING BENCHMARKS:</span>
+                <div class="flex justify-between pb-1 border-b border-[var(--color-foreground)]/10">
+                  <span class="text-[var(--color-foreground)]/60">ACIDITY:</span>
+                  <span class="font-bold">HIGH / CRISP</span>
+                </div>
+                <div class="flex justify-between pb-1 border-b border-[var(--color-foreground)]/10">
+                  <span class="text-[var(--color-foreground)]/60">MINERALITY:</span>
+                  <span class="font-bold">VOLCANIC FLINT</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-[var(--color-foreground)]/60">CELLAR POTENTIAL:</span>
+                  <span class="font-bold">5 – 12 YEARS</span>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Tab 2: Terroir & Vinification -->
+          @if (activeTab() === 'specs') {
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-fade-in">
+              <div class="lg:col-span-8 space-y-4">
+                <span class="editorial-tag text-[var(--color-primary)]">ORIGIN & VINEYARD</span>
+                <h3 class="font-big text-3xl uppercase tracking-tight text-[var(--color-foreground)]">
+                  Soil Heritage & Fermentation
+                </h3>
+                <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/80 leading-relaxed">
+                  Cultivated in ancient, ungrafted vineyards situated in {{ t(p.region) || 'the Aegean volcanic caldera' }}. The soils consist of {{ t(p.soil) || 'decomposed pumice, basalt, and limestone schist' }}, forcing root systems deep underground for natural moisture without artificial irrigation.
+                </p>
+                <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/80 leading-relaxed">
+                  Hand-harvested at dawn, followed by gentle whole-cluster pressing and indigenous wild-yeast spontaneous fermentation in temperature-regulated vats and aged French oak barrels.
+                </p>
+              </div>
+
+              <div class="lg:col-span-4 p-5 bg-[var(--color-paper-light)]/60 border border-[var(--color-foreground)]/20 rounded-xs font-mono text-xs space-y-2">
+                <span class="font-bold text-[var(--color-foreground)] block mb-2 uppercase">GEOGRAPHY:</span>
+                <div class="flex justify-between pb-1 border-b border-[var(--color-foreground)]/10">
+                  <span class="text-[var(--color-foreground)]/60">TERROIR:</span>
+                  <span class="font-bold uppercase">{{ t(p.soil) || 'VOLCANIC' }}</span>
+                </div>
+                <div class="flex justify-between pb-1 border-b border-[var(--color-foreground)]/10">
+                  <span class="text-[var(--color-foreground)]/60">VARIETAL:</span>
+                  <span class="font-bold uppercase">{{ t(p.varietal) || 'ASSYRTIKO' }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-[var(--color-foreground)]/60">ALCOHOL:</span>
+                  <span class="font-bold">{{ p.alcohol || '13.5%' }} ABV</span>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Tab 3: Cellar Service & Pairing -->
+          @if (activeTab() === 'sommelier') {
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-fade-in">
+              <div class="lg:col-span-8 space-y-4">
+                <span class="editorial-tag text-[var(--color-primary)]">ATELIER SERVICE</span>
+                <h3 class="font-big text-3xl uppercase tracking-tight text-[var(--color-foreground)]">
+                  Decanting & Culinary Harmony
+                </h3>
+                <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/80 leading-relaxed">
+                  Recommended service temperature between 10°C and 12°C. For youthful vintages, decanting for 20 minutes before serving unlocks complex flinty and savory nuances.
+                </p>
+                <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/80 leading-relaxed">
+                  Exceptional pairing alongside grilled Aegean sea bream with lemon oil, wild caper salads, aged goat cheeses, roasted poultry with rosemary, and slow-cooked shellfish.
+                </p>
+              </div>
+
+              <div class="lg:col-span-4 p-5 bg-[var(--color-paper-light)]/60 border border-[var(--color-foreground)]/20 rounded-xs font-mono text-xs space-y-2">
+                <span class="font-bold text-[var(--color-foreground)] block mb-2 uppercase">RECOMMENDED SERVICE:</span>
+                <div class="flex justify-between pb-1 border-b border-[var(--color-foreground)]/10">
+                  <span class="text-[var(--color-foreground)]/60">TEMP:</span>
+                  <span class="font-bold">10°C – 12°C</span>
+                </div>
+                <div class="flex justify-between pb-1 border-b border-[var(--color-foreground)]/10">
+                  <span class="text-[var(--color-foreground)]/60">GLASSWARE:</span>
+                  <span class="font-bold">BURGUNDY / BORDEAUX</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-[var(--color-foreground)]/60">DECANT:</span>
+                  <span class="font-bold">20 MINUTES</span>
+                </div>
+              </div>
+            </div>
+          }
+
+          <!-- Tab 4: Dispatch & Care -->
+          @if (activeTab() === 'shipping') {
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start animate-fade-in">
+              <div class="lg:col-span-8 space-y-4">
+                <span class="editorial-tag text-[var(--color-primary)]">STORAGE & DISPATCH</span>
+                <h3 class="font-big text-3xl uppercase tracking-tight text-[var(--color-foreground)]">
+                  Cellar-Direct Temperature Protocol
+                </h3>
+                <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/80 leading-relaxed">
+                  Every bottle in our cellar ledger is stored in optimal conditions (14°C constant temperature, 70% hygrometry, vibration-free). All shipments are packed in certified thermal polystyrene protection to shield bottles from temperature variations.
+                </p>
+                <p class="font-mono text-xs uppercase tracking-wider text-[var(--color-foreground)]/80 leading-relaxed">
+                  Dispatch occurs Monday through Thursday via priority insured courier to prevent weekend warehouse holding.
+                </p>
+              </div>
+
+              <div class="lg:col-span-4 p-5 bg-[var(--color-paper-light)]/60 border border-[var(--color-foreground)]/20 rounded-xs font-mono text-xs space-y-2">
+                <span class="font-bold text-[var(--color-foreground)] block mb-2 uppercase">DELIVERY GUARANTEE:</span>
+                <div class="flex justify-between pb-1 border-b border-[var(--color-foreground)]/10">
+                  <span class="text-[var(--color-foreground)]/60">PACKAGING:</span>
+                  <span class="font-bold">INSULATED CELLAR BOX</span>
+                </div>
+                <div class="flex justify-between pb-1 border-b border-[var(--color-foreground)]/10">
+                  <span class="text-[var(--color-foreground)]/60">FREE DISPATCH:</span>
+                  <span class="font-bold">> {{ cart.formatPrice(storeConfig().free_shipping_threshold) }}</span>
+                </div>
+                <div class="flex justify-between">
+                  <span class="text-[var(--color-foreground)]/60">INSURANCE:</span>
+                  <span class="font-bold">100% COVERED</span>
+                </div>
+              </div>
+            </div>
+          }
+
+        </div>
+
+      </section>
+
+      <!-- ============================================================ 03: RELATED CELLAR BOTTLES -->
+      @if (relatedProducts().length > 0) {
+        <section class="pt-8 border-t-[1.5px] border-[var(--color-foreground)] space-y-6 reveal" whReveal>
+          
+          <div class="flex items-center justify-between">
+            <div>
+              <span class="editorial-tag text-[var(--color-primary)]">COMPLEMENTARY BOTTLES</span>
+              <h2 class="font-big text-3xl sm:text-4xl uppercase tracking-tight text-[var(--color-foreground)]">
+                More From The Cellar Ledger
+              </h2>
+            </div>
+
+            <a
+              routerLink="/shop"
+              class="font-mono text-xs font-bold uppercase tracking-wider text-[var(--color-foreground)] hover:text-[var(--color-primary)] underline cursor-pointer"
+            >
+              VIEW ALL BOTTLES →
+            </a>
+          </div>
+
+          <!-- Related Bottles Grid -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            @for (rel of relatedProducts(); track rel.id; let rIdx = $index) {
+              <article class="shop-card-modern group reveal" whReveal [revealDelay]="rIdx * 80">
+                
+                <!-- Card Header -->
+                <div class="p-3.5 border-b-[1.5px] border-[var(--color-foreground)] flex items-center justify-between bg-[var(--color-paper-light)]/60">
+                  <span class="font-mono text-[10px] uppercase tracking-wider font-bold text-[var(--color-foreground)]/70 truncate">
+                    / {{ t(rel.region) }}
+                  </span>
+                  @if (rel.vintage) {
+                    <span class="shop-vintage-stamp text-[9px] py-0.5 px-1.5">
+                      {{ rel.vintage }}
+                    </span>
+                  }
+                </div>
+
+                <!-- Bottle Visual -->
+                <div class="bottle-podium h-60">
+                  <a [routerLink]="['/shop', rel.slug || rel.id]" class="w-full h-full flex items-center justify-center cursor-pointer">
+                    <img
+                      [src]="getPrimaryImage(rel)"
+                      [alt]="rel.name"
+                      class="bottle-img-interactive"
+                      loading="lazy"
+                    />
+                  </a>
+                </div>
+
+                <!-- Card Body -->
+                <div class="p-4 flex flex-col justify-between flex-1 gap-3 bg-white">
+                  <div>
+                    <div class="font-mono text-[10px] uppercase tracking-wider text-[var(--color-foreground)]/70 mb-1 truncate">
+                      {{ t(rel.varietal) }}
+                    </div>
+                    <h3 class="font-big text-xl uppercase tracking-tight text-[var(--color-foreground)] leading-none truncate">
+                      <a [routerLink]="['/shop', rel.slug || rel.id]" class="hover:text-[var(--color-primary)] transition-colors">
+                        {{ rel.name }}
+                      </a>
+                    </h3>
+                  </div>
+
+                  <div class="pt-3 border-t border-[var(--color-foreground)]/15 flex items-center justify-between gap-2">
+                    <span class="font-mono text-base font-bold text-[var(--color-primary)]">
+                      {{ cart.formatPrice(rel.price) }}
+                    </span>
+
+                    @if (isOutOfStock(rel)) {
+                      <span class="font-mono text-[10px] uppercase text-red-600 font-bold">
+                        OUT OF STOCK
+                      </span>
+                    } @else {
+                      <button
+                        type="button"
+                        (click)="addRelatedToBasket(rel, $event)"
+                        class="py-1.5 px-3 bg-[var(--color-foreground)] hover:bg-[var(--color-primary)] text-white font-mono text-[10px] font-bold uppercase rounded-xs transition-colors cursor-pointer"
+                        title="Add bottle to cart"
+                      >
+                        + ADD
+                      </button>
+                    }
+                  </div>
+                </div>
+
+              </article>
+            }
+          </div>
+
+        </section>
+      }
+
+      <!-- ============================================================ 04: PRIVATE CELLAR ADVISORY BANNER -->
+      <section class="pt-6">
+        <div class="terracotta-block p-8 md:p-12 border-[1.5px] border-[var(--color-foreground)] shadow-xl rounded-xs reveal" whReveal>
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
+            
+            <div class="lg:col-span-8 space-y-3">
+              <span class="tape-sticker bg-[var(--color-foreground)] text-white">SOMMELIER SOURCING</span>
+              <h2 class="font-big text-3xl sm:text-4xl uppercase leading-[0.9] tracking-tight text-white">
+                Seeking A Specific Vintage Or Private Allocation?
+              </h2>
+              <p class="font-mono text-xs uppercase tracking-wider text-white/80 leading-relaxed max-w-xl">
+                Our cellar masters source rare, archived, and library vintages direct from independent Greek winemakers for private collectors.
+              </p>
+            </div>
+
+            <div class="lg:col-span-4 flex flex-col items-start lg:items-end justify-center gap-3">
+              <a
+                routerLink="/contact"
+                class="btn bg-white text-[var(--color-foreground)] hover:bg-[var(--color-paper-light)] border-[1.5px] border-[var(--color-foreground)] font-mono text-xs font-bold uppercase tracking-wider w-full text-center py-3 rounded-xs cursor-pointer"
+              >
+                CONSULT OUR SOMMELIER →
+              </a>
+              <span class="kraft-tape-note text-center w-full text-[10px]">
+                BESPOKE CELLAR CONSULTING & SOURCING
+              </span>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+    </div>
+  }
+
+</div>

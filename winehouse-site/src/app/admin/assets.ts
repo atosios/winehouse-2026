@@ -101,7 +101,7 @@ import { catchError } from 'rxjs/operators';
       </div>
     } @else if (filteredAssets().length === 0) {
       <div class="admin-card admin-empty-state">
-        <div class="admin-empty-state-icon">🖼️</div>
+        <div class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 mx-auto flex items-center justify-center text-slate-400 mb-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg></div>
         <p>
           @if (searchQuery) {
             No files match your search term.
@@ -161,7 +161,7 @@ import { catchError } from 'rxjs/operators';
                 </div>
               } @else {
                 <div class="aspect-square w-full rounded-lg bg-slate-100 flex flex-col items-center justify-center text-slate-400">
-                  <span class="text-3xl mb-1">📄</span>
+                  <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="mb-1 text-slate-400"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg>
                   <span class="text-2xs font-mono uppercase">{{ asset.mime_type?.split('/')?.[1] || 'FILE' }}</span>
                 </div>
               }
@@ -230,10 +230,10 @@ import { catchError } from 'rxjs/operators';
                         <img [src]="mediaUrl(asset.url || asset.path)" [alt]="asset.name" class="w-9 h-9 rounded-lg object-cover cursor-pointer border border-slate-200" (click)="openLightbox(asset)" />
                       } @else if (isVideo(asset)) {
                         <div class="w-9 h-9 rounded-lg bg-slate-900 flex items-center justify-center text-white text-xs cursor-pointer" (click)="openLightbox(asset)">
-                          ▶
+                          <svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                         </div>
                       } @else {
-                        <span class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center text-base border border-slate-200">📄</span>
+                        <span class="w-9 h-9 rounded-lg bg-slate-100 flex items-center justify-center border border-slate-200 text-slate-400"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V9z"></path><polyline points="13 2 13 9 20 9"></polyline></svg></span>
                       }
                       <span class="text-xs font-semibold text-slate-900 truncate max-w-xs">{{ asset.name }}</span>
                     </div>

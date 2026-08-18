@@ -6,6 +6,7 @@ import { SiteSettingsService } from './site-settings.service';
 export interface CartItemProduct {
   id: number | string;
   name: string;
+  slug?: string;
   vintage?: string;
   region?: I18nText;
   varietal?: I18nText;

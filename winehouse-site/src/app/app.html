@@ -1,11 +1,15 @@
-@if (!isAdmin()) {
-  <wh-header />
-}
-<main>
-  <router-outlet />
-</main>
+@if (showMaintenance()) {
+  <wh-maintenance />
+} @else {
+  @if (!isAdmin()) {
+    <wh-header />
+  }
+  <main>
+    <router-outlet />
+  </main>
 
-@if (!isAdmin()) {
-  <wh-cart-drawer />
-  <wh-checkout-modal />
+  @if (!isAdmin()) {
+    <wh-cart-drawer />
+    <wh-checkout-modal />
+  }
 }

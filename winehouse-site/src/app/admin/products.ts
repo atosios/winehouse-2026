@@ -1,6 +1,6 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AdminApi, Product, Asset } from './api';
+import { AdminApi, Product, Asset, GrapeVarietyItem } from './api';
 import { WhI18nInput } from './i18n-input';
 import { AdminConfirm } from './confirm-dialog';
 import { I18nService, I18nText } from '../core/i18n.service';
@@ -239,7 +239,7 @@ import { resolveMediaUrl } from '../core/media.utils';
           <div class="px-6 py-4 border-b border-slate-100 flex items-center justify-between bg-slate-50/80">
             <div>
               <h3 class="text-base font-bold text-slate-900 flex items-center gap-2">
-                <span>{{ editingProduct()?.id ? '🍾 Edit Product' : '🍾 Add Product' }}</span>
+                <span>{{ editingProduct()?.id ? 'Edit Product' : 'Add Product' }}</span>
                 @if (formProduct.name) {
                   <span class="text-xs font-mono text-slate-500 font-normal">/ {{ formProduct.name }}</span>
                 }
@@ -288,8 +288,8 @@ import { resolveMediaUrl } from '../core/media.utils';
           <!-- Error Feedback Alert -->
           @if (errorMessage()) {
             <div class="mx-6 mt-4 p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center justify-between">
-              <span>⚠ {{ errorMessage() }}</span>
-              <button type="button" (click)="errorMessage.set('')" class="text-red-500 hover:text-red-800 text-xs font-bold">✕</button>
+              <span>{{ errorMessage() }}</span>
+              <button type="button" (click)="errorMessage.set('')" class="text-red-500 hover:text-red-800 text-xs font-bold cursor-pointer">✕</button>
             </div>
           }
 
@@ -306,7 +306,8 @@ import { resolveMediaUrl } from '../core/media.utils';
                   <div class="flex items-center justify-between">
                     <div>
                       <span class="admin-field-label !mb-0 font-bold text-slate-900 flex items-center gap-1.5">
-                        <span>🖼️</span> Product Media
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                        <span>Product Media</span>
                       </span>
                       <span class="text-2xs text-slate-500">Square &amp; bottle showcase photos</span>
                     </div>
@@ -329,7 +330,7 @@ import { resolveMediaUrl } from '../core/media.utils';
                       <!-- Overlay Badges (Matching Live Site) -->
                       <div class="absolute top-2 left-2 flex flex-col gap-1 items-start pointer-events-none">
                         <span class="px-2 py-0.5 rounded bg-emerald-600 text-white font-mono text-[9px] font-bold uppercase tracking-wider shadow-xs">
-                          ★ Main Cover
+                          Main Cover
                         </span>
                         @if (formProduct.vintage) {
                           <span class="px-2 py-0.5 rounded bg-slate-900/85 text-white font-mono text-[9px] font-bold uppercase tracking-wider shadow-xs">
@@ -346,37 +347,28 @@ import { resolveMediaUrl } from '../core/media.utils';
                         </div>
                       }
 
-                      <!-- Hover Change Overlay -->
+                      <!-- Hover Change Overlay: Single Button -->
                       <div class="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
                         <button
                           type="button"
-                          (click)="multiFileInput.click()"
-                          class="btn btn-secondary btn-xs !bg-white/95 !text-slate-800 shadow-sm"
-                        >
-                          + Upload
-                        </button>
-                        <button
-                          type="button"
                           (click)="openAssetLibraryModal()"
-                          class="btn btn-secondary btn-xs !bg-white/95 !text-slate-800 shadow-sm"
+                          class="btn btn-secondary btn-xs !bg-white/95 !text-slate-800 shadow-sm flex items-center gap-1.5 cursor-pointer"
                         >
-                          📁 Library
+                          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                          <span>Manage Photos / Upload</span>
                         </button>
                       </div>
                     } @else {
-                      <!-- Empty State Square Dropzone -->
+                      <!-- Empty State Square Dropzone: Clicking opens unified modal -->
                       <div
                         class="w-full h-full flex flex-col items-center justify-center text-center p-4 cursor-pointer hover:bg-slate-50/80 transition-colors"
-                        (click)="multiFileInput.click()"
-                        (dragover)="onDragOver($event)"
-                        (dragleave)="onDragLeave($event)"
-                        (drop)="onDrop($event)"
+                        (click)="openAssetLibraryModal()"
                       >
-                        <div class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 text-xl mb-2">
-                          📷
+                        <div class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 mb-2">
+                          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                         </div>
                         <p class="text-xs font-bold text-slate-800">No Photo Selected</p>
-                        <p class="text-2xs text-slate-400 mt-0.5">Drag &amp; drop images or click to upload</p>
+                        <p class="text-2xs text-slate-400 mt-0.5">Click to choose from library or upload</p>
                       </div>
                     }
                   </div>
@@ -421,56 +413,16 @@ import { resolveMediaUrl } from '../core/media.utils';
                     </div>
                   }
 
-                  <!-- Compact Multi-Upload Controls & Dropzone Trigger -->
-                  <div
-                    class="p-3 rounded-xl border border-dashed border-slate-300 bg-white hover:bg-slate-50/60 transition-all flex items-center justify-between gap-2"
-                    [class.border-wine-500]="isDragging()"
-                    [class.bg-wine-50/20]="isDragging()"
-                    (dragover)="onDragOver($event)"
-                    (dragleave)="onDragLeave($event)"
-                    (drop)="onDrop($event)"
-                  >
-                    <!-- Hidden File Input -->
-                    <input
-                      #multiFileInput
-                      type="file"
-                      multiple
-                      accept="image/*"
-                      (change)="onFilesSelected($event)"
-                      class="hidden"
-                    />
-
-                    <div class="min-w-0">
-                      @if (uploadingCount() > 0) {
-                        <div class="flex items-center gap-1.5 text-xs font-semibold text-wine-600">
-                          <span class="animate-spin text-sm">⏳</span>
-                          <span>Uploading {{ uploadingCount() }} file(s)…</span>
-                        </div>
-                      } @else {
-                        <p class="text-xs font-semibold text-slate-800 truncate">Add more photos</p>
-                        <p class="text-2xs text-slate-400 truncate">Multi-file drop supported</p>
-                      }
-                    </div>
-
-                    <div class="flex items-center gap-1.5 shrink-0">
-                      <button
-                        type="button"
-                        (click)="multiFileInput.click()"
-                        class="btn btn-secondary btn-xs cursor-pointer !py-1"
-                        title="Upload from computer"
-                      >
-                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                        <span>Upload</span>
-                      </button>
-                      <button
-                        type="button"
-                        (click)="openAssetLibraryModal()"
-                        class="btn btn-secondary btn-xs cursor-pointer !py-1"
-                        title="Pick from existing Media Library"
-                      >
-                        <span>Library</span>
-                      </button>
-                    </div>
+                  <!-- Single Unified Action Button to choose from library or upload -->
+                  <div class="pt-1">
+                    <button
+                      type="button"
+                      (click)="openAssetLibraryModal()"
+                      class="w-full py-2 px-3 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-slate-800 text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer shadow-2xs transition-colors"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                      <span>Choose from Library or Upload Photos</span>
+                    </button>
                   </div>
 
                 </div>
@@ -495,6 +447,7 @@ import { resolveMediaUrl } from '../core/media.utils';
                         type="text"
                         name="productName"
                         [(ngModel)]="formProduct.name"
+                        (ngModelChange)="onIdentityChange()"
                         required
                         placeholder="e.g. RITUÁL"
                         class="admin-field-input !text-sm !font-bold"
@@ -507,6 +460,7 @@ import { resolveMediaUrl } from '../core/media.utils';
                         type="text"
                         name="productVintage"
                         [(ngModel)]="formProduct.vintage"
+                        (ngModelChange)="onIdentityChange()"
                         placeholder="2024 / NV"
                         class="admin-field-input font-mono"
                       />
@@ -517,7 +471,12 @@ import { resolveMediaUrl } from '../core/media.utils';
                   <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 pt-1">
                     <div>
                       <label class="admin-field-label">Category</label>
-                      <select name="productCategory" [(ngModel)]="formProduct.category" class="admin-field-input font-semibold text-slate-800">
+                      <select
+                        name="productCategory"
+                        [(ngModel)]="formProduct.category"
+                        (ngModelChange)="onIdentityChange()"
+                        class="admin-field-input font-semibold text-slate-800"
+                      >
                         @for (cat of categoryOptions(); track cat.key) {
                           <option [value]="cat.key">{{ cat.key }} ({{ getI18nVal(cat.label) }})</option>
                         }
@@ -548,6 +507,52 @@ import { resolveMediaUrl } from '../core/media.utils';
                       />
                     </div>
                   </div>
+
+                  <!-- URL Slug (Auto-generated from Name + Category + Vintage & Editable) -->
+                  <div class="pt-1.5 border-t border-slate-200/60 mt-2">
+                    <div class="flex items-center justify-between mb-1.5">
+                      <label class="admin-field-label !mb-0 flex items-center gap-1.5">
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg>
+                        <span>URL Slug / Permalink</span>
+                        @if (!isSlugCustomized()) {
+                          <span class="text-[9px] font-mono font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded">
+                            AUTO-SYNCED
+                          </span>
+                        } @else {
+                          <span class="text-[9px] font-mono font-bold text-amber-700 bg-amber-50 border border-amber-200 px-1.5 py-0.5 rounded">
+                            CUSTOM
+                          </span>
+                        }
+                      </label>
+                      <button
+                        type="button"
+                        (click)="regenerateSlug()"
+                        class="text-[11px] font-mono text-slate-500 hover:text-wine-700 font-semibold flex items-center gap-1 cursor-pointer transition-colors"
+                        title="Reset & auto-generate slug from Name, Category, and Vintage"
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l5.67-5.67"/></svg>
+                        <span>Auto-generate</span>
+                      </button>
+                    </div>
+
+                    <div class="relative flex items-center">
+                      <span class="absolute left-3 font-mono text-xs text-slate-400 select-none pointer-events-none">
+                        /shop/
+                      </span>
+                      <input
+                        type="text"
+                        name="productSlug"
+                        [(ngModel)]="formProduct.slug"
+                        (input)="onSlugManualEdit()"
+                        (blur)="onSlugBlur()"
+                        placeholder="ritual-volcanic-2024"
+                        class="admin-field-input !pl-16 font-mono text-xs !font-semibold text-slate-800"
+                      />
+                    </div>
+                    <p class="text-2xs text-slate-400 mt-1 font-mono">
+                      Dedicated product page route: <span class="text-slate-700 font-medium">/shop/{{ formProduct.slug || 'bottle-slug' }}</span>
+                    </p>
+                  </div>
                 </div>
 
                 <!-- Section 2: Terroir & Technical Specifications -->
@@ -556,10 +561,97 @@ import { resolveMediaUrl } from '../core/media.utils';
                     <span class="text-xs font-bold text-slate-900 uppercase tracking-wider font-mono">02 / Terroir &amp; Specifications</span>
                   </div>
 
-                  <!-- Region & Varietal (Bilingual) -->
-                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
+                  <!-- Region / Origin (Bilingual) -->
+                  <div>
                     <wh-i18n-input label="Region / Origin" [(value)]="formProduct.region" [globalLang]="editingLang()" helperText="e.g. Pyrgos, Santorini PDO" />
-                    <wh-i18n-input label="Grape Varietal" [(value)]="formProduct.varietal" [globalLang]="editingLang()" helperText="e.g. 100% Assyrtiko" />
+                  </div>
+
+                  <!-- Grape Varieties & Blend Composition (List with Add & Percentage) -->
+                  <div class="space-y-2.5 pt-2 border-t border-slate-200/60">
+                    <div class="flex items-center justify-between">
+                      <div>
+                        <label class="admin-field-label !mb-0">Grape Varieties &amp; Blend</label>
+                        <span class="text-2xs text-slate-500">Add grape varieties with optional percentages (e.g. 70% Assyrtiko, 30% Athiri).</span>
+                      </div>
+                      <button
+                        type="button"
+                        (click)="addVariety()"
+                        class="btn btn-secondary btn-xs flex items-center gap-1 cursor-pointer font-semibold"
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                        <span>Add Variety</span>
+                      </button>
+                    </div>
+
+                    @if (formVarieties().length === 0) {
+                      <div class="p-3 bg-white rounded-xl border border-dashed border-slate-200 text-center text-xs text-slate-400">
+                        No grape varieties added yet. Click <button type="button" (click)="addVariety()" class="text-wine-700 underline font-semibold cursor-pointer">Add Variety</button> to define the blend.
+                      </div>
+                    } @else {
+                      <div class="space-y-2">
+                        @for (item of formVarieties(); track $index) {
+                          <div class="flex items-center gap-2 p-2.5 bg-white rounded-xl border border-slate-200/80 shadow-2xs">
+                            <span class="text-2xs font-mono font-bold text-slate-400 px-1">#{{ $index + 1 }}</span>
+
+                            <div class="flex-1 min-w-0">
+                              <wh-i18n-input
+                                [(value)]="item.variety"
+                                [globalLang]="editingLang()"
+                                placeholder="e.g. Assyrtiko / Xinomavro"
+                                (valueChange)="onVarietyChange()"
+                              />
+                            </div>
+
+                            <div class="w-24 shrink-0 relative">
+                              <input
+                                type="number"
+                                min="0"
+                                max="100"
+                                step="1"
+                                [(ngModel)]="item.percentage"
+                                (ngModelChange)="onVarietyChange()"
+                                placeholder="%"
+                                class="admin-field-input !py-1.5 !pr-6 text-center font-bold font-mono text-xs"
+                                title="Optional blend percentage"
+                              />
+                              <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs font-mono font-bold text-slate-400 pointer-events-none">%</span>
+                            </div>
+
+                            <button
+                              type="button"
+                              (click)="removeVariety($index)"
+                              class="w-7 h-7 rounded-lg text-slate-400 hover:text-red-600 hover:bg-red-50 flex items-center justify-center transition-colors cursor-pointer shrink-0 font-bold"
+                              title="Remove this variety"
+                            >
+                              ✕
+                            </button>
+                          </div>
+                        }
+                      </div>
+
+                      <!-- Live Preview & Total Percentage Status -->
+                      <div class="flex flex-wrap items-center justify-between gap-2 px-1 text-2xs font-mono text-slate-500">
+                        <div class="flex items-center gap-1.5 truncate">
+                          <span class="font-bold text-slate-600">Sync Preview:</span>
+                          <span class="text-slate-800 font-medium truncate">{{ getI18nVal(formProduct.varietal) || '—' }}</span>
+                        </div>
+
+                        @if (totalPercentage() > 0) {
+                          <div class="flex items-center gap-1">
+                            <span class="text-slate-400">Total:</span>
+                            <span
+                              class="font-bold px-1.5 py-0.5 rounded"
+                              [class.bg-emerald-50]="totalPercentage() === 100"
+                              [class.text-emerald-700]="totalPercentage() === 100"
+                              [class.bg-amber-50]="totalPercentage() !== 100"
+                              [class.text-amber-700]="totalPercentage() !== 100"
+                            >
+                              {{ totalPercentage() }}%
+                            </span>
+                          </div>
+                        }
+                      </div>
+                    }
                   </div>
 
                   <!-- Soil & Alcohol -->
@@ -635,15 +727,15 @@ import { resolveMediaUrl } from '../core/media.utils';
       </div>
     }
 
-    <!-- Asset Library Multi-Picker Modal -->
+    <!-- Asset Library & Upload Multi-Picker Modal -->
     @if (isAssetModalOpen()) {
       <div class="fixed inset-0 z-[60] bg-black/60 backdrop-blur-xs flex items-center justify-center p-4 overflow-y-auto">
-        <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150">
+        <div class="bg-white rounded-xl shadow-2xl border border-slate-200 w-full max-w-2xl overflow-hidden my-6 animate-in fade-in zoom-in-95 duration-150 flex flex-col">
           
           <div class="px-5 py-3.5 border-b border-slate-100 flex items-center justify-between bg-slate-50/50">
             <div>
-              <h3 class="text-sm font-bold text-slate-900">Select Media Library Photos</h3>
-              <p class="text-2xs text-slate-500">Click photos to select multiple, then click Add Selected.</p>
+              <h3 class="text-sm font-bold text-slate-900">Product Photos</h3>
+              <p class="text-2xs text-slate-500">Pick from existing library photos or upload new images from your device.</p>
             </div>
             <button
               type="button"
@@ -654,52 +746,144 @@ import { resolveMediaUrl } from '../core/media.utils';
             </button>
           </div>
 
-          <div class="p-5 max-h-[60vh] overflow-y-auto">
-            @if (loadingAssets()) {
-              <div class="py-12 text-center text-xs text-slate-400">Loading library assets…</div>
-            } @else if (availableAssets().length === 0) {
-              <div class="py-12 text-center text-xs text-slate-500">No media assets found in library.</div>
-            } @else {
-              <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                @for (asset of availableAssets(); track asset.id) {
-                  <div
-                    (click)="toggleAssetSelection(asset.url)"
-                    class="relative group rounded-lg border-2 overflow-hidden aspect-square cursor-pointer transition-all bg-slate-100"
-                    [class.border-wine-600]="isAssetSelected(asset.url)"
-                    [class.ring-2]="isAssetSelected(asset.url)"
-                    [class.ring-wine-600/30]="isAssetSelected(asset.url)"
-                    [class.border-slate-200]="!isAssetSelected(asset.url)"
-                  >
-                    <img [src]="mediaUrl(asset.url || asset.path)" [alt]="asset.name" class="w-full h-full object-cover" />
-                    
-                    <!-- Selection Indicator -->
-                    @if (isAssetSelected(asset.url)) {
-                      <div class="absolute top-1 right-1 w-5 h-5 rounded-full bg-wine-600 text-white flex items-center justify-center text-xs font-bold shadow-xs">
-                        ✓
-                      </div>
-                    }
+          <!-- Modal Tabs -->
+          <div class="px-5 py-2.5 border-b border-slate-100 flex items-center justify-between bg-white">
+            <div class="admin-tabs !mb-0">
+              <button
+                type="button"
+                class="admin-tab flex items-center gap-1.5 cursor-pointer text-xs"
+                [class.active]="assetModalTab() === 'library'"
+                (click)="assetModalTab.set('library')"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+                <span>Media Library ({{ availableAssets().length }})</span>
+              </button>
+              <button
+                type="button"
+                class="admin-tab flex items-center gap-1.5 cursor-pointer text-xs"
+                [class.active]="assetModalTab() === 'upload'"
+                (click)="assetModalTab.set('upload')"
+              >
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
+                <span>Upload New</span>
+              </button>
+            </div>
+
+            @if (assetModalTab() === 'library') {
+              <div class="text-2xs text-slate-400 font-mono">
+                {{ selectedAssetUrls().length }} selected
+              </div>
+            }
+          </div>
+
+          <!-- Modal Body -->
+          <div class="p-5 max-h-[55vh] overflow-y-auto min-h-[260px]">
+            @if (assetModalTab() === 'library') {
+              @if (loadingAssets()) {
+                <div class="py-16 text-center text-xs text-slate-400">
+                  <div class="inline-block animate-spin rounded-full h-6 w-6 border-2 border-slate-300 border-t-wine-600 mb-2"></div>
+                  <p>Loading library assets…</p>
+                </div>
+              } @else if (availableAssets().length === 0) {
+                <div class="py-16 text-center text-xs text-slate-500">
+                  <p class="font-semibold text-slate-700">No media assets found in library</p>
+                  <button type="button" (click)="assetModalTab.set('upload')" class="btn btn-primary btn-xs mt-3 cursor-pointer">
+                    + Upload Photos
+                  </button>
+                </div>
+              } @else {
+                <div class="grid grid-cols-3 sm:grid-cols-4 gap-3">
+                  @for (asset of availableAssets(); track asset.id) {
+                    <div
+                      (click)="toggleAssetSelection(asset.url)"
+                      class="relative group rounded-lg border-2 overflow-hidden aspect-square cursor-pointer transition-all bg-slate-100"
+                      [class.border-wine-600]="isAssetSelected(asset.url)"
+                      [class.ring-2]="isAssetSelected(asset.url)"
+                      [class.ring-wine-600/30]="isAssetSelected(asset.url)"
+                      [class.border-slate-200]="!isAssetSelected(asset.url)"
+                    >
+                      <img [src]="mediaUrl(asset.url || asset.path)" [alt]="asset.name" class="w-full h-full object-cover" />
+                      
+                      <!-- Selection Indicator -->
+                      @if (isAssetSelected(asset.url)) {
+                        <div class="absolute top-1 right-1 w-5 h-5 rounded-full bg-wine-600 text-white flex items-center justify-center text-xs font-bold shadow-xs">
+                          ✓
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            }
+
+            @if (assetModalTab() === 'upload') {
+              <div class="py-4 max-w-md mx-auto">
+                <div
+                  class="p-8 rounded-2xl border-2 border-dashed border-slate-300 hover:border-wine-600 bg-slate-50 hover:bg-slate-100/60 transition-all flex flex-col items-center justify-center text-center gap-3 cursor-pointer"
+                  (click)="modalUploadInput.click()"
+                  (dragover)="onDragOver($event)"
+                  (dragleave)="onDragLeave($event)"
+                  (drop)="onDrop($event)"
+                >
+                  <input
+                    #modalUploadInput
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    (change)="onFilesSelected($event)"
+                    class="hidden"
+                  />
+
+                  <div class="w-12 h-12 rounded-full bg-white border border-slate-200 shadow-2xs flex items-center justify-center text-slate-500">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                   </div>
-                }
+
+                  <div>
+                    <h4 class="text-xs font-bold text-slate-900">
+                      {{ uploadingCount() > 0 ? 'Uploading photo(s)…' : 'Drag & drop photos or click to browse' }}
+                    </h4>
+                    <p class="text-2xs text-slate-400 mt-0.5">
+                      Supports JPG, PNG, WEBP. Uploaded photos are added directly to this product.
+                    </p>
+                  </div>
+
+                  @if (uploadingCount() > 0) {
+                    <div class="inline-flex items-center gap-1.5 text-xs text-wine-600 font-semibold font-mono">
+                      <span class="inline-block animate-spin rounded-full h-3.5 w-3.5 border-2 border-wine-300 border-t-wine-600"></span>
+                      <span>Uploading {{ uploadingCount() }} item(s)…</span>
+                    </div>
+                  } @else {
+                    <button type="button" class="btn btn-primary btn-xs mt-1 pointer-events-none">
+                      Browse Files
+                    </button>
+                  }
+                </div>
               </div>
             }
           </div>
 
           <div class="px-5 py-3 border-t border-slate-100 bg-slate-50/50 flex items-center justify-between">
             <span class="text-xs font-mono text-slate-500">
-              {{ selectedAssetUrls().length }} photo(s) selected
+              @if (assetModalTab() === 'library') {
+                {{ selectedAssetUrls().length }} photo(s) selected
+              } @else {
+                {{ uploadedImages().length }} total product photo(s)
+              }
             </span>
             <div class="flex items-center gap-2">
               <button type="button" (click)="closeAssetLibraryModal()" class="btn btn-secondary btn-xs cursor-pointer">
-                Cancel
+                {{ assetModalTab() === 'upload' ? 'Done' : 'Cancel' }}
               </button>
-              <button
-                type="button"
-                [disabled]="selectedAssetUrls().length === 0"
-                (click)="addSelectedAssetsToProduct()"
-                class="btn btn-primary btn-xs cursor-pointer"
-              >
-                Add Selected ({{ selectedAssetUrls().length }})
-              </button>
+              @if (assetModalTab() === 'library') {
+                <button
+                  type="button"
+                  [disabled]="selectedAssetUrls().length === 0"
+                  (click)="addSelectedAssetsToProduct()"
+                  class="btn btn-primary btn-xs cursor-pointer"
+                >
+                  Add Selected ({{ selectedAssetUrls().length }})
+                </button>
+              }
             </div>
           </div>
 
@@ -751,8 +935,8 @@ import { resolveMediaUrl } from '../core/media.utils';
             <!-- Error Feedback -->
             @if (csvError()) {
               <div class="p-3 rounded-xl bg-red-50 border border-red-200 text-red-700 text-xs font-semibold flex items-center justify-between">
-                <span>⚠ {{ csvError() }}</span>
-                <button type="button" (click)="csvError.set('')" class="text-red-500 hover:text-red-800 text-xs font-bold">✕</button>
+                <span>{{ csvError() }}</span>
+                <button type="button" (click)="csvError.set('')" class="text-red-500 hover:text-red-800 text-xs font-bold cursor-pointer">✕</button>
               </div>
             }
 
@@ -925,6 +1109,7 @@ export class AdminProducts implements OnInit {
 
   // Asset Library Picker
   readonly isAssetModalOpen = signal(false);
+  readonly assetModalTab = signal<'library' | 'upload'>('library');
   readonly loadingAssets = signal(false);
   readonly availableAssets = signal<Asset[]>([]);
   readonly selectedAssetUrls = signal<string[]>([]);
@@ -995,7 +1180,7 @@ export class AdminProducts implements OnInit {
     return this.i18n.t(val);
   }
 
-  private cloneI18n(val?: I18nText | string | null): I18nText {
+  private cloneI18n(val?: I18nText | string | null): { en: string; el: string } {
     if (!val) return { en: '', el: '' };
     if (typeof val === 'string') return { en: val, el: '' };
     return { en: val.en || '', el: val.el || '' };
@@ -1018,11 +1203,165 @@ export class AdminProducts implements OnInit {
     });
   });
 
+  readonly isSlugCustomized = signal(false);
+
+  slugify(text: string): string {
+    return text
+      .toString()
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // strip diacritics
+      .toLowerCase()
+      .trim()
+      .replace(/[^a-z0-9\s-_]/g, '')
+      .replace(/[\s_]+/g, '-')
+      .replace(/-+/g, '-')
+      .replace(/^-+|-+$/g, '');
+  }
+
+  computeDefaultSlug(name?: string, category?: string, vintage?: string): string {
+    const parts = [name, category, vintage].filter((v) => v && v.toString().trim().length > 0);
+    return this.slugify(parts.join('-'));
+  }
+
+  onIdentityChange(): void {
+    if (!this.isSlugCustomized()) {
+      this.formProduct.slug = this.computeDefaultSlug(
+        this.formProduct.name,
+        this.formProduct.category,
+        this.formProduct.vintage
+      );
+    }
+  }
+
+  onSlugManualEdit(): void {
+    this.isSlugCustomized.set(true);
+  }
+
+  onSlugBlur(): void {
+    if (this.formProduct.slug?.trim()) {
+      this.formProduct.slug = this.slugify(this.formProduct.slug);
+    } else {
+      this.regenerateSlug();
+    }
+  }
+
+  regenerateSlug(): void {
+    this.isSlugCustomized.set(false);
+    this.formProduct.slug = this.computeDefaultSlug(
+      this.formProduct.name,
+      this.formProduct.category,
+      this.formProduct.vintage
+    );
+  }
+
+  readonly formVarieties = signal<Array<{ variety: { en: string; el: string }; percentage: number | null }>>([]);
+
+  readonly totalPercentage = computed(() => {
+    return this.formVarieties().reduce((sum, item) => {
+      const val = typeof item.percentage === 'string' ? parseFloat(item.percentage) : item.percentage;
+      return sum + (val != null && !isNaN(val) ? val : 0);
+    }, 0);
+  });
+
+  parseVarietiesFromI18n(val?: I18nText | null): Array<{ variety: { en: string; el: string }; percentage: number | null }> {
+    if (!val) return [];
+    const normalized = this.cloneI18n(val);
+    const enStr = (normalized.en || '').trim();
+    const elStr = (normalized.el || '').trim();
+    if (!enStr && !elStr) return [];
+
+    const splitItems = (str: string) =>
+      str.split(/[,&/]/).map((s) => s.trim()).filter(Boolean);
+
+    const enParts = splitItems(enStr);
+    const elParts = splitItems(elStr);
+
+    const parseItem = (str: string) => {
+      const match1 = str.match(/^(\d+(?:\.\d+)?)\s*%\s*(.+)$/);
+      if (match1) {
+        return { pct: parseFloat(match1[1]), name: match1[2].trim() };
+      }
+      const match2 = str.match(/^(.+?)\s*(\d+(?:\.\d+)?)\s*%$/);
+      if (match2) {
+        return { pct: parseFloat(match2[2]), name: match2[1].trim() };
+      }
+      return { pct: null, name: str };
+    };
+
+    const count = Math.max(enParts.length, elParts.length);
+    if (count === 0) return [];
+
+    const result: Array<{ variety: { en: string; el: string }; percentage: number | null }> = [];
+    for (let i = 0; i < count; i++) {
+      const pEn = enParts[i] ? parseItem(enParts[i]) : null;
+      const pEl = elParts[i] ? parseItem(elParts[i]) : null;
+
+      result.push({
+        variety: {
+          en: pEn?.name || pEl?.name || '',
+          el: pEl?.name || pEn?.name || '',
+        },
+        percentage: pEn?.pct ?? pEl?.pct ?? null,
+      });
+    }
+    return result;
+  }
+
+  addVariety(nameEn = '', nameEl = '', percentage: number | null = null): void {
+    this.formVarieties.update((list) => [
+      ...list,
+      {
+        variety: { en: nameEn, el: nameEl },
+        percentage,
+      },
+    ]);
+    this.syncVarietalFromVarieties();
+  }
+
+  removeVariety(index: number): void {
+    this.formVarieties.update((list) => list.filter((_, i) => i !== index));
+    this.syncVarietalFromVarieties();
+  }
+
+  onVarietyChange(): void {
+    this.syncVarietalFromVarieties();
+  }
+
+  syncVarietalFromVarieties(): void {
+    const list = this.formVarieties();
+    if (list.length === 0) {
+      this.formProduct.varietal = { en: '', el: '' };
+      return;
+    }
+
+    const enParts: string[] = [];
+    const elParts: string[] = [];
+
+    list.forEach((item) => {
+      const pct = item.percentage != null && !isNaN(Number(item.percentage)) && Number(item.percentage) > 0
+        ? `${item.percentage}% `
+        : '';
+      const nameEn = (item.variety.en || item.variety.el || '').trim();
+      const nameEl = (item.variety.el || item.variety.en || '').trim();
+
+      if (nameEn) enParts.push(`${pct}${nameEn}`);
+      if (nameEl) elParts.push(`${pct}${nameEl}`);
+    });
+
+    this.formProduct.varietal = {
+      en: enParts.join(', '),
+      el: elParts.join(', '),
+    };
+  }
+
   private getEmptyProduct(): Partial<Product> {
+    const defaultVintage = new Date().getFullYear().toString();
+    const defaultCategory = 'VOLCANIC';
     return {
       name: '',
-      vintage: new Date().getFullYear().toString(),
-      category: 'VOLCANIC',
+      slug: '',
+      vintage: defaultVintage,
+      category: defaultCategory,
       price: 45.0,
       compare_at_price: null,
       stock_quantity: 50,
@@ -1046,13 +1385,19 @@ export class AdminProducts implements OnInit {
     this.errorMessage.set('');
     this.uploadedImages.set([]);
     this.mainCoverImage.set('');
+    this.isSlugCustomized.set(false);
     this.formProduct = this.getEmptyProduct();
+    this.formVarieties.set([{ variety: { en: '', el: '' }, percentage: null }]);
     this.isModalOpen.set(true);
   }
 
   openEditModal(product: Product): void {
     this.editingProduct.set(product);
     this.errorMessage.set('');
+
+    const defaultSlug = this.computeDefaultSlug(product.name, product.category, product.vintage);
+    // If slug matches computed default or was empty, keep auto-sync; otherwise mark as custom
+    this.isSlugCustomized.set(!!product.slug && product.slug !== defaultSlug);
 
     const allImages: string[] = [];
     if (product.cover_image) allImages.push(product.cover_image);
@@ -1067,8 +1412,15 @@ export class AdminProducts implements OnInit {
     this.uploadedImages.set(allImages);
     this.mainCoverImage.set(product.cover_image || allImages[0] || '');
 
+    let varieties = this.parseVarietiesFromI18n(product.varietal);
+    if (varieties.length === 0) {
+      varieties = [{ variety: { en: '', el: '' }, percentage: null }];
+    }
+    this.formVarieties.set(varieties);
+
     this.formProduct = {
       ...product,
+      slug: product.slug || defaultSlug,
       gallery: Array.isArray(product.gallery) ? [...product.gallery] : [],
       region: this.cloneI18n(product.region),
       varietal: this.cloneI18n(product.varietal),
@@ -1160,6 +1512,7 @@ export class AdminProducts implements OnInit {
   // --- Asset Library Modal Handlers ---
   openAssetLibraryModal(): void {
     this.selectedAssetUrls.set([]);
+    this.assetModalTab.set('library');
     this.isAssetModalOpen.set(true);
     this.loadingAssets.set(true);
     this.api.listAssets().subscribe({
@@ -1209,6 +1562,7 @@ export class AdminProducts implements OnInit {
   }
 
   saveProduct(): void {
+    this.syncVarietalFromVarieties();
     this.errorMessage.set('');
     if (!this.formProduct.name?.trim()) {
       this.errorMessage.set('Please enter a product name.');
@@ -1219,9 +1573,18 @@ export class AdminProducts implements OnInit {
     const mainImg = this.mainCoverImage() || (allImages.length > 0 ? allImages[0] : '');
     const galleryImgs = allImages.filter((img) => img !== mainImg);
 
+    const rawSlug = this.formProduct.slug?.trim()
+      ? this.slugify(this.formProduct.slug)
+      : this.computeDefaultSlug(this.formProduct.name, this.formProduct.category, this.formProduct.vintage);
+
     const payload: Partial<Product> = {
       ...this.formProduct,
+      varieties: this.formVarieties().map((v) => ({
+        variety: this.cloneI18n(v.variety),
+        percentage: v.percentage != null && !isNaN(Number(v.percentage)) ? Number(v.percentage) : null,
+      })),
       name: this.formProduct.name.trim(),
+      slug: rawSlug,
       cover_image: mainImg,
       gallery: galleryImgs,
       price: typeof this.formProduct.price === 'string' ? parseFloat(this.formProduct.price) || 0 : (this.formProduct.price ?? 0),

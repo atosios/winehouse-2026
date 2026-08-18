@@ -36,80 +36,78 @@ import { AdminAuth } from './auth';
       }
     </div>
 
-    <div class="grid gap-6 lg:grid-cols-3">
-      <!-- Quick Action Cards Grid -->
-      <div class="lg:col-span-1">
-        <h2 class="text-base font-semibold text-slate-900 tracking-tight mb-3">Quick Actions</h2>
-        <div class="grid gap-3 grid-cols-2">
-          @for (action of quickActions; track action.path) {
-            <a [routerLink]="action.path" class="admin-action-card">
-              <div class="admin-action-card-icon" [innerHTML]="action.icon"></div>
-              <span class="admin-action-card-label">{{ action.label }}</span>
-            </a>
-          }
-        </div>
-      </div>
-
-      <!-- Recent Content Updates Feed -->
-      <div class="lg:col-span-2">
-        <div class="flex items-center justify-between mb-3">
-          <h2 class="text-base font-semibold text-slate-900 tracking-tight">Recent Activity</h2>
-          <a routerLink="/admin/posts" class="text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors">
-            View all posts →
+    <!-- Quick Action Cards (6-Column Grid) -->
+    <div class="mb-8">
+      <h2 class="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono mb-3">Quick Navigation Hub</h2>
+      <div class="grid gap-3 grid-cols-2 sm:grid-cols-3 lg:grid-cols-6">
+        @for (action of quickActions; track action.path) {
+          <a [routerLink]="action.path" class="admin-action-card">
+            <div class="admin-action-card-icon" [innerHTML]="action.icon"></div>
+            <span class="admin-action-card-label">{{ action.label }}</span>
           </a>
-        </div>
-
-        @if (loading()) {
-          <div class="admin-card text-center py-8 text-slate-400 text-sm">
-            Loading activity…
-          </div>
-        } @else if (recentItems().length === 0) {
-          <div class="admin-card admin-empty-state">
-            <div class="admin-empty-state-icon">📝</div>
-            <p>No activity yet. Create your first post or page to get started.</p>
-          </div>
-        } @else {
-          <div class="admin-card !p-0 overflow-hidden">
-            <div class="divide-y divide-slate-100">
-              @for (item of recentItems(); track item.id + item.type) {
-                <div class="flex items-center justify-between p-4 hover:bg-slate-50/80 transition-colors">
-                  <div class="flex items-center gap-3 min-w-0">
-                    <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 shrink-0">
-                      {{ item.type === 'post' ? 'P' : 'Pg' }}
-                    </div>
-                    <div class="min-w-0">
-                      <div class="flex items-center gap-2">
-                        <a
-                          [routerLink]="item.type === 'post' ? ['/admin/posts', item.id] : ['/admin/pages', item.id]"
-                          class="text-sm font-semibold text-slate-900 hover:underline truncate"
-                        >
-                          {{ item.title }}
-                        </a>
-                        <span
-                          class="admin-badge text-2xs"
-                          [class]="item.type === 'post' ? 'admin-badge-live' : 'admin-badge-draft'"
-                        >
-                          {{ item.type === 'post' ? 'Journal' : 'Page' }}
-                        </span>
-                      </div>
-                      <p class="text-xs text-slate-400 mt-0.5">
-                        {{ item.published ? 'Live on website' : 'Draft' }} · {{ item.updated_at | date: 'medium' }}
-                      </p>
-                    </div>
-                  </div>
-
-                  <a
-                    [routerLink]="item.type === 'post' ? ['/admin/posts', item.id] : ['/admin/pages', item.id]"
-                    class="text-xs font-semibold text-slate-500 hover:text-slate-900 px-2.5 py-1 rounded-md hover:bg-slate-200/60 transition-colors shrink-0"
-                  >
-                    Edit
-                  </a>
-                </div>
-              }
-            </div>
-          </div>
         }
       </div>
+    </div>
+
+    <!-- Recent Content & Activity -->
+    <div>
+      <div class="flex items-center justify-between mb-3">
+        <h2 class="text-xs font-bold uppercase tracking-wider text-slate-900 font-mono">Recent Activity &amp; Updates</h2>
+        <a routerLink="/admin/posts" class="text-xs font-semibold text-slate-600 hover:text-slate-900 transition-colors">
+          View all posts →
+        </a>
+      </div>
+
+      @if (loading()) {
+        <div class="admin-card text-center py-8 text-slate-400 text-sm">
+          Loading activity…
+        </div>
+      } @else if (recentItems().length === 0) {
+        <div class="admin-card admin-empty-state">
+          <div class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 mx-auto flex items-center justify-center text-slate-400 mb-2"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg></div>
+          <p>No activity yet. Create your first post or page to get started.</p>
+        </div>
+      } @else {
+        <div class="admin-card !p-0 overflow-hidden">
+          <div class="divide-y divide-slate-100">
+            @for (item of recentItems(); track item.id + item.type) {
+              <div class="flex items-center justify-between p-4 hover:bg-slate-50/80 transition-colors">
+                <div class="flex items-center gap-3 min-w-0">
+                  <div class="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center text-xs font-bold text-slate-600 shrink-0">
+                    {{ item.type === 'post' ? 'P' : 'Pg' }}
+                  </div>
+                  <div class="min-w-0">
+                    <div class="flex items-center gap-2">
+                      <a
+                        [routerLink]="item.type === 'post' ? ['/admin/posts', item.id] : ['/admin/pages', item.id]"
+                        class="text-sm font-semibold text-slate-900 hover:underline truncate"
+                      >
+                        {{ item.title }}
+                      </a>
+                      <span
+                        class="admin-badge text-2xs"
+                        [class]="item.type === 'post' ? 'admin-badge-live' : 'admin-badge-draft'"
+                      >
+                        {{ item.type === 'post' ? 'Journal' : 'Page' }}
+                      </span>
+                    </div>
+                    <p class="text-xs text-slate-400 mt-0.5">
+                      {{ item.published ? 'Live on website' : 'Draft' }} · {{ item.updated_at | date: 'medium' }}
+                    </p>
+                  </div>
+                </div>
+
+                <a
+                  [routerLink]="item.type === 'post' ? ['/admin/posts', item.id] : ['/admin/pages', item.id]"
+                  class="text-xs font-semibold text-slate-500 hover:text-slate-900 px-2.5 py-1 rounded-md hover:bg-slate-200/60 transition-colors shrink-0"
+                >
+                  Edit
+                </a>
+              </div>
+            }
+          </div>
+        </div>
+      }
     </div>
   `,
 })
@@ -139,19 +137,29 @@ export class AdminOverview implements OnInit {
 
   quickActions = [
     {
-      path: '/admin/posts/new',
-      label: 'New Post',
+      path: '/admin/homepage-editor',
+      label: 'Page Studio',
+      icon: this.svgIcon('<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="3" y1="9" x2="21" y2="9"/><line x1="9" y1="21" x2="9" y2="9"/>'),
+    },
+    {
+      path: '/admin/products',
+      label: 'Products',
+      icon: this.svgIcon('<path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/>'),
+    },
+    {
+      path: '/admin/posts',
+      label: 'Journal Posts',
       icon: this.svgIcon('<path d="M12 20h9"/><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"/>'),
     },
     {
-      path: '/admin/pages/new',
-      label: 'New Page',
-      icon: this.svgIcon('<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/>'),
+      path: '/admin/assets',
+      label: 'Media Library',
+      icon: this.svgIcon('<rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'),
     },
     {
-      path: '/admin/assets',
-      label: 'Upload Media',
-      icon: this.svgIcon('<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/>'),
+      path: '/admin/store-config',
+      label: 'Store Config',
+      icon: this.svgIcon('<circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/>'),
     },
     {
       path: '/admin/settings',

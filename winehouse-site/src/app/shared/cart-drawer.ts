@@ -21,12 +21,12 @@ import { resolveMediaUrl } from '../core/media.utils';
         class="fixed top-0 right-0 bottom-0 z-[130] w-full max-w-md bg-[var(--color-paper-light)] text-[var(--color-foreground)] border-l-[1.5px] border-[var(--color-foreground)] shadow-2xl flex flex-col justify-between overflow-hidden animate-in slide-in-from-right duration-300"
         role="dialog"
         aria-modal="true"
-        aria-label="Basket"
+        aria-label="Cart"
       >
         <!-- Top Bar Header -->
         <div class="p-6 border-b-[1.5px] border-[var(--color-foreground)] bg-white/40 flex items-center justify-between">
           <div class="flex items-center gap-3">
-            <h3 class="font-big text-2xl uppercase tracking-tight text-[var(--color-foreground)]">Basket</h3>
+            <h3 class="font-big text-2xl uppercase tracking-tight text-[var(--color-foreground)]">Cart</h3>
             <span class="px-2 py-0.5 rounded bg-[var(--color-foreground)] text-white font-mono text-2xs font-bold uppercase tracking-wider">
               {{ cart.totalCount() }} {{ cart.totalCount() === 1 ? 'Item' : 'Items' }}
             </span>
@@ -36,7 +36,7 @@ import { resolveMediaUrl } from '../core/media.utils';
             type="button"
             (click)="cart.closeDrawer()"
             class="p-2 text-[var(--color-foreground)] hover:text-[var(--color-primary)] font-mono text-lg font-bold transition-colors cursor-pointer"
-            aria-label="Close basket"
+            aria-label="Close cart"
           >
             ✕
           </button>
@@ -116,7 +116,7 @@ import { resolveMediaUrl } from '../core/media.utils';
           } @else {
             <div class="py-20 text-center space-y-3">
               <p class="font-mono text-xs uppercase font-bold tracking-wider text-[var(--color-foreground)]">
-                Your basket is empty
+                Your cart is empty
               </p>
               <p class="font-sans text-xs text-[var(--color-foreground)]/60 max-w-xs mx-auto">
                 Explore our wines and selections in the online store.
@@ -175,7 +175,7 @@ import { resolveMediaUrl } from '../core/media.utils';
                 (click)="cart.clear()"
                 class="font-mono text-2xs uppercase text-[var(--color-foreground)]/50 hover:text-red-600 transition-colors cursor-pointer"
               >
-                Clear Basket
+                Clear Cart
               </button>
             </div>
 

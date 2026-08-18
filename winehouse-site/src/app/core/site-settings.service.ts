@@ -1,4 +1,5 @@
-import { Injectable, inject, signal, computed } from '@angular/core';
+import { Injectable, inject, signal, computed, PLATFORM_ID } from '@angular/core';
+import { isPlatformBrowser } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { Observable, of, tap, catchError } from 'rxjs';
 import { SITE } from './site-config';
@@ -52,6 +53,7 @@ export const DEFAULT_STORE_CONFIG: StoreConfig = {
     { key: 'RESERVE', label: { en: 'CELLAR RESERVE', el: 'ΠΑΛΑΙΩΣΗ & RESERVE' }, enabled: true },
     { key: 'INDIGENOUS', label: { en: 'ANCIENT INDIGENOUS', el: 'ΑΥΤΟΧΘΟΝΕΣ ΠΟΙΚΙΛΙΕΣ' }, enabled: true },
   ],
+  low_stock_threshold: 5,
 };
 
 export const DEFAULT_SITE_COLORS: SiteColors = {
@@ -563,7 +565,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   shop_content: JSON.parse(JSON.stringify(DEFAULT_SHOP_CONTENT)),
   contact_content: JSON.parse(JSON.stringify(DEFAULT_CONTACT_PAGE_CONTENT)),
   maintenance_content: JSON.parse(JSON.stringify(DEFAULT_MAINTENANCE_CONTENT)),
-  maintenance_mode: true,
+  maintenance_mode: false,
   store_config: JSON.parse(JSON.stringify(DEFAULT_STORE_CONFIG)),
   mail_config: JSON.parse(JSON.stringify(DEFAULT_MAIL_CONFIG)),
 };
@@ -571,6 +573,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
 @Injectable({ providedIn: 'root' })
 export class SiteSettingsService {
   private http = inject(HttpClient);
+  private platformId = inject(PLATFORM_ID);
 
   readonly settings = signal<SiteSettings>(DEFAULT_SITE_SETTINGS);
   readonly isLoaded = signal(false);
@@ -632,6 +635,10 @@ export class SiteSettingsService {
    * Load public settings from backend API. Falls back cleanly to local defaults.
    */
   load(): Observable<SiteSettings> {
+    if (!isPlatformBrowser(this.platformId)) {
+      this.isLoaded.set(true);
+      return of(this.settings());
+    }
     return this.http.get<SiteSettings>(`${API_BASE}/settings`).pipe(
       tap((loaded) => {
         if (loaded && typeof loaded === 'object') {

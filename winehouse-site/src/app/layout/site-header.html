@@ -56,7 +56,7 @@
         </button>
       </div>
 
-      <!-- Cellar Basket Button -->
+      <!-- Cellar Cart Button -->
       <button
         type="button"
         (click)="cart.openDrawer()"
@@ -69,14 +69,14 @@
         [class.bg-[var(--color-foreground)]]="!isDarkSection()"
         [class.text-[var(--color-paper-light)]]="!isDarkSection()"
         [class.hover:bg-[var(--color-primary)]]="!isDarkSection()"
-        title="Open Basket"
+        title="Open Cart"
       >
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
           <circle cx="8" cy="21" r="1"/>
           <circle cx="19" cy="21" r="1"/>
           <path d="M2.05 2.05h2l2.66 12.42a2 2 0 0 0 2 1.58h9.78a2 2 0 0 0 1.95-1.57l1.65-7.43H5.12"/>
         </svg>
-        <span>Basket</span>
+        <span>Cart</span>
         @if (cart.totalCount() > 0) {
           <span class="px-1.5 py-0.2 rounded-full bg-[var(--color-primary)] text-white text-[10px] font-mono font-extrabold animate-pulse">
             {{ cart.totalCount() }}
@@ -87,7 +87,7 @@
 
     <!-- Mobile menu toggle & Language indicator -->
     <div class="flex items-center gap-2 md:hidden">
-      <!-- Mobile Basket Icon Button -->
+      <!-- Mobile Cart Icon Button -->
       <button
         type="button"
         (click)="cart.openDrawer()"
@@ -99,7 +99,7 @@
         [class.border-[var(--color-foreground)]]="!isDarkSection()"
         [class.bg-[var(--color-foreground)]]="!isDarkSection()"
         [class.text-white]="!isDarkSection()"
-        aria-label="Open Basket"
+        aria-label="Open Cart"
       >
         <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="shrink-0">
           <circle cx="8" cy="21" r="1"/>
