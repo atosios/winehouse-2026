@@ -1,4 +1,5 @@
-import { Component, Injectable, signal } from '@angular/core';
+import { Component, Injectable, signal, computed } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 
 export interface ConfirmOptions {
   title: string;
@@ -6,6 +7,8 @@ export interface ConfirmOptions {
   confirmLabel?: string;
   cancelLabel?: string;
   danger?: boolean;
+  requireTextMatch?: string;
+  matchPlaceholder?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -15,10 +18,12 @@ export class AdminConfirm {
     title: '',
     message: '',
   });
+  readonly typedInput = signal('');
 
   private _resolve: ((value: boolean) => void) | null = null;
 
   open(options: ConfirmOptions): Promise<boolean> {
+    this.typedInput.set('');
     this.options.set({
       confirmLabel: 'Confirm',
       cancelLabel: 'Cancel',
@@ -34,6 +39,7 @@ export class AdminConfirm {
   /** @internal — called by the dialog component */
   _respond(value: boolean) {
     this.visible.set(false);
+    this.typedInput.set('');
     this._resolve?.(value);
     this._resolve = null;
   }
@@ -42,6 +48,7 @@ export class AdminConfirm {
 @Component({
   selector: 'wh-confirm-dialog',
   standalone: true,
+  imports: [FormsModule],
   template: `
     @if (svc.visible()) {
       <div
@@ -49,7 +56,7 @@ export class AdminConfirm {
         (click)="svc._respond(false)"
       >
         <div
-          class="relative w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-200/90 p-6 sm:p-7 overflow-hidden transition-all transform duration-200"
+          class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-slate-200/90 p-6 sm:p-7 overflow-hidden transition-all transform duration-200"
           (click)="$event.stopPropagation()"
         >
           <!-- Top badge + title + message -->
@@ -57,9 +64,9 @@ export class AdminConfirm {
             @if (svc.options().danger) {
               <div class="w-12 h-12 rounded-2xl bg-red-50 text-red-600 flex items-center justify-center shrink-0 border border-red-100 shadow-xs">
                 <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M3 6h18m-2 0v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6m3 0V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/>
-                  <line x1="10" y1="11" x2="10" y2="17"/>
-                  <line x1="14" y1="11" x2="14" y2="17"/>
+                  <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/>
+                  <line x1="12" y1="9" x2="12" y2="13"/>
+                  <line x1="12" y1="17" x2="12.01" y2="17"/>
                 </svg>
               </div>
             } @else {
@@ -82,6 +89,29 @@ export class AdminConfirm {
             </div>
           </div>
 
+          <!-- GitHub-style Type Confirmation Challenge -->
+          @if (svc.options().requireTextMatch; as requiredText) {
+            <div class="mt-5 p-4 rounded-2xl bg-red-50/60 border border-red-200/80 space-y-3">
+              <div class="text-xs text-slate-700 leading-snug">
+                To confirm this destructive action, please type
+                <strong class="font-mono font-bold select-all bg-white px-2 py-0.5 rounded border border-red-300 text-red-600 tracking-wider">
+                  {{ requiredText }}
+                </strong>
+                below:
+              </div>
+
+              <input
+                type="text"
+                [ngModel]="svc.typedInput()"
+                (ngModelChange)="svc.typedInput.set($event)"
+                (keydown.enter)="onEnterKey()"
+                [placeholder]="svc.options().matchPlaceholder || ('Type ' + requiredText + ' to confirm')"
+                class="w-full px-3.5 py-2.5 bg-white border border-slate-300 focus:border-red-500 focus:ring-2 focus:ring-red-200 rounded-xl text-xs font-mono font-bold text-slate-900 placeholder:text-slate-400 placeholder:font-normal outline-none transition-all"
+                autofocus
+              />
+            </div>
+          }
+
           <!-- Bottom Action Buttons -->
           <div class="mt-6 pt-5 border-t border-slate-100 flex items-center justify-end gap-3">
             <button
@@ -93,9 +123,13 @@ export class AdminConfirm {
             </button>
             <button
               type="button"
-              class="px-4 py-2.5 text-xs font-semibold text-white shadow-sm active:scale-[0.98] rounded-xl transition-all cursor-pointer select-none flex items-center gap-1.5"
+              [disabled]="!isMatch()"
+              class="px-4 py-2.5 text-xs font-semibold text-white shadow-sm active:scale-[0.98] rounded-xl transition-all select-none flex items-center gap-1.5"
+              [class.cursor-not-allowed]="!isMatch()"
+              [class.opacity-40]="!isMatch()"
+              [class.cursor-pointer]="isMatch()"
               [class]="svc.options().danger ? 'bg-red-600 hover:bg-red-700 shadow-red-500/20' : 'bg-slate-900 hover:bg-slate-800'"
-              (click)="svc._respond(true)"
+              (click)="confirm()"
             >
               @if (svc.options().danger) {
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
@@ -110,4 +144,23 @@ export class AdminConfirm {
 })
 export class ConfirmDialog {
   constructor(public svc: AdminConfirm) {}
+
+  readonly isMatch = computed(() => {
+    const required = this.svc.options().requireTextMatch;
+    if (!required) return true;
+    return this.svc.typedInput().trim().toUpperCase() === required.trim().toUpperCase();
+  });
+
+  confirm(): void {
+    if (this.isMatch()) {
+      this.svc._respond(true);
+    }
+  }
+
+  onEnterKey(): void {
+    if (this.isMatch()) {
+      this.svc._respond(true);
+    }
+  }
 }
+

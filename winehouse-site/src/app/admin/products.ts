@@ -2,6 +2,7 @@ import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi, Product, Asset } from './api';
 import { WhI18nInput } from './i18n-input';
+import { AdminConfirm } from './confirm-dialog';
 import { I18nService, I18nText } from '../core/i18n.service';
 import { SiteSettingsService } from '../core/site-settings.service';
 import { resolveMediaUrl } from '../core/media.utils';
@@ -904,6 +905,7 @@ import { resolveMediaUrl } from '../core/media.utils';
 export class AdminProducts implements OnInit {
   protected readonly Math = Math;
   private api = inject(AdminApi);
+  private confirmDialog = inject(AdminConfirm);
   private settingsService = inject(SiteSettingsService);
   readonly i18n = inject(I18nService);
 
@@ -1261,8 +1263,15 @@ export class AdminProducts implements OnInit {
     }
   }
 
-  deleteProduct(product: Product): void {
-    if (confirm(`Are you sure you want to remove ${product.name}?`)) {
+  async deleteProduct(product: Product): Promise<void> {
+    const confirmed = await this.confirmDialog.open({
+      title: `Delete Product ${product.name}?`,
+      message: `Are you sure you want to permanently remove "${product.name}" from the cellar catalog?`,
+      confirmLabel: 'Delete Product',
+      cancelLabel: 'Cancel',
+      danger: true,
+    });
+    if (confirmed) {
       this.api.deleteProduct(product.id).subscribe({
         next: () => {
           this.products.update((list) => list.filter((p) => p.id !== product.id));

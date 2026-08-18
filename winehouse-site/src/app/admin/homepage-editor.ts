@@ -3,6 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { WhMediaPicker } from './media-picker';
 import { WhI18nInput } from './i18n-input';
+import { AdminConfirm } from './confirm-dialog';
 import {
   AdminApi,
   HomepageContent,
@@ -1095,6 +1096,7 @@ export type EditablePageKey = 'home' | 'about' | 'shop' | 'contact' | 'maintenan
 })
 export class AdminHomepageEditor implements OnInit {
   private settingsService = inject(SiteSettingsService);
+  private confirmDialog = inject(AdminConfirm);
   readonly i18n = inject(I18nService);
 
   readonly activePage = signal<EditablePageKey>('home');
@@ -1111,11 +1113,11 @@ export class AdminHomepageEditor implements OnInit {
 
   /* Pages navigation */
   readonly pages: Array<{ key: EditablePageKey; label: string; route: string; icon: string }> = [
-    { key: 'home', label: 'Homepage', route: '/', icon: '🏠' },
-    { key: 'about', label: 'About Us', route: '/about', icon: '📖' },
-    { key: 'shop', label: 'e-Shop & Cellar', route: '/shop', icon: '🍷' },
-    { key: 'contact', label: 'Contact', route: '/contact', icon: '✉️' },
-    { key: 'maintenance', label: 'Maintenance Mode', route: '/maintenance', icon: '🚧' },
+    { key: 'home', label: 'Homepage', route: '/', icon: '01' },
+    { key: 'about', label: 'About Us', route: '/about', icon: '02' },
+    { key: 'shop', label: 'e-Shop & Cellar', route: '/shop', icon: '03' },
+    { key: 'contact', label: 'Contact', route: '/contact', icon: '04' },
+    { key: 'maintenance', label: 'Maintenance Mode', route: '/maintenance', icon: '05' },
   ];
 
   /* Sub-tabs */
@@ -1267,9 +1269,19 @@ export class AdminHomepageEditor implements OnInit {
     });
   }
 
-  resetActivePageToDefaults(): void {
+  async resetActivePageToDefaults(): Promise<void> {
     const label = this.activePageLabel;
-    if (confirm(`Are you sure you want to reset all content for ${label} back to default curation?`)) {
+    const confirmed = await this.confirmDialog.open({
+      title: `Reset ${label} to Factory Defaults?`,
+      message: `This will permanently overwrite all custom copy, headlines, hero assets, and curated sections on the ${label} page back to the original factory default state.\n\nThis action cannot be undone.`,
+      confirmLabel: 'Reset Defaults',
+      cancelLabel: 'Cancel',
+      danger: true,
+      requireTextMatch: 'RESET DEFAULTS',
+      matchPlaceholder: 'Type RESET DEFAULTS to confirm',
+    });
+
+    if (confirmed) {
       const page = this.activePage();
       if (page === 'home') {
         this.content = JSON.parse(JSON.stringify(DEFAULT_HOMEPAGE_CONTENT));

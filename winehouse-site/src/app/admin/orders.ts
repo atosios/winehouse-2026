@@ -2,6 +2,7 @@ import { DatePipe } from '@angular/common';
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi, Order } from './api';
+import { AdminConfirm } from './confirm-dialog';
 
 @Component({
   selector: 'wh-admin-orders',
@@ -311,6 +312,7 @@ import { AdminApi, Order } from './api';
 })
 export class AdminOrders implements OnInit {
   private api = inject(AdminApi);
+  private confirmDialog = inject(AdminConfirm);
 
   readonly orders = signal<Order[]>([]);
   readonly loading = signal(true);
@@ -391,8 +393,15 @@ export class AdminOrders implements OnInit {
       });
   }
 
-  deleteOrder(order: Order): void {
-    if (confirm(`Are you sure you want to delete order ${order.order_number}?`)) {
+  async deleteOrder(order: Order): Promise<void> {
+    const confirmed = await this.confirmDialog.open({
+      title: `Delete Order ${order.order_number}?`,
+      message: `Are you sure you want to delete order ${order.order_number} for customer ${order.customer_name}?`,
+      confirmLabel: 'Delete Order',
+      cancelLabel: 'Cancel',
+      danger: true,
+    });
+    if (confirmed) {
       this.api.deleteOrder(order.id).subscribe({
         next: () => {
           this.orders.update((list) => list.filter((p) => p.id !== order.id));

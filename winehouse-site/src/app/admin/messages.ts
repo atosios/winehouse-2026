@@ -1,6 +1,7 @@
 import { Component, inject, signal, computed, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi, ContactMessage } from './api';
+import { AdminConfirm } from './confirm-dialog';
 
 @Component({
   selector: 'wh-admin-messages',
@@ -312,6 +313,7 @@ import { AdminApi, ContactMessage } from './api';
 })
 export class AdminMessages implements OnInit {
   private api = inject(AdminApi);
+  private confirmDialog = inject(AdminConfirm);
 
   readonly messages = signal<ContactMessage[]>([]);
   readonly loading = signal(true);
@@ -415,8 +417,15 @@ export class AdminMessages implements OnInit {
     });
   }
 
-  deleteMessage(msg: ContactMessage): void {
-    if (confirm(`Are you sure you want to delete the message from ${msg.name}?`)) {
+  async deleteMessage(msg: ContactMessage): Promise<void> {
+    const confirmed = await this.confirmDialog.open({
+      title: `Delete Message from ${msg.name}?`,
+      message: `Are you sure you want to delete this message regarding "${msg.subject || msg.project_type || 'General Inquiry'}"?`,
+      confirmLabel: 'Delete Message',
+      cancelLabel: 'Cancel',
+      danger: true,
+    });
+    if (confirmed) {
       this.api.deleteMessage(msg.id).subscribe({
         next: () => {
           this.messages.update((list) => list.filter((m) => m.id !== msg.id));
