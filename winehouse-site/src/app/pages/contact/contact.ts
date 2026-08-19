@@ -36,6 +36,7 @@ export class Contact implements OnInit {
   phone = '';
   projectType = 'Private Tasting';
   message = '';
+  subscribeNewsletter = false;
   readonly sent = signal(false);
   readonly sending = signal(false);
   readonly sendError = signal<string | null>(null);
@@ -132,6 +133,7 @@ export class Contact implements OnInit {
     this.phone = '';
     this.projectType = 'Private Tasting';
     this.message = '';
+    this.subscribeNewsletter = false;
   }
 
   @HostListener('document:click')
@@ -164,6 +166,7 @@ export class Contact implements OnInit {
         subject: this.projectType,
         project_type: this.projectType,
         message: this.message.trim(),
+        subscribe_newsletter: this.subscribeNewsletter,
       })
       .subscribe({
         next: () => {

@@ -1,0 +1,489 @@
+<div class="post-detail-page bg-[#faf6ef] text-[#1c1714] min-h-screen pb-24 font-sans selection:bg-[#701423] selection:text-white">
+
+  <!-- ========================================================================================= -->
+  <!-- 1. LOADING SKELETON STATE                                                                 -->
+  <!-- ========================================================================================= -->
+  @if (loading()) {
+    <div class="shell pt-32 pb-20 space-y-6 animate-pulse">
+      <div class="h-4 w-32 bg-slate-200 rounded"></div>
+      <div class="bg-white rounded-2xl border border-slate-200/80 p-8 sm:p-12 space-y-6 shadow-xs w-full">
+        <div class="h-10 w-3/4 bg-slate-200 rounded"></div>
+        <div class="h-6 w-1/2 bg-slate-100 rounded"></div>
+        <div class="h-4 w-40 bg-slate-100 rounded"></div>
+        <div class="pt-6 space-y-4">
+          <div class="h-4 w-full bg-slate-100 rounded"></div>
+          <div class="h-4 w-5/6 bg-slate-100 rounded"></div>
+          <div class="h-4 w-4/6 bg-slate-100 rounded"></div>
+        </div>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================================= -->
+  <!-- 2. ERROR / NOT FOUND STATE                                                                -->
+  <!-- ========================================================================================= -->
+  @else if (error() || !post()) {
+    <div class="shell py-24 text-center min-h-[50vh] flex flex-col items-center justify-center space-y-6">
+      <div class="w-16 h-16 rounded-2xl bg-white border border-[#e8ded0] shadow-sm mx-auto flex items-center justify-center text-[#701423] font-serif text-2xl font-bold">
+        WH
+      </div>
+      <div class="space-y-2">
+        <span class="text-xs font-mono font-bold tracking-widest text-[#701423] uppercase bg-[#faf7f2] px-3 py-1 rounded border border-[#e8ded0]">
+          / CELLAR ARCHIVE
+        </span>
+        <h1 class="text-2xl sm:text-3xl font-serif font-bold text-slate-900 tracking-wide mt-3">
+          Dispatch Not Located
+        </h1>
+        <p class="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-md mx-auto">
+          {{ error() || 'The requested article, cellar dispatch, or masterclass notes could not be found.' }}
+        </p>
+      </div>
+
+      <div class="pt-4 flex items-center justify-center gap-3">
+        <button
+          type="button"
+          (click)="goBack()"
+          class="px-5 py-2.5 rounded-xl border border-slate-300 bg-white hover:bg-slate-50 text-xs font-mono font-bold uppercase tracking-wider text-slate-800 transition-colors cursor-pointer shadow-2xs"
+        >
+          ← Return
+        </button>
+        <a
+          routerLink="/"
+          class="px-5 py-2.5 rounded-xl bg-[#701423] hover:bg-[#85182a] text-white text-xs font-mono font-bold uppercase tracking-wider transition-colors shadow-sm"
+        >
+          Explore Homepage
+        </a>
+      </div>
+    </div>
+  }
+
+  <!-- ========================================================================================= -->
+  <!-- 3. ARTICLE CONTENT VIEW (WIDE SHELL CONTAINER MATCHING ALL PAGES)                         -->
+  <!-- ========================================================================================= -->
+  @else {
+    @let p = post()!;
+
+    <!-- Top Sticky Breadcrumb / Action Bar -->
+    <header class="pt-24 sm:pt-28 pb-4 border-b border-[#e8ded0] bg-[#faf6ef]/95 backdrop-blur-md sticky top-0 z-30">
+      <div class="shell flex items-center justify-between gap-4">
+        
+        <!-- Breadcrumb & Back -->
+        <div class="flex items-center gap-3 min-w-0">
+          <button
+            type="button"
+            (click)="goBack()"
+            class="flex items-center gap-1.5 text-xs font-mono uppercase tracking-wider text-slate-500 hover:text-[#701423] transition-colors cursor-pointer shrink-0"
+            title="Go back"
+          >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
+            <span class="hidden sm:inline">Back</span>
+          </button>
+
+          <span class="text-slate-300 font-mono text-xs">/</span>
+
+          <a routerLink="/" class="text-xs font-mono uppercase tracking-wider text-slate-500 hover:text-[#701423] transition-colors shrink-0">
+            Journal
+          </a>
+
+          @if (p.category) {
+            <span class="text-slate-300 font-mono text-xs">/</span>
+            <span class="text-xs font-mono uppercase tracking-wider text-[#701423] font-bold truncate">
+              {{ p.category }}
+            </span>
+          }
+        </div>
+
+        <!-- Share & Actions -->
+        <div class="flex items-center gap-2 shrink-0">
+          <button
+            type="button"
+            (click)="copyLink()"
+            class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-[#e8ded0] bg-white hover:bg-slate-50 text-slate-700 text-xs font-mono font-semibold transition-all cursor-pointer shadow-2xs"
+            [title]="'Copy dispatch link'"
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+            <span>{{ copiedToast() ? 'Copied ✓' : 'Share' }}</span>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <main class="shell pt-8 sm:pt-10 space-y-12">
+
+      <!-- ======================================================================================= -->
+      <!-- AUTHENTIC ARTICLE CANVAS (FULL SHELL WIDTH, EXACT 1-TO-1 MATCH WITH EDITOR)             -->
+      <!-- ======================================================================================= -->
+      <article class="article-live-canvas w-full space-y-6">
+
+        <!-- 1. Article Header (Title & Teaser) -->
+        @if (p.title || p.excerpt) {
+          <div class="space-y-4">
+            
+            <!-- Title -->
+            @if (p.title && p.title !== 'Untitled') {
+              <h1
+                class="w-full font-serif font-bold text-3xl sm:text-4xl text-slate-900 leading-tight"
+                [ngStyle]="getCustomStyle('title')"
+              >
+                {{ p.title }}
+              </h1>
+            }
+
+            <!-- Teaser -->
+            @if (p.excerpt) {
+              <p
+                class="w-full font-serif italic text-base sm:text-lg text-slate-600 leading-relaxed"
+                [ngStyle]="getCustomStyle('excerpt')"
+              >
+                {{ p.excerpt }}
+              </p>
+            }
+
+            <!-- Authentic Journal Byline -->
+            <div class="flex items-center gap-3 text-xs text-slate-400 pt-3 border-t border-slate-100 flex-wrap">
+              <span class="font-semibold text-slate-900 font-serif">{{ p.author_name || 'The Winehouse' }}</span>
+              <span>·</span>
+              <span>{{ p.category || 'Cellar Journal' }}</span>
+              <span>·</span>
+              <span>{{ p.published_at ? (p.published_at | date:'mediumDate') : (p.created_at | date:'mediumDate') }}</span>
+              @if (!p.published) {
+                <span class="px-2 py-0.5 rounded text-3xs font-mono font-bold bg-amber-100 text-amber-900 border border-amber-300">
+                  DRAFT PREVIEW
+                </span>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- 2. Dynamic Article Content Blocks (Supports Layout Containers & Multi-Columns) -->
+        <div class="space-y-4 pt-2">
+          @for (block of blocks(); track block.id) {
+            <ng-container *ngTemplateOutlet="renderPublicBlock; context: { block: block }"></ng-container>
+          }
+        </div>
+
+      </article>
+
+      <!-- ======================================================================================= -->
+      <!-- FOOTER: TAGS & RELATED DISPATCHES                                                       -->
+      <!-- ======================================================================================= -->
+      @if (p.tags && p.tags.length > 0) {
+        <div class="flex flex-wrap items-center gap-2 pt-2">
+          <span class="text-2xs font-mono text-slate-400 uppercase mr-1">Filed Under:</span>
+          @for (tag of p.tags; track tag) {
+            <span class="px-2.5 py-1 rounded-md bg-white border border-[#e8ded0] text-slate-600 text-2xs font-mono font-bold uppercase tracking-wider shadow-2xs">
+              #{{ tag }}
+            </span>
+          }
+        </div>
+      }
+
+      @if (relatedPosts().length > 0) {
+        <section class="pt-10 border-t border-[#e8ded0] space-y-6">
+          <div class="flex items-center justify-between">
+            <span class="text-xs font-mono font-bold uppercase tracking-widest text-slate-400">
+              / CONTINUE READING
+            </span>
+            <a routerLink="/" class="text-2xs font-mono uppercase tracking-wider text-[#701423] font-bold hover:underline">
+              Back to Home →
+            </a>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-5">
+            @for (rel of relatedPosts(); track rel.id) {
+              <a
+                [routerLink]="['/posts', rel.slug || rel.id]"
+                class="group block p-4 rounded-2xl border border-[#e8ded0] bg-white hover:border-[#701423] hover:shadow-md transition-all space-y-3"
+              >
+                @if (rel.cover_image) {
+                  <div class="w-full aspect-16/10 rounded-xl overflow-hidden bg-slate-100 border border-slate-200">
+                    <img [src]="mediaUrl(rel.cover_image)" [alt]="rel.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                  </div>
+                }
+                <div class="space-y-1">
+                  <span class="text-3xs font-mono font-bold uppercase tracking-wider text-[#701423]">
+                    {{ rel.category || rel.post_type || 'JOURNAL' }}
+                  </span>
+                  <h4 class="text-sm font-serif font-bold text-slate-900 group-hover:text-[#701423] transition-colors line-clamp-2 leading-snug">
+                    {{ rel.title }}
+                  </h4>
+                  <p class="text-2xs text-slate-400 font-mono">
+                    {{ rel.published_at ? (rel.published_at | date:'MMM d, y') : (rel.created_at | date:'MMM d, y') }}
+                  </p>
+                </div>
+              </a>
+            }
+          </div>
+        </section>
+      }
+
+    </main>
+
+    <!-- ======================================================================================= -->
+    <!-- REUSABLE PUBLIC BLOCK TEMPLATE (Supports Recursive Nesting for Containers & Columns)   -->
+    <!-- ======================================================================================= -->
+    <ng-template #renderPublicBlock let-block="block">
+      
+      <!-- 1. CONTAINER LAYOUT BLOCK -->
+      @if (block.type === 'container') {
+        <div [class]="getContainerClasses(block)">
+          @for (child of block.children || []; track child.id) {
+            <ng-container *ngTemplateOutlet="renderPublicBlock; context: { block: child }"></ng-container>
+          }
+        </div>
+      }
+
+      <!-- 2. 2-COLUMNS LAYOUT BLOCK -->
+      @else if (block.type === 'columns_2') {
+        <div [class]="getColumns2Classes(block)" class="my-4">
+          <div class="space-y-4">
+            @for (c1 of block.columns?.[0] || []; track c1.id) {
+              <ng-container *ngTemplateOutlet="renderPublicBlock; context: { block: c1 }"></ng-container>
+            }
+          </div>
+          <div class="space-y-4">
+            @for (c2 of block.columns?.[1] || []; track c2.id) {
+              <ng-container *ngTemplateOutlet="renderPublicBlock; context: { block: c2 }"></ng-container>
+            }
+          </div>
+        </div>
+      }
+
+      <!-- 3. 3-COLUMNS LAYOUT BLOCK -->
+      @else if (block.type === 'columns_3') {
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-4 my-4 items-start">
+          @for (colList of block.columns || []; track $index) {
+            <div class="space-y-4">
+              @for (cItem of colList; track cItem.id) {
+                <ng-container *ngTemplateOutlet="renderPublicBlock; context: { block: cItem }"></ng-container>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- 4. HEADING BLOCK -->
+      @else if (block.type === 'heading') {
+        @if (block.headingLevel === 'h3') {
+          <h3
+            class="w-full font-bold text-xl text-slate-900 pt-2"
+            [ngStyle]="getTypographyStyle(block.typography)"
+          >
+            {{ block.headingText }}
+          </h3>
+        } @else {
+          <h2
+            class="w-full font-serif font-bold text-2xl text-slate-900 pb-1 border-b border-slate-100 pt-3"
+            [ngStyle]="getTypographyStyle(block.typography)"
+          >
+            {{ block.headingText }}
+          </h2>
+        }
+      }
+
+      <!-- 5. PARAGRAPH BLOCK -->
+      @else if (block.type === 'paragraph') {
+        <p
+          class="w-full font-sans text-slate-700 leading-relaxed text-sm sm:text-base whitespace-pre-line"
+          [ngStyle]="getTypographyStyle(block.typography)"
+        >
+          {{ block.paragraphText }}
+        </p>
+      }
+
+      <!-- 6. IMAGE BLOCK -->
+      @else if (block.type === 'image' && block.imageUrl) {
+        <figure class="my-2 space-y-2">
+          <div [class]="getImageContainerClass(block)">
+            <img
+              [src]="mediaUrl(block.imageUrl)"
+              [alt]="block.imageCaption || block.imageSettings?.altText || (post()?.title || '')"
+              class="w-full"
+              [ngStyle]="getImageStyle(block)"
+              loading="lazy"
+            />
+          </div>
+          @if (block.imageCaption) {
+            <figcaption class="w-full text-center text-xs text-slate-400 italic">
+              {{ block.imageCaption }}
+            </figcaption>
+          }
+        </figure>
+      }
+
+      <!-- 7. VIDEO BLOCK -->
+      @else if (block.type === 'video' && block.videoUrl) {
+        <figure class="my-2 space-y-2">
+          <div class="relative rounded-2xl overflow-hidden border border-slate-900 bg-slate-950 max-h-96">
+            <video
+              [src]="mediaUrl(block.videoUrl)"
+              controls
+              playsinline
+              preload="metadata"
+              class="w-full max-h-96"
+            ></video>
+          </div>
+          @if (block.videoCaption) {
+            <figcaption class="w-full text-center text-xs text-slate-400 italic">
+              {{ block.videoCaption }}
+            </figcaption>
+          }
+        </figure>
+      }
+
+      <!-- 8. QUOTE BLOCK -->
+      @else if (block.type === 'quote') {
+        <div class="my-2 p-5 rounded-2xl bg-slate-50 border-l-4 border-[#701423] space-y-2">
+          <p
+            class="font-serif italic text-slate-800 text-base sm:text-lg"
+            [ngStyle]="getTypographyStyle(block.typography)"
+          >
+            "{{ block.quoteText }}"
+          </p>
+          @if (block.quoteAuthor) {
+            <p class="text-xs font-semibold text-slate-500">
+              — {{ block.quoteAuthor }}
+            </p>
+          }
+        </div>
+      }
+
+      <!-- 9. WINE CARD BLOCK (Live Site Tasting Highlight Frame) -->
+      @else if (block.type === 'wine_card') {
+        <div class="my-3 p-5 sm:p-6 rounded-2xl bg-[#faf7f2] border border-[#e8ded0] space-y-3.5 shadow-2xs">
+          <div class="flex items-center justify-between border-b border-[#e8ded0]/80 pb-2">
+            <span class="text-2xs font-bold uppercase tracking-wider text-[#701423] flex items-center gap-1.5">
+              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 22h8M12 11v11M17 3H7c0 4.5 3 8 5 8s5-3.5 5-8z"/></svg>
+              <span>Wine Tasting Highlight</span>
+            </span>
+            @if (block.sommelierRating) {
+              <span class="text-2xs font-bold px-2.5 py-0.5 bg-[#701423]/10 text-[#701423] rounded-full font-mono">
+                {{ block.sommelierRating }}
+              </span>
+            }
+          </div>
+
+          <!-- 2-Column Split: Square Bottle Photo on Left, Wine Dossier on Right -->
+          <div class="grid grid-cols-1 sm:grid-cols-12 gap-4 items-start">
+            @if (block.imageUrl) {
+              <div class="sm:col-span-3">
+                <div class="rounded-xl overflow-hidden border border-[#e8ded0] bg-white aspect-square flex items-center justify-center shadow-xs">
+                  <img [src]="mediaUrl(block.imageUrl)" [alt]="block.wineName" class="w-full h-full object-cover" />
+                </div>
+              </div>
+            }
+
+            <div [class]="block.imageUrl ? 'sm:col-span-9 space-y-2' : 'sm:col-span-12 space-y-2'">
+              <div class="flex items-baseline gap-2">
+                <span class="font-serif font-bold text-xl text-slate-900">{{ block.wineName }}</span>
+                @if (block.vintage) {
+                  <span class="text-xs text-slate-500 font-mono">({{ block.vintage }})</span>
+                }
+              </div>
+              <div class="flex items-center gap-2 text-xs text-slate-600 font-medium">
+                <span>{{ block.winery }}</span>
+                @if (block.region) {
+                  <span>·</span>
+                  <span>{{ block.region }}</span>
+                }
+              </div>
+              @if (block.grape) {
+                <p class="text-2xs text-slate-500 font-mono">{{ block.grape }}</p>
+              }
+            </div>
+          </div>
+
+          @if (block.tastingNotes) {
+            <div class="border-t border-[#e8ded0] pt-2.5">
+              <p
+                class="text-xs text-slate-700 italic"
+                [ngStyle]="getTypographyStyle(block.typography)"
+              >
+                "{{ block.tastingNotes }}"
+              </p>
+            </div>
+          }
+
+          @if (block.productId || block.productSlug) {
+            <div class="border-t border-[#e8ded0] pt-3 flex items-center justify-between">
+              @if (block.productPrice) {
+                <span class="text-sm font-bold text-slate-900 font-serif">€{{ block.productPrice | number:'1.2-2' }}</span>
+              } @else {
+                <span></span>
+              }
+              <a
+                [routerLink]="['/shop', block.productSlug || block.productId]"
+                class="inline-flex items-center gap-1.5 px-4 py-1.5 rounded-xl bg-[#701423] text-white text-xs font-semibold hover:bg-[#8a1c2e] transition-colors shadow-xs"
+              >
+                <span>Discover Wine in Shop</span>
+                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              </a>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- 10. PAIRING BOX BLOCK -->
+      @else if (block.type === 'pairing_box') {
+        <div class="my-2 p-5 rounded-2xl bg-amber-50/70 border border-amber-200/80 space-y-2">
+          <span class="text-2xs font-bold uppercase tracking-wider text-amber-800 flex items-center gap-1.5">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>
+            <span>Pairing Suggestion</span>
+          </span>
+          <div class="space-y-1">
+            <h4 class="font-bold text-sm text-slate-900">{{ block.dishName }}</h4>
+            @if (block.matchedWine) {
+              <p class="text-xs font-medium text-amber-900">Matched Wine: <span class="font-bold">{{ block.matchedWine }}</span></p>
+            }
+          </div>
+          @if (block.pairingNotes) {
+            <p
+              class="text-xs text-slate-600 leading-relaxed"
+              [ngStyle]="getTypographyStyle(block.typography)"
+            >
+              {{ block.pairingNotes }}
+            </p>
+          }
+        </div>
+      }
+
+      <!-- 11. EVENT BOX BLOCK -->
+      @else if (block.type === 'event_box') {
+        <div class="my-2 p-5 rounded-2xl bg-slate-900 text-white space-y-2 shadow-sm">
+          <span class="text-2xs font-bold uppercase tracking-wider text-amber-300 flex items-center gap-1.5">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span>Cellar Experience</span>
+          </span>
+          <h4 class="font-bold text-sm text-white">{{ block.eventTitle }}</h4>
+          <div class="grid grid-cols-2 gap-2 text-xs text-slate-300">
+            @if (block.eventDate) {
+              <div>📅 {{ block.eventDate }} {{ block.eventTime ? '· ' + block.eventTime : '' }}</div>
+            }
+            @if (block.eventLocation) {
+              <div>📍 {{ block.eventLocation }}</div>
+            }
+          </div>
+          @if (block.rsvpLink) {
+            <div class="pt-1">
+              <a
+                [routerLink]="block.rsvpLink"
+                class="inline-block px-3 py-1.5 rounded-lg bg-[#701423] hover:bg-[#85182a] text-white text-xs font-bold uppercase tracking-wider transition-colors"
+              >
+                Reserve Tasting Seat →
+              </a>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- 12. DIVIDER BLOCK -->
+      @else if (block.type === 'divider') {
+        <div class="py-4 text-center text-slate-300 text-xs select-none">
+          ──────────
+        </div>
+      }
+
+    </ng-template>
+
+  }
+</div>

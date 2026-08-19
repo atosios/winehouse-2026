@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 
@@ -457,6 +457,63 @@ export interface MailConfig {
   send_customer_order_confirmation: boolean;
 }
 
+export interface NewsletterConfig {
+  newsletter_from_name: string;
+  newsletter_from_address: string;
+  newsletter_reply_to: string;
+  company_legal_name: string;
+  company_physical_address: string;
+  company_contact_email: string;
+  company_phone: string;
+  footer_disclaimer: string;
+  privacy_policy_url: string;
+  custom_smtp_enabled?: boolean;
+  smtp_host?: string;
+  smtp_port?: number;
+  smtp_encryption?: string;
+  smtp_username?: string;
+  smtp_password?: string;
+}
+
+export interface NewsletterSubscriber {
+  id: number;
+  email: string;
+  name: string | null;
+  status: 'subscribed' | 'unsubscribed';
+  source: string;
+  consent_given_at: string | null;
+  consent_text: string | null;
+  ip_address: string | null;
+  token: string | null;
+  unsubscribed_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface NewsletterCampaign {
+  id: number;
+  subject: string;
+  preview_text: string | null;
+  title: string | null;
+  content: string;
+  status: 'draft' | 'sent';
+  sent_count: number;
+  recipient_count: number;
+  sent_at: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SubscribersListResponse {
+  subscribers: NewsletterSubscriber[];
+  stats: {
+    total: number;
+    active: number;
+    unsubscribed: number;
+    recent_30d: number;
+  };
+}
+
 export interface SeoPageMetadata {
   title?: I18nText;
   description?: I18nText;
@@ -511,6 +568,7 @@ export interface SiteSettings {
   maintenance_mode: boolean;
   store_config?: StoreConfig;
   mail_config?: MailConfig;
+  newsletter_config?: NewsletterConfig;
   seo_config?: SeoConfigSettings;
 }
 
@@ -618,6 +676,7 @@ export class AdminApi {
     subject?: string;
     project_type?: string;
     message: string;
+    subscribe_newsletter?: boolean;
   }): Observable<{ success: boolean; message: string; id: number }> {
     return this.http.post<{ success: boolean; message: string; id: number }>(`${API_BASE}/contact`, data);
   }
@@ -628,6 +687,15 @@ export class AdminApi {
   }
   getPublicProduct(slugOrId: string): Observable<Product> {
     return this.http.get<Product>(`${API_BASE}/shop/products/${slugOrId}`);
+  }
+
+  // Public Journal & Post endpoints
+  getPublicPosts(params?: { category?: string; post_type?: string }): Observable<Post[]> {
+    return this.http.get<Post[]>(`${API_BASE}/posts`, { params: params as any });
+  }
+  getPublicPost(slugOrId: string, preview?: boolean): Observable<Post> {
+    const params = preview ? { preview: '1' } : undefined;
+    return this.http.get<Post>(`${API_BASE}/posts/${slugOrId}`, { params });
   }
   submitPublicOrder(data: {
     customer_name: string;
@@ -862,6 +930,84 @@ export class AdminApi {
     return this.http.post<{ success: boolean; message?: string; error?: string }>(
       `${this.base}/settings/mail-test`,
       data
+    );
+  }
+
+  // Newsletter & Audience (Public & Admin)
+  subscribeNewsletter(payload: {
+    email: string;
+    name?: string;
+    consent: boolean;
+    source?: string;
+    consent_text?: string;
+  }): Observable<{ success: boolean; message: string; subscriber?: Partial<NewsletterSubscriber> }> {
+    return this.http.post<{ success: boolean; message: string; subscriber?: Partial<NewsletterSubscriber> }>(
+      `${this.base}/newsletter/subscribe`,
+      payload
+    );
+  }
+
+  unsubscribeNewsletter(params: { token?: string; email?: string }): Observable<{ success: boolean; message: string; email?: string }> {
+    return this.http.post<{ success: boolean; message: string; email?: string }>(
+      `${this.base}/newsletter/unsubscribe`,
+      params
+    );
+  }
+
+  listSubscribers(params?: { status?: string; search?: string }): Observable<SubscribersListResponse> {
+    let httpParams = new HttpParams();
+    if (params?.status) httpParams = httpParams.set('status', params.status);
+    if (params?.search) httpParams = httpParams.set('search', params.search);
+    return this.http.get<SubscribersListResponse>(`${this.base}/newsletter/subscribers`, { params: httpParams });
+  }
+
+  createSubscriber(data: { email: string; name?: string; status?: string }): Observable<NewsletterSubscriber> {
+    return this.http.post<NewsletterSubscriber>(`${this.base}/newsletter/subscribers`, data);
+  }
+
+  updateSubscriber(id: number, data: Partial<NewsletterSubscriber>): Observable<NewsletterSubscriber> {
+    return this.http.put<NewsletterSubscriber>(`${this.base}/newsletter/subscribers/${id}`, data);
+  }
+
+  deleteSubscriber(id: number): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.base}/newsletter/subscribers/${id}`);
+  }
+
+  getExportSubscribersUrl(): string {
+    return `${this.base}/newsletter/subscribers/export`;
+  }
+
+  listCampaigns(): Observable<NewsletterCampaign[]> {
+    return this.http.get<NewsletterCampaign[]>(`${this.base}/newsletter/campaigns`);
+  }
+
+  getCampaign(id: number): Observable<NewsletterCampaign> {
+    return this.http.get<NewsletterCampaign>(`${this.base}/newsletter/campaigns/${id}`);
+  }
+
+  createCampaign(data: { subject: string; title?: string; preview_text?: string; content: string }): Observable<NewsletterCampaign> {
+    return this.http.post<NewsletterCampaign>(`${this.base}/newsletter/campaigns`, data);
+  }
+
+  updateCampaign(id: number, data: Partial<NewsletterCampaign>): Observable<NewsletterCampaign> {
+    return this.http.put<NewsletterCampaign>(`${this.base}/newsletter/campaigns/${id}`, data);
+  }
+
+  deleteCampaign(id: number): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.base}/newsletter/campaigns/${id}`);
+  }
+
+  sendTestCampaign(id: number, recipientEmail: string): Observable<{ success: boolean; message?: string; error?: string }> {
+    return this.http.post<{ success: boolean; message?: string; error?: string }>(
+      `${this.base}/newsletter/campaigns/${id}/test`,
+      { recipient_email: recipientEmail }
+    );
+  }
+
+  sendCampaign(id: number): Observable<{ success: boolean; message: string; campaign: NewsletterCampaign }> {
+    return this.http.post<{ success: boolean; message: string; campaign: NewsletterCampaign }>(
+      `${this.base}/newsletter/campaigns/${id}/send`,
+      {}
     );
   }
 }

@@ -14,6 +14,7 @@ import {
   SiteSettings,
   StoreConfig,
   MailConfig,
+  NewsletterConfig,
   SeoConfigSettings,
 } from '../admin/api';
 
@@ -90,6 +91,24 @@ export const DEFAULT_MAIL_CONFIG: MailConfig = {
   notify_on_new_message: true,
   notify_on_order_status_change: true,
   send_customer_order_confirmation: true,
+};
+
+export const DEFAULT_NEWSLETTER_CONFIG: NewsletterConfig = {
+  newsletter_from_name: 'The Winehouse Cellar Dispatches',
+  newsletter_from_address: 'newsletter@winehouse.gr',
+  newsletter_reply_to: 'info@winehouse.gr',
+  company_legal_name: 'The Winehouse Fine Terroirs Single Member P.C.',
+  company_physical_address: '14 Vasilissis Sofias Ave, Athens 106 74, Greece',
+  company_contact_email: 'info@winehouse.gr',
+  company_phone: '+30 210 000 0000',
+  footer_disclaimer: 'You are receiving this communication because you subscribed to The Winehouse Cellar Dispatches or opted in at checkout / inquiry.',
+  privacy_policy_url: '/privacy',
+  custom_smtp_enabled: false,
+  smtp_host: 'smtp.winehouse.gr',
+  smtp_port: 587,
+  smtp_encryption: 'tls',
+  smtp_username: 'newsletter@winehouse.gr',
+  smtp_password: '',
 };
 
 export const DEFAULT_STORE_CONFIG: StoreConfig = {
@@ -305,21 +324,22 @@ export const DEFAULT_HOMEPAGE_CONTENT: HomepageContent = {
   },
   contact: {
     enabled: true,
-    tag: '/ GET IN TOUCH',
-    headline: "LET'S CREATE\nSOMETHING\nMEANINGFUL.",
-    subtext: 'Curating bespoke wine experiences, private table tastings & cellar consultation.',
-    button_text: 'SEND MESSAGE',
-    card_cellar_label: 'Cellar',
-    card_cellar_text: "INDEPENDENT ATELIER\nSHIPPING WORLDWIDE",
-    card_direct_label: 'Direct',
-    card_email: 'hello@thewinehouse.gr',
-    card_phone: '+30 210 123 4567',
+    tag: "/ LET'S CONNECT",
+    headline: "KEEP ME\nPOSTED",
+    subtext:
+      'We curate private collections, source museum-allocated verticals, and arrange custom delivery for private cellar cellars across Europe.',
+    button_text: 'SUBSCRIBE TO NEWSLETTER',
+    card_cellar_label: '',
+    card_cellar_text: '',
+    card_direct_label: '',
+    card_email: '',
+    card_phone: '',
     card_socials: [
       { label: 'INSTAGRAM', url: 'https://instagram.com' },
       { label: 'SUBSTACK', url: 'https://substack.com' },
       { label: 'SPOTIFY', url: 'https://spotify.com' },
     ],
-    card_kraft_note: "I'M ALWAYS OPEN\nTO NEW IDEAS",
+    card_kraft_note: "CURATED TASTINGS\n& LIVING SOIL STORIES",
   },
   footer: {
     tag: '/ FOOTER',
@@ -628,6 +648,7 @@ export const DEFAULT_SITE_SETTINGS: SiteSettings = {
   maintenance_mode: false,
   store_config: JSON.parse(JSON.stringify(DEFAULT_STORE_CONFIG)),
   mail_config: JSON.parse(JSON.stringify(DEFAULT_MAIL_CONFIG)),
+  newsletter_config: JSON.parse(JSON.stringify(DEFAULT_NEWSLETTER_CONFIG)),
   seo_config: JSON.parse(JSON.stringify(DEFAULT_SEO_CONFIG)),
 };
 
@@ -657,6 +678,11 @@ export class SiteSettingsService {
   readonly maintenancePage = computed<MaintenancePageContent>(() => this.settings().maintenance_content || DEFAULT_MAINTENANCE_CONTENT);
   readonly isMaintenanceMode = computed(() => this.settings().maintenance_mode);
   readonly storeConfig = computed<StoreConfig>(() => this.settings().store_config || DEFAULT_STORE_CONFIG);
+  readonly mailConfig = computed<MailConfig>(() => this.settings().mail_config || DEFAULT_MAIL_CONFIG);
+  readonly newsletterConfig = computed<NewsletterConfig>(() => ({
+    ...DEFAULT_NEWSLETTER_CONFIG,
+    ...(this.settings().newsletter_config || {}),
+  }));
   readonly seoConfig = computed<SeoConfigSettings>(() => this.settings().seo_config || DEFAULT_SEO_CONFIG);
 
   constructor() {
@@ -993,6 +1019,13 @@ export class SiteSettingsService {
               : DEFAULT_STORE_CONFIG.categories,
           };
 
+          const rawNc = updated.newsletter_config || data.newsletter_config || this.settings().newsletter_config || DEFAULT_NEWSLETTER_CONFIG;
+          const mergedNewsletterConfig: NewsletterConfig = {
+            ...DEFAULT_NEWSLETTER_CONFIG,
+            ...rawNc,
+            custom_smtp_enabled: Boolean((rawNc as any)?.custom_smtp_enabled ?? DEFAULT_NEWSLETTER_CONFIG.custom_smtp_enabled),
+          };
+
           const rawSeo = updated.seo_config || data.seo_config || this.settings().seo_config || DEFAULT_SEO_CONFIG;
           const mergedSeoConfig: SeoConfigSettings = {
             ...DEFAULT_SEO_CONFIG,
@@ -1042,6 +1075,8 @@ export class SiteSettingsService {
             contact_content: updated.contact_content || data.contact_content || this.settings().contact_content || DEFAULT_CONTACT_PAGE_CONTENT,
             maintenance_content: updated.maintenance_content || data.maintenance_content || this.settings().maintenance_content || DEFAULT_MAINTENANCE_CONTENT,
             store_config: mergedStoreConfig,
+            mail_config: updated.mail_config || data.mail_config || this.settings().mail_config || DEFAULT_MAIL_CONFIG,
+            newsletter_config: mergedNewsletterConfig,
             seo_config: mergedSeoConfig,
           };
 

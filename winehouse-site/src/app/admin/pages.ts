@@ -687,6 +687,33 @@ export class AdminPages implements OnInit {
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>
           <span>All Pages</span>
         </a>
+
+        <!-- Undo / Redo Toolbar -->
+        <div class="flex items-center rounded-lg border border-slate-200 bg-white p-0.5 shadow-2xs">
+          <button
+            type="button"
+            class="w-7 h-7 rounded flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
+            [disabled]="!canUndo()"
+            (click)="undo()"
+            title="Undo (Ctrl+Z)"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/>
+            </svg>
+          </button>
+          <button
+            type="button"
+            class="w-7 h-7 rounded flex items-center justify-center text-slate-600 hover:text-slate-900 hover:bg-slate-100 disabled:opacity-30 disabled:hover:bg-transparent disabled:cursor-not-allowed transition-colors cursor-pointer"
+            [disabled]="!canRedo()"
+            (click)="redo()"
+            title="Redo (Ctrl+Y / Ctrl+Shift+Z)"
+          >
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3L21 13"/>
+            </svg>
+          </button>
+        </div>
+
         <h1 class="text-xl sm:text-2xl font-bold tracking-tight text-slate-900">{{ isNew ? 'Create New Page' : 'Edit Page' }}</h1>
       </div>
 
@@ -705,12 +732,12 @@ export class AdminPages implements OnInit {
           <div class="admin-card space-y-4">
             <div>
               <label class="admin-field-label" for="page-title">Page Title</label>
-              <input id="page-title" class="admin-field-input text-base font-semibold" name="title" [(ngModel)]="model.title" required placeholder="e.g. Private Cellar Tastings" (ngModelChange)="hasChanges = true" />
+              <input id="page-title" class="admin-field-input text-base font-semibold" name="title" [(ngModel)]="model.title" required placeholder="e.g. Private Cellar Tastings" (ngModelChange)="onContentChange()" />
             </div>
 
             <div>
               <label class="admin-field-label" for="page-body">Page Content (HTML / Markdown supported)</label>
-              <textarea id="page-body" class="admin-field-input min-h-96 font-mono text-xs leading-relaxed" name="body" [(ngModel)]="model.body" placeholder="Write page content here..." (ngModelChange)="hasChanges = true"></textarea>
+              <textarea id="page-body" class="admin-field-input min-h-96 font-mono text-xs leading-relaxed" name="body" [(ngModel)]="model.body" placeholder="Write page content here..." (ngModelChange)="onContentChange()"></textarea>
             </div>
           </div>
         </div>
@@ -723,7 +750,7 @@ export class AdminPages implements OnInit {
             <!-- Folder Assignment -->
             <div>
               <label class="admin-field-label" for="page-folder">Folder</label>
-              <select id="page-folder" class="admin-field-input text-xs" name="folder_id" [(ngModel)]="model.folder_id" (ngModelChange)="hasChanges = true">
+              <select id="page-folder" class="admin-field-input text-xs" name="folder_id" [(ngModel)]="model.folder_id" (ngModelChange)="onContentChange()">
                 <option [ngValue]="null">⚪ Unorganized</option>
                 @for (f of availableFolders(); track f.id) {
                   <option [ngValue]="f.id">📁 {{ f.name }}</option>
@@ -733,7 +760,7 @@ export class AdminPages implements OnInit {
 
             <div>
               <label class="admin-field-label" for="slug">Web Address Slug</label>
-              <input id="slug" class="admin-field-input font-mono text-xs" name="slug" [(ngModel)]="model.slug" placeholder="e.g. private-tastings" (ngModelChange)="hasChanges = true" />
+              <input id="slug" class="admin-field-input font-mono text-xs" name="slug" [(ngModel)]="model.slug" placeholder="e.g. private-tastings" (ngModelChange)="onContentChange()" />
               <p class="text-2xs text-slate-500 mt-1.5 font-mono">Public URL: <span class="font-bold text-slate-900">/{{ model.slug || slugPreview || '…' }}</span></p>
             </div>
 
@@ -745,7 +772,7 @@ export class AdminPages implements OnInit {
                 </span>
               </div>
               <label class="ios-toggle">
-                <input type="checkbox" name="published" [(ngModel)]="model.published" (ngModelChange)="hasChanges = true" />
+                <input type="checkbox" name="published" [(ngModel)]="model.published" (ngModelChange)="onContentChange()" />
                 <span class="ios-toggle-slider"></span>
               </label>
             </div>
@@ -772,7 +799,7 @@ export class AdminPages implements OnInit {
     </form>
   `,
   host: {
-    '(document:keydown.control.s)': 'onCtrlS($event)',
+    '(document:keydown)': 'onDocumentKeydown($event)',
   },
 })
 export class AdminPageEdit implements OnInit {
@@ -789,6 +816,106 @@ export class AdminPageEdit implements OnInit {
   editorTab = signal<'content' | 'settings'>('content');
   hasChanges = false;
 
+  // --- Undo / Redo History ---
+  private undoStack: Array<Partial<Page>> = [];
+  private redoStack: Array<Partial<Page>> = [];
+  private isApplyingHistory = false;
+  private historyDebounceTimer: any = null;
+
+  readonly undoCount = signal(0);
+  readonly redoCount = signal(0);
+  readonly canUndo = computed(() => this.undoCount() > 0);
+  readonly canRedo = computed(() => this.redoCount() > 0);
+
+  recordSnapshot() {
+    if (this.isApplyingHistory) return;
+    try {
+      const snap = JSON.parse(JSON.stringify(this.model));
+      if (this.undoStack.length > 0) {
+        const last = this.undoStack[this.undoStack.length - 1];
+        if (JSON.stringify(last) === JSON.stringify(snap)) {
+          return;
+        }
+      }
+      this.undoStack.push(snap);
+      if (this.undoStack.length > 60) this.undoStack.shift();
+      this.redoStack = [];
+      this.undoCount.set(this.undoStack.length);
+      this.redoCount.set(0);
+    } catch {}
+  }
+
+  onContentChange() {
+    this.hasChanges = true;
+    if (this.isApplyingHistory) return;
+    clearTimeout(this.historyDebounceTimer);
+    this.historyDebounceTimer = setTimeout(() => {
+      this.recordSnapshot();
+    }, 500);
+  }
+
+  undo() {
+    if (this.undoStack.length === 0) return;
+    clearTimeout(this.historyDebounceTimer);
+    this.isApplyingHistory = true;
+    try {
+      const currentSnap = JSON.parse(JSON.stringify(this.model));
+      let prev = this.undoStack.pop()!;
+      if (this.undoStack.length > 0 && JSON.stringify(prev) === JSON.stringify(currentSnap)) {
+        prev = this.undoStack.pop()!;
+      }
+      this.redoStack.push(currentSnap);
+      this.model = JSON.parse(JSON.stringify(prev));
+      this.hasChanges = true;
+      this.undoCount.set(this.undoStack.length);
+      this.redoCount.set(this.redoStack.length);
+    } catch {}
+    this.isApplyingHistory = false;
+  }
+
+  redo() {
+    if (this.redoStack.length === 0) return;
+    clearTimeout(this.historyDebounceTimer);
+    this.isApplyingHistory = true;
+    try {
+      const currentSnap = JSON.parse(JSON.stringify(this.model));
+      let next = this.redoStack.pop()!;
+      if (this.redoStack.length > 0 && JSON.stringify(next) === JSON.stringify(currentSnap)) {
+        next = this.redoStack.pop()!;
+      }
+      this.undoStack.push(currentSnap);
+      this.model = JSON.parse(JSON.stringify(next));
+      this.hasChanges = true;
+      this.undoCount.set(this.undoStack.length);
+      this.redoCount.set(this.redoStack.length);
+    } catch {}
+    this.isApplyingHistory = false;
+  }
+
+  onDocumentKeydown(e: KeyboardEvent) {
+    const isMac = typeof navigator !== 'undefined' && /Mac|iPod|iPhone|iPad/.test(navigator.platform);
+    const isCmdOrCtrl = isMac ? e.metaKey : e.ctrlKey;
+    if (!isCmdOrCtrl) return;
+
+    const key = e.key.toLowerCase();
+    if (key === 's') {
+      e.preventDefault();
+      this.save();
+      return;
+    }
+    if (key === 'z') {
+      e.preventDefault();
+      if (e.shiftKey) this.redo();
+      else this.undo();
+      return;
+    }
+    if (key === 'y') {
+      e.preventDefault();
+      this.redo();
+      return;
+    }
+  }
+
   get slugPreview(): string {
     return (this.model.title || '')
       .toLowerCase()
@@ -804,7 +931,13 @@ export class AdminPageEdit implements OnInit {
 
     if (!this.isNew) {
       const id = Number(this.route.snapshot.paramMap.get('id'));
-      this.api.getPage(id).subscribe((page) => (this.model = page));
+      this.api.getPage(id).subscribe((page) => {
+        this.model = page;
+        this.undoStack = [];
+        this.redoStack = [];
+        this.undoCount.set(0);
+        this.redoCount.set(0);
+      });
     }
   }
 

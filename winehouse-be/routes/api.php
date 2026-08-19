@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactController;
 use App\Http\Controllers\FolderController;
 use App\Http\Controllers\LlmsTxtController;
+use App\Http\Controllers\NewsletterController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PostController;
@@ -23,6 +24,8 @@ Route::get('/posts', [PostController::class, 'publicIndex']);
 Route::get('/posts/{slug}', [PostController::class, 'publicShow']);
 Route::get('/pages/{slug}', [PageController::class, 'publicShow']);
 Route::post('/contact', [ContactController::class, 'publicStore']);
+Route::post('/newsletter/subscribe', [NewsletterController::class, 'publicSubscribe']);
+Route::match(['GET', 'POST'], '/newsletter/unsubscribe', [NewsletterController::class, 'publicUnsubscribe']);
 
 // Public e-Shop endpoints.
 Route::get('/shop/products', [ProductController::class, 'publicIndex']);
@@ -63,6 +66,20 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::get('/messages/{message}', [ContactController::class, 'show']);
     Route::put('/messages/{message}/status', [ContactController::class, 'updateStatus']);
     Route::delete('/messages/{message}', [ContactController::class, 'destroy']);
+
+    // Newsletter & Audience
+    Route::get('/newsletter/subscribers/export', [NewsletterController::class, 'adminExportSubscribers']);
+    Route::get('/newsletter/subscribers', [NewsletterController::class, 'adminSubscribers']);
+    Route::post('/newsletter/subscribers', [NewsletterController::class, 'adminStoreSubscriber']);
+    Route::put('/newsletter/subscribers/{subscriber}', [NewsletterController::class, 'adminUpdateSubscriber']);
+    Route::delete('/newsletter/subscribers/{subscriber}', [NewsletterController::class, 'adminDeleteSubscriber']);
+    Route::get('/newsletter/campaigns', [NewsletterController::class, 'adminCampaigns']);
+    Route::post('/newsletter/campaigns', [NewsletterController::class, 'adminStoreCampaign']);
+    Route::get('/newsletter/campaigns/{campaign}', [NewsletterController::class, 'adminShowCampaign']);
+    Route::put('/newsletter/campaigns/{campaign}', [NewsletterController::class, 'adminUpdateCampaign']);
+    Route::delete('/newsletter/campaigns/{campaign}', [NewsletterController::class, 'adminDeleteCampaign']);
+    Route::post('/newsletter/campaigns/{campaign}/test', [NewsletterController::class, 'adminSendTestCampaign']);
+    Route::post('/newsletter/campaigns/{campaign}/send', [NewsletterController::class, 'adminSendCampaign']);
 
     Route::get('/settings', [SettingController::class, 'index']);
     Route::put('/settings', [SettingController::class, 'update']);

@@ -1,11 +1,12 @@
 import { Component, inject, signal, OnInit, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { AdminApi, SiteSettings, MailConfig, SeoConfigSettings } from './api';
+import { AdminApi, SiteSettings, MailConfig, NewsletterConfig, SeoConfigSettings } from './api';
 import {
   SiteSettingsService,
   DEFAULT_SITE_SETTINGS,
   DEFAULT_SITE_COLORS,
   DEFAULT_MAIL_CONFIG,
+  DEFAULT_NEWSLETTER_CONFIG,
   DEFAULT_SEO_CONFIG,
 } from '../core/site-settings.service';
 import { resolveMediaUrl } from '../core/media.utils';
@@ -836,6 +837,128 @@ import { WhSocialIcon, SOCIAL_ICON_LIBRARY, resolveSocialIconKey, SocialIconDef 
           </div>
         </div>
 
+        <!-- Row 3: Newsletter & Marketing Dispatches Mail Configuration (EU GDPR Compliant) -->
+        <div class="pt-2 border-t border-slate-200/80">
+          <div class="mb-3">
+            <div class="flex items-center gap-2 mb-0.5">
+              <span class="px-2 py-0.5 text-2xs font-bold uppercase rounded bg-wine-100 text-wine-800 font-mono">EU GDPR Mandatory</span>
+              <h2 class="text-base font-bold text-slate-900 tracking-tight">Newsletter &amp; Marketing Sender Information</h2>
+            </div>
+            <p class="text-xs text-slate-500">Configure the dedicated sender mailbox and mandatory EU legal footer disclosure for all broadcast dispatches.</p>
+          </div>
+
+          <div class="admin-card space-y-4">
+            <!-- Dedicated Newsletter Sender Coordinates -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div>
+                <label class="admin-field-label" for="nl-from-name">Newsletter Sender Name *</label>
+                <input id="nl-from-name" class="admin-field-input text-xs" type="text" placeholder="The Winehouse Cellar Dispatches" [(ngModel)]="ensureNewsletterConfig().newsletter_from_name" />
+              </div>
+
+              <div>
+                <label class="admin-field-label" for="nl-from-address">Newsletter "From" Email *</label>
+                <input id="nl-from-address" class="admin-field-input font-mono text-xs" type="email" placeholder="newsletter@winehouse.gr" [(ngModel)]="ensureNewsletterConfig().newsletter_from_address" />
+              </div>
+
+              <div>
+                <label class="admin-field-label" for="nl-reply-to">Reply-To Email</label>
+                <input id="nl-reply-to" class="admin-field-input font-mono text-xs" type="email" placeholder="info@winehouse.gr" [(ngModel)]="ensureNewsletterConfig().newsletter_reply_to" />
+              </div>
+            </div>
+
+            <!-- Mandatory Legal Footprint -->
+            <div class="pt-2 border-t border-slate-100">
+              <span class="text-[10px] font-mono font-bold uppercase tracking-wider text-slate-400 block mb-2">
+                Mandatory EU Legal Entity Footprint
+              </span>
+
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label class="admin-field-label" for="nl-legal-name">Registered Company Legal Name *</label>
+                  <input id="nl-legal-name" class="admin-field-input text-xs" type="text" placeholder="The Winehouse Fine Terroirs Single Member P.C." [(ngModel)]="ensureNewsletterConfig().company_legal_name" />
+                </div>
+
+                <div>
+                  <label class="admin-field-label" for="nl-legal-addr">Valid Physical Postal Address *</label>
+                  <input id="nl-legal-addr" class="admin-field-input text-xs" type="text" placeholder="14 Vasilissis Sofias Ave, Athens 106 74, Greece" [(ngModel)]="ensureNewsletterConfig().company_physical_address" />
+                </div>
+              </div>
+
+              <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-3">
+                <div>
+                  <label class="admin-field-label" for="nl-contact-email">Company Contact Email</label>
+                  <input id="nl-contact-email" class="admin-field-input font-mono text-xs" type="email" placeholder="info@winehouse.gr" [(ngModel)]="ensureNewsletterConfig().company_contact_email" />
+                </div>
+
+                <div>
+                  <label class="admin-field-label" for="nl-phone">Company Phone</label>
+                  <input id="nl-phone" class="admin-field-input text-xs" type="text" placeholder="+30 210 000 0000" [(ngModel)]="ensureNewsletterConfig().company_phone" />
+                </div>
+
+                <div>
+                  <label class="admin-field-label" for="nl-privacy-url">Privacy Policy URL</label>
+                  <input id="nl-privacy-url" class="admin-field-input text-xs" type="text" placeholder="/about" [(ngModel)]="ensureNewsletterConfig().privacy_policy_url" />
+                </div>
+              </div>
+
+              <div class="mt-3">
+                <label class="admin-field-label" for="nl-disclaimer">Footer Consent Disclaimer Notice</label>
+                <textarea id="nl-disclaimer" rows="2" class="admin-field-input text-xs leading-relaxed" placeholder="You are receiving this communication because you subscribed to The Winehouse Cellar Dispatches..." [(ngModel)]="ensureNewsletterConfig().footer_disclaimer"></textarea>
+              </div>
+            </div>
+
+            <!-- Optional Custom Dedicated SMTP for Newsletters -->
+            <div class="pt-2 border-t border-slate-100">
+              <label class="flex items-center justify-between p-3 rounded-xl border border-slate-200/80 bg-slate-50/50 hover:bg-slate-50 transition-colors cursor-pointer">
+                <div>
+                  <span class="text-xs font-bold text-slate-900 block">Use Custom Dedicated SMTP for Newsletters</span>
+                  <span class="text-2xs text-slate-500">Route bulk newsletter campaigns through a separate dedicated SMTP server (e.g. SendGrid, Mailgun, or AWS SES).</span>
+                </div>
+                <input
+                  type="checkbox"
+                  class="rounded border-slate-300 text-wine-700 focus:ring-wine-500"
+                  [(ngModel)]="ensureNewsletterConfig().custom_smtp_enabled"
+                />
+              </label>
+
+              @if (ensureNewsletterConfig().custom_smtp_enabled) {
+                <div class="mt-3 p-4 rounded-xl border border-wine-200 bg-wine-50/30 space-y-3">
+                  <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                    <div>
+                      <label class="admin-field-label">Custom SMTP Host</label>
+                      <input class="admin-field-input font-mono text-xs" type="text" placeholder="smtp.mailgun.org" [(ngModel)]="ensureNewsletterConfig().smtp_host" />
+                    </div>
+                    <div>
+                      <label class="admin-field-label">Port</label>
+                      <input class="admin-field-input font-mono text-xs" type="number" placeholder="587" [(ngModel)]="ensureNewsletterConfig().smtp_port" />
+                    </div>
+                    <div>
+                      <label class="admin-field-label">Encryption</label>
+                      <select class="admin-field-input text-xs" [(ngModel)]="ensureNewsletterConfig().smtp_encryption">
+                        <option value="tls">TLS</option>
+                        <option value="ssl">SSL</option>
+                        <option value="none">None</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label class="admin-field-label">SMTP Username</label>
+                      <input class="admin-field-input font-mono text-xs" type="text" placeholder="postmaster@domain.com" [(ngModel)]="ensureNewsletterConfig().smtp_username" />
+                    </div>
+                    <div>
+                      <label class="admin-field-label">SMTP Password</label>
+                      <input class="admin-field-input font-mono text-xs" type="password" placeholder="••••••••••••" [(ngModel)]="ensureNewsletterConfig().smtp_password" />
+                    </div>
+                  </div>
+                </div>
+              }
+            </div>
+
+          </div>
+        </div>
+
         <div class="flex justify-end pt-2">
           <button type="button" class="btn btn-primary btn-sm" [disabled]="saving()" (click)="saveSettings()">
             {{ saving() ? 'Saving…' : 'Save Mail Settings' }}
@@ -1107,6 +1230,7 @@ export class AdminSettings implements OnInit {
     ...JSON.parse(JSON.stringify(DEFAULT_SITE_SETTINGS)),
     colors: { ...DEFAULT_SITE_COLORS },
     mail_config: { ...DEFAULT_MAIL_CONFIG },
+    newsletter_config: { ...DEFAULT_NEWSLETTER_CONFIG },
     seo_config: { ...DEFAULT_SEO_CONFIG },
   };
 
@@ -1131,6 +1255,13 @@ export class AdminSettings implements OnInit {
       this.model.mail_config = { ...DEFAULT_MAIL_CONFIG };
     }
     return this.model.mail_config;
+  }
+
+  ensureNewsletterConfig(): NewsletterConfig {
+    if (!this.model.newsletter_config) {
+      this.model.newsletter_config = { ...DEFAULT_NEWSLETTER_CONFIG };
+    }
+    return this.model.newsletter_config;
   }
 
   ensureSeoConfig(): SeoConfigSettings {
@@ -1323,6 +1454,10 @@ export class AdminSettings implements OnInit {
             mail_config: {
               ...DEFAULT_MAIL_CONFIG,
               ...(data.mail_config || {}),
+            },
+            newsletter_config: {
+              ...DEFAULT_NEWSLETTER_CONFIG,
+              ...(data.newsletter_config || {}),
             },
             seo_config: {
               ...DEFAULT_SEO_CONFIG,

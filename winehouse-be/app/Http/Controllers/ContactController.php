@@ -21,6 +21,7 @@ class ContactController extends Controller
             'subject' => ['nullable', 'string', 'max:255'],
             'project_type' => ['nullable', 'string', 'max:255'],
             'message' => ['required', 'string', 'max:10000'],
+            'subscribe_newsletter' => ['nullable', 'boolean'],
         ]);
 
         $subject = $validated['subject'] ?? ($validated['project_type'] ?? 'General Inquiry');
@@ -36,6 +37,36 @@ class ContactController extends Controller
             'status' => 'new',
             'ip_address' => $request->ip(),
         ]);
+
+        // If user opted-in to newsletter subscription
+        if (!empty($validated['subscribe_newsletter'])) {
+            $email = strtolower(trim($validated['email']));
+            $existingSub = \App\Models\NewsletterSubscriber::where('email', $email)->first();
+            if (!$existingSub) {
+                $newSub = \App\Models\NewsletterSubscriber::create([
+                    'email' => $email,
+                    'name' => trim($validated['name']),
+                    'status' => 'subscribed',
+                    'source' => 'contact_form',
+                    'consent_given_at' => now(),
+                    'consent_text' => 'Opted in to cellar newsletter dispatches via contact inquiry form.',
+                    'ip_address' => $request->ip(),
+                    'token' => \App\Models\NewsletterSubscriber::generateUniqueToken(),
+                ]);
+                MailService::sendNewsletterWelcome($newSub);
+            } elseif ($existingSub->status === 'unsubscribed') {
+                $existingSub->update([
+                    'status' => 'subscribed',
+                    'source' => 'contact_form',
+                    'consent_given_at' => now(),
+                    'consent_text' => 'Re-subscribed to cellar newsletter dispatches via contact inquiry form.',
+                    'ip_address' => $request->ip(),
+                    'unsubscribed_at' => null,
+                ]);
+                $existingSub->ensureToken();
+                MailService::sendNewsletterWelcome($existingSub);
+            }
+        }
 
         // Trigger company email notification
         MailService::notifyCompanyNewContact($contactMessage);

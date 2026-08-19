@@ -31,7 +31,7 @@ import { FOLDER_COLORS } from './folder-sidebar';
 
       <!-- Current Selection / Square-Friendly Preview Card -->
       @if (value) {
-        <div class="relative group rounded-2xl border border-slate-200 bg-white overflow-hidden shadow-xs max-w-sm">
+        <div class="relative group rounded-xl border border-slate-200 bg-white overflow-hidden shadow-xs max-w-sm">
           <!-- Live Preview -->
           <div class="relative w-full overflow-hidden flex items-center justify-center bg-slate-950" [class]="previewHeight">
             @if (isVideo(value)) {
@@ -88,10 +88,10 @@ import { FOLDER_COLORS } from './folder-sidebar';
       } @else {
         <!-- Empty State Drop/Select Area -->
         <div
-          class="p-4 rounded-2xl border-2 border-dashed border-slate-200 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-50 transition-all flex flex-col items-center justify-center text-center gap-2.5 cursor-pointer group max-w-sm"
+          class="p-4 rounded-xl border-2 border-dashed border-slate-200 hover:border-slate-400 bg-slate-50/50 hover:bg-slate-50 transition-all flex flex-col items-center justify-center text-center gap-2.5 cursor-pointer group max-w-sm"
           (click)="openModal()"
         >
-          <div class="w-9 h-9 rounded-full bg-white border border-slate-200 shadow-2xs flex items-center justify-center text-slate-500 group-hover:scale-110 transition-transform">
+          <div class="w-9 h-9 rounded-lg bg-white border border-slate-200 shadow-2xs flex items-center justify-center text-slate-500 group-hover:scale-105 transition-transform">
             @if (accept === 'video') {
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2" ry="2"/></svg>
             } @else {
@@ -130,7 +130,7 @@ import { FOLDER_COLORS } from './folder-sidebar';
     @if (modalOpen()) {
       <div class="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/60 backdrop-blur-sm animate-fadeIn" (click)="closeModal()">
         <div
-          class="relative w-full max-w-5xl max-h-[90vh] bg-white rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-slideUp"
+          class="relative w-full max-w-5xl max-h-[90vh] bg-white rounded-xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden animate-slideUp"
           (click)="$event.stopPropagation()"
         >
           <!-- Modal Header -->
@@ -145,7 +145,7 @@ import { FOLDER_COLORS } from './folder-sidebar';
             <div class="flex items-center gap-2">
               <button
                 type="button"
-                class="w-8 h-8 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
+                class="w-8 h-8 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-600 flex items-center justify-center font-bold text-sm transition-colors cursor-pointer"
                 (click)="closeModal()"
               >
                 ✕
@@ -223,7 +223,7 @@ import { FOLDER_COLORS } from './folder-sidebar';
                 </div>
               } @else if (filteredAssets().length === 0) {
                 <div class="py-16 text-center text-slate-400">
-                  <div class="w-12 h-12 rounded-full bg-slate-100 border border-slate-200 mx-auto flex items-center justify-center text-slate-400 mb-2">
+                  <div class="w-12 h-12 rounded-lg bg-slate-100 border border-slate-200 mx-auto flex items-center justify-center text-slate-400 mb-2">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
                   </div>
                   <p class="text-sm font-semibold text-slate-700">No matching media found</p>
@@ -252,7 +252,7 @@ import { FOLDER_COLORS } from './folder-sidebar';
                           />
                         } @else if (isVideoAsset(asset)) {
                           <div class="w-full h-full flex flex-col items-center justify-center text-white bg-slate-950 p-2 text-center">
-                            <span class="w-10 h-10 rounded-full bg-white/10 flex items-center justify-center mb-1 group-hover:bg-wine-600 transition-colors">
+                            <span class="w-10 h-10 rounded-lg bg-white/10 flex items-center justify-center mb-1 group-hover:bg-wine-600 transition-colors">
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
                             </span>
                             <span class="text-2xs font-mono uppercase text-slate-400 font-semibold">Video</span>
@@ -271,7 +271,7 @@ import { FOLDER_COLORS } from './folder-sidebar';
                         }
 
                         @if (isSelected(asset)) {
-                          <div class="absolute top-2 right-2 w-6 h-6 rounded-full bg-wine-600 text-white font-bold text-xs flex items-center justify-center shadow-md">
+                          <div class="absolute top-2 right-2 w-6 h-6 rounded-md bg-wine-600 text-white font-bold text-xs flex items-center justify-center shadow-md">
                             ✓
                           </div>
                         }
@@ -307,13 +307,13 @@ import { FOLDER_COLORS } from './folder-sidebar';
                 </div>
 
                 <div
-                  class="p-8 rounded-2xl border-2 border-dashed border-slate-300 hover:border-wine-600 bg-slate-50 hover:bg-slate-100/60 transition-all flex flex-col items-center justify-center text-center gap-4 cursor-pointer relative"
+                  class="p-8 rounded-xl border-2 border-dashed border-slate-300 hover:border-wine-600 bg-slate-50 hover:bg-slate-100/60 transition-all flex flex-col items-center justify-center text-center gap-4 cursor-pointer relative"
                   [class.opacity-50]="uploading()"
                   (dragover)="onDragOver($event)"
                   (dragleave)="isDragging.set(false)"
                   (drop)="onDrop($event)"
                 >
-                  <div class="w-14 h-14 rounded-full bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-500">
+                  <div class="w-12 h-12 rounded-xl bg-white border border-slate-200 shadow-sm flex items-center justify-center text-slate-500">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="17 8 12 3 7 8"></polyline><line x1="12" y1="3" x2="12" y2="15"></line></svg>
                   </div>
 
@@ -327,7 +327,7 @@ import { FOLDER_COLORS } from './folder-sidebar';
                   </div>
 
                   @if (uploadError()) {
-                    <div class="p-3 rounded-xl bg-red-50 text-red-700 border border-red-200 text-xs font-semibold">
+                    <div class="p-3 rounded-lg bg-red-50 text-red-700 border border-red-200 text-xs font-semibold">
                       {{ uploadError() }}
                     </div>
                   }

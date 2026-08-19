@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, HostListener, inject, signal, computed } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { CartService } from '../core/cart.service';
 import { AdminApi, Order } from '../admin/api';
 import { I18nService, I18nText } from '../core/i18n.service';
@@ -7,7 +8,7 @@ import { SiteSettingsService } from '../core/site-settings.service';
 
 @Component({
   selector: 'wh-checkout-modal',
-  imports: [FormsModule],
+  imports: [FormsModule, RouterLink],
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     @if (cart.isCheckoutOpen()) {
@@ -222,10 +223,16 @@ import { SiteSettingsService } from '../core/site-settings.service';
                   </div>
                 }
 
-                <!-- Action Button -->
+                <!-- Action Button & Legal Disclaimer -->
                 <div class="pt-4 border-t-[1.5px] border-[var(--color-foreground)] flex flex-col sm:flex-row items-center justify-between gap-4">
-                  <div class="text-left font-mono text-[11px] text-[var(--color-foreground)]/70">
-                    <span>Payment via Direct Bank Wire Transfer upon order confirmation.</span>
+                  <div class="text-left font-mono text-[11px] text-[var(--color-foreground)]/70 space-y-1">
+                    <p class="leading-tight">
+                      By ordering, you certify you are <strong>18+</strong> and agree to our
+                      <a routerLink="/terms" target="_blank" class="underline hover:text-[var(--color-primary)] font-bold">Terms of Sale</a>
+                      &amp;
+                      <a routerLink="/privacy" target="_blank" class="underline hover:text-[var(--color-primary)] font-bold">Privacy Policy</a>.
+                    </p>
+                    <p class="text-[10px] text-slate-500">Payment via Direct Bank Wire Transfer upon order confirmation.</p>
                   </div>
 
                   <button

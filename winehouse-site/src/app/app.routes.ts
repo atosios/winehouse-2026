@@ -43,14 +43,52 @@ export const routes: Routes = [
       import('./pages/product-detail/product-detail').then((m) => m.ProductDetail),
   },
   {
+    path: 'posts/:slug',
+    title: title('Journal Dispatch'),
+    loadComponent: () =>
+      import('./pages/post-detail/post-detail').then((m) => m.PostDetail),
+  },
+  {
+    path: 'post/:slug',
+    title: title('Journal Dispatch'),
+    loadComponent: () =>
+      import('./pages/post-detail/post-detail').then((m) => m.PostDetail),
+  },
+  {
+    path: 'journal/:slug',
+    title: title('Journal Dispatch'),
+    loadComponent: () =>
+      import('./pages/post-detail/post-detail').then((m) => m.PostDetail),
+  },
+  {
     path: 'contact',
     title: title('Contact'),
     loadComponent: () => import('./pages/contact/contact').then((m) => m.Contact),
   },
   {
+    path: 'terms',
+    title: title('Terms & Conditions'),
+    loadComponent: () => import('./pages/legal/legal').then((m) => m.LegalPage),
+  },
+  {
+    path: 'privacy',
+    title: title('Privacy & Cookie Policy'),
+    loadComponent: () => import('./pages/legal/legal').then((m) => m.LegalPage),
+  },
+  {
+    path: 'legal',
+    title: title('Legal & Policies'),
+    loadComponent: () => import('./pages/legal/legal').then((m) => m.LegalPage),
+  },
+  {
     path: 'maintenance',
     title: title('Under maintenance'),
     loadComponent: () => import('./pages/maintenance/maintenance').then((m) => m.Maintenance),
+  },
+  {
+    path: 'newsletter/unsubscribe',
+    title: title('Newsletter Preferences'),
+    loadComponent: () => import('./pages/newsletter/unsubscribe').then((m) => m.NewsletterUnsubscribe),
   },
   {
     path: 'admin/login',
@@ -104,6 +142,11 @@ export const routes: Routes = [
       {
         path: 'posts/:id',
         loadComponent: () => import('./admin/posts').then((m) => m.AdminPostEdit),
+      },
+      {
+        path: 'newsletter',
+        title: title('Newsletter & Audience Studio'),
+        loadComponent: () => import('./admin/newsletter').then((m) => m.AdminNewsletter),
       },
       {
         path: 'pages',

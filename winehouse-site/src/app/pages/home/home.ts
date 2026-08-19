@@ -144,63 +144,71 @@ export class Home implements OnInit, AfterViewInit {
     this.dropdownOpen.set(false);
   }
 
-  resetContactForm() {
-    this.formSubmitted.set(false);
-    this.contactError.set(null);
-    this.contactData = {
-      name: '',
-      email: '',
-      phone: '',
-      projectType: 'Private Tasting',
-      message: '',
-    };
-  }
+  newsletterData = {
+    name: '',
+    email: '',
+    consent: false,
+  };
+  readonly newsletterSubmitted = signal(false);
+  readonly submittingNewsletter = signal(false);
+  readonly newsletterError = signal<string | null>(null);
+  readonly newsletterSuccessMsg = signal<string>('');
 
-  @HostListener('document:click')
-  onDocumentClick() {
-    if (this.dropdownOpen()) {
-      this.dropdownOpen.set(false);
+  submitNewsletter(): void {
+    if (!this.newsletterData.email?.trim()) {
+      this.newsletterError.set('Please enter a valid email address.');
+      return;
     }
-  }
-
-  @HostListener('document:keydown.escape')
-  onEscape() {
-    if (this.dropdownOpen()) {
-      this.dropdownOpen.set(false);
-    }
-  }
-
-  submitContact() {
-    if (!this.contactData.name?.trim() || !this.contactData.email?.trim() || !this.contactData.message?.trim()) {
+    if (!this.newsletterData.consent) {
+      this.newsletterError.set('Please confirm your consent to receive newsletter communications.');
       return;
     }
 
-    this.submittingContact.set(true);
-    this.contactError.set(null);
+    this.submittingNewsletter.set(true);
+    this.newsletterError.set(null);
 
     this.api
-      .submitContactMessage({
-        name: this.contactData.name.trim(),
-        email: this.contactData.email.trim(),
-        phone: this.contactData.phone?.trim() || undefined,
-        subject: this.contactData.projectType,
-        project_type: this.contactData.projectType,
-        message: this.contactData.message.trim(),
+      .subscribeNewsletter({
+        email: this.newsletterData.email.trim(),
+        name: this.newsletterData.name.trim() || undefined,
+        consent: true,
+        source: 'homepage',
+        consent_text: 'I agree to receive curated newsletters and cellar dispatches from The Winehouse under EU GDPR regulations.',
       })
       .subscribe({
-        next: () => {
-          this.submittingContact.set(false);
-          this.formSubmitted.set(true);
+        next: (res) => {
+          this.submittingNewsletter.set(false);
+          this.newsletterSubmitted.set(true);
+          this.newsletterSuccessMsg.set(res.message || 'Thank you for subscribing to The Winehouse Cellar Dispatches.');
         },
         error: (err) => {
-          console.error('Contact message submission error:', err);
-          this.submittingContact.set(false);
-          this.contactError.set(
-            err?.error?.message || 'We could not dispatch your message. Please check your details and try again.'
+          console.error('Newsletter subscription error:', err);
+          this.submittingNewsletter.set(false);
+          this.newsletterError.set(
+            err?.error?.message || 'We could not complete your subscription. Please check your email and try again.'
           );
         },
       });
   }
+
+  resetNewsletterForm(): void {
+    this.newsletterSubmitted.set(false);
+    this.newsletterError.set(null);
+    this.newsletterData = {
+      name: '',
+      email: '',
+      consent: false,
+    };
+  }
+
+  getNewsletterBtnText(): string {
+    const raw = this.t(this.hp().contact.button_text);
+    if (!raw || raw.trim().toLowerCase() === 'send message' || raw.trim().toLowerCase() === 'send message →') {
+      return this.i18n.currentLang() === 'el' ? 'ΕΓΓΡΑΦΗ ΣΤΟ NEWSLETTER' : 'SUBSCRIBE TO NEWSLETTER';
+    }
+    return raw;
+  }
 }
+
 
 

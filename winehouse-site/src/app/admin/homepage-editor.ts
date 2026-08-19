@@ -4,8 +4,10 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { WhMediaPicker } from './media-picker';
 import { WhI18nInput } from './i18n-input';
 import { AdminConfirm } from './confirm-dialog';
+import { resolveMediaUrl } from '../core/media.utils';
 import {
   AdminApi,
+  Post,
   HomepageContent,
   AboutPageContent,
   ShopPageContent,
@@ -102,7 +104,7 @@ export interface PageLibraryCard {
         </div>
 
         <!-- Library Filter & Search Toolbar -->
-        <div class="bg-white p-3 rounded-2xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+        <div class="bg-white p-3 rounded-xl border border-slate-200/80 shadow-2xs flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div class="relative flex-1">
             <svg class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input
@@ -122,7 +124,7 @@ export interface PageLibraryCard {
         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           @for (page of filteredPagesLibrary(); track page.key) {
             <div
-              class="group relative bg-white rounded-2xl border border-slate-200/90 hover:border-wine-600 hover:shadow-md transition-all duration-200 p-4 sm:p-5 flex flex-col justify-between cursor-pointer"
+              class="group relative bg-white rounded-xl border border-slate-200/90 hover:border-wine-600 hover:shadow-md transition-all duration-200 p-4 sm:p-5 flex flex-col justify-between cursor-pointer"
               (click)="selectPage(page.key)"
             >
               <!-- Card Header: Title on Top & Category Badge -->
@@ -295,28 +297,6 @@ export interface PageLibraryCard {
         </div>
       }
 
-      <!-- Fast Page Switcher Strip -->
-      <div class="bg-white p-2.5 rounded-2xl border border-slate-200/80 shadow-2xs mb-6 flex flex-wrap items-center gap-2">
-        <span class="text-2xs font-mono font-bold uppercase tracking-wider text-slate-400 px-3 py-1">Switch Page:</span>
-        @for (page of pages; track page.key) {
-          <button
-            type="button"
-            (click)="selectPage(page.key)"
-            class="flex items-center gap-2 px-3.5 py-1.5 rounded-xl text-xs font-bold font-mono tracking-tight transition-all duration-200 cursor-pointer"
-            [class.bg-slate-900]="activePage() === page.key"
-            [class.text-white]="activePage() === page.key"
-            [class.shadow-sm]="activePage() === page.key"
-            [class.bg-slate-50]="activePage() !== page.key"
-            [class.text-slate-600]="activePage() !== page.key"
-            [class.hover:bg-slate-100]="activePage() !== page.key"
-            [class.hover:text-slate-900]="activePage() !== page.key"
-          >
-            <span class="text-xs opacity-75">{{ page.icon }}</span>
-            <span>{{ page.label }}</span>
-          </button>
-        }
-      </div>
-
       <!-- ========================================================================================= -->
       <!-- 1. HOMEPAGE EDITOR                                                                        -->
       <!-- ========================================================================================= -->
@@ -379,10 +359,16 @@ export interface PageLibraryCard {
           <div class="admin-card">
             <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
               <h2 class="text-base font-bold text-slate-900 font-mono">{{ getHomeSectionTag('intro') }}</h2>
-              <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                <input type="checkbox" [(ngModel)]="content.intro.enabled" class="rounded border-slate-300 text-wine-600 focus:ring-wine-500" />
-                <span>Section Enabled</span>
-              </label>
+              <button
+                type="button"
+                (click)="content.intro.enabled = !content.intro.enabled"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold border transition-colors cursor-pointer select-none"
+                [class]="content.intro.enabled ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'"
+                [title]="content.intro.enabled ? 'Click to hide this section on live homepage' : 'Click to activate this section on live homepage'"
+              >
+                <span class="w-2 h-2 rounded-full" [class]="content.intro.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
+                <span>{{ content.intro.enabled ? 'SECTION ACTIVE' : 'SECTION HIDDEN' }}</span>
+              </button>
             </div>
 
             <!-- 2-Column Live Site Layout: Media on Left, Editorial Headings on Right -->
@@ -390,7 +376,7 @@ export interface PageLibraryCard {
               
               <!-- Left Column: Portrait Showcase Frame -->
               <div class="lg:col-span-5 flex flex-col gap-3.5">
-                <div class="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-3.5">
+                <div class="p-4 bg-slate-50/80 rounded-xl border border-slate-200/80 space-y-3.5">
                   <span class="admin-field-label !mb-0 font-bold text-slate-900 flex items-center gap-1.5">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg> <span>Intro Showcase Portrait</span>
                   </span>
@@ -406,7 +392,7 @@ export interface PageLibraryCard {
 
               <!-- Right Column: Editorial Copy & Philosophy -->
               <div class="lg:col-span-7 space-y-4">
-                <div class="p-4 bg-slate-50/50 rounded-2xl border border-slate-200/80 space-y-3.5">
+                <div class="p-4 bg-slate-50/50 rounded-xl border border-slate-200/80 space-y-3.5">
                   <div class="grid grid-cols-1 sm:grid-cols-2 gap-3.5">
                     <wh-i18n-input label="Section Tag" [(value)]="content.intro.tag" [globalLang]="globalEditingLang()" />
                     <wh-i18n-input label="Tape Sticker Label" [(value)]="content.intro.tape_sticker" [globalLang]="globalEditingLang()" />
@@ -457,10 +443,16 @@ export interface PageLibraryCard {
           <div class="admin-card">
             <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
               <h2 class="text-base font-bold text-slate-900 font-mono">{{ getHomeSectionTag('manifesto') }}</h2>
-              <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                <input type="checkbox" [(ngModel)]="content.manifesto.enabled" class="rounded border-slate-300 text-wine-600 focus:ring-wine-500" />
-                <span>Section Enabled</span>
-              </label>
+              <button
+                type="button"
+                (click)="content.manifesto.enabled = !content.manifesto.enabled"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold border transition-colors cursor-pointer select-none"
+                [class]="content.manifesto.enabled ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'"
+                [title]="content.manifesto.enabled ? 'Click to hide this section on live homepage' : 'Click to activate this section on live homepage'"
+              >
+                <span class="w-2 h-2 rounded-full" [class]="content.manifesto.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
+                <span>{{ content.manifesto.enabled ? 'SECTION ACTIVE' : 'SECTION HIDDEN' }}</span>
+              </button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -489,14 +481,20 @@ export interface PageLibraryCard {
       @if (activeHomeTab() === 'services') {
         <div class="space-y-6">
           <div class="admin-card">
-            <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3 flex-wrap gap-2">
               <h2 class="text-base font-bold text-slate-900 font-mono">{{ getHomeSectionTag('services') }}</h2>
-              <div class="flex items-center gap-3">
+              <div class="flex items-center gap-2">
                 <button type="button" class="btn btn-secondary btn-xs" (click)="addServiceItem()">+ Add Pillar</button>
-                <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                  <input type="checkbox" [(ngModel)]="content.services.enabled" class="rounded border-slate-300 text-wine-600 focus:ring-wine-500" />
-                  <span>Section Enabled</span>
-                </label>
+                <button
+                  type="button"
+                  (click)="content.services.enabled = !content.services.enabled"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold border transition-colors cursor-pointer select-none"
+                  [class]="content.services.enabled ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'"
+                  [title]="content.services.enabled ? 'Click to hide this section on live homepage' : 'Click to activate this section on live homepage'"
+                >
+                  <span class="w-2 h-2 rounded-full" [class]="content.services.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
+                  <span>{{ content.services.enabled ? 'SECTION ACTIVE' : 'SECTION HIDDEN' }}</span>
+                </button>
               </div>
             </div>
 
@@ -543,10 +541,16 @@ export interface PageLibraryCard {
           <div class="admin-card">
             <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
               <h2 class="text-base font-bold text-slate-900 font-mono">{{ getHomeSectionTag('craft') }}</h2>
-              <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                <input type="checkbox" [(ngModel)]="content.craft.enabled" class="rounded border-slate-300 text-wine-600 focus:ring-wine-500" />
-                <span>Section Enabled</span>
-              </label>
+              <button
+                type="button"
+                (click)="content.craft.enabled = !content.craft.enabled"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold border transition-colors cursor-pointer select-none"
+                [class]="content.craft.enabled ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'"
+                [title]="content.craft.enabled ? 'Click to hide this section on live homepage' : 'Click to activate this section on live homepage'"
+              >
+                <span class="w-2 h-2 rounded-full" [class]="content.craft.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
+                <span>{{ content.craft.enabled ? 'SECTION ACTIVE' : 'SECTION HIDDEN' }}</span>
+              </button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
@@ -588,14 +592,24 @@ export interface PageLibraryCard {
       @if (activeHomeTab() === 'cellar') {
         <div class="space-y-6">
           <div class="admin-card">
-            <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+            <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3 flex-wrap gap-2">
               <h2 class="text-base font-bold text-slate-900 font-mono">{{ getHomeSectionTag('cellar') }}</h2>
-              <div class="flex items-center gap-3">
-                <button type="button" class="btn btn-secondary btn-xs" (click)="addCellarItem()">+ Add Bottle Card</button>
-                <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                  <input type="checkbox" [(ngModel)]="content.cellar.enabled" class="rounded border-slate-300 text-wine-600 focus:ring-wine-500" />
-                  <span>Section Enabled</span>
-                </label>
+              <div class="flex items-center gap-2">
+                <button type="button" class="btn btn-secondary btn-xs" (click)="addCellarItem()">+ Add Custom Card</button>
+                <button type="button" class="btn btn-primary btn-xs flex items-center gap-1.5" (click)="openPostPicker(null)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M19 20H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h10l6 6v10a2 2 0 0 1-2 2z"/><polyline points="14 2 14 8 20 8"/></svg>
+                  <span>+ Add from Post</span>
+                </button>
+                <button
+                  type="button"
+                  (click)="content.cellar.enabled = !content.cellar.enabled"
+                  class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold border transition-colors cursor-pointer select-none ml-1"
+                  [class]="content.cellar.enabled ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'"
+                  [title]="content.cellar.enabled ? 'Click to hide this section on live homepage' : 'Click to activate this section on live homepage'"
+                >
+                  <span class="w-2 h-2 rounded-full" [class]="content.cellar.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
+                  <span>{{ content.cellar.enabled ? 'SECTION ACTIVE' : 'SECTION HIDDEN' }}</span>
+                </button>
               </div>
             </div>
 
@@ -608,40 +622,60 @@ export interface PageLibraryCard {
               </div>
             </div>
 
-            <!-- Bottle Cards (2-Column Grid Layout) -->
+            <!-- Bottle / Post Cards (2-Column Grid Layout) -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
               @for (card of content.cellar.items; track $index) {
                 <div class="bg-slate-50/80 p-4 rounded-xl border border-slate-200/80 space-y-3">
                   <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
-                    <span class="font-mono text-xs font-bold text-wine-700">Card #{{ $index + 1 }}</span>
-                    <div class="flex items-center gap-1">
-                      <button type="button" (click)="moveCellarUp($index)" [disabled]="$index === 0" class="btn btn-secondary btn-xs !py-0.5 !px-1.5">↑</button>
-                      <button type="button" (click)="moveCellarDown($index)" [disabled]="$index === content.cellar.items.length - 1" class="btn btn-secondary btn-xs !py-0.5 !px-1.5">↓</button>
+                    <div class="flex items-center gap-2">
+                      <span class="font-mono text-xs font-bold text-wine-700">Card #{{ $index + 1 }}</span>
+                    </div>
+                    <div class="flex items-center gap-1.5">
+                      <button
+                        type="button"
+                        (click)="openPostPicker($index)"
+                        class="btn btn-secondary btn-xs !py-0.5 !px-2 flex items-center gap-1 text-slate-700 hover:text-wine-800 cursor-pointer"
+                        title="Select a post from your library to pre-fill image, title, url & tags"
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg>
+                        <span>Link Post...</span>
+                      </button>
+                      <button type="button" (click)="moveCellarUp($index)" [disabled]="$index === 0" class="btn btn-secondary btn-xs !py-0.5 !px-1.5 cursor-pointer">↑</button>
+                      <button type="button" (click)="moveCellarDown($index)" [disabled]="$index === content.cellar.items.length - 1" class="btn btn-secondary btn-xs !py-0.5 !px-1.5 cursor-pointer">↓</button>
                       <button type="button" (click)="removeCellarItem($index)" class="text-red-500 hover:text-red-700 px-1 text-xs font-bold cursor-pointer">✕</button>
                     </div>
                   </div>
 
-                  <!-- 2-Column Split inside bottle card -->
+                  <!-- 2-Column Split inside card -->
                   <div class="grid grid-cols-1 sm:grid-cols-12 gap-3.5 items-start">
                     <div class="sm:col-span-5">
-                      <wh-media-picker label="Cover Image" [(value)]="card.img" helperText="Square bottle image" accept="image" />
+                      <wh-media-picker label="Cover Image" [(value)]="card.img" helperText="Card cover or bottle artwork" accept="image" />
                     </div>
 
                     <div class="sm:col-span-7 space-y-2.5">
-                      <wh-i18n-input label="Bottle Name" [(value)]="card.name" [globalLang]="globalEditingLang()" />
+                      <wh-i18n-input label="Card Title / Headline" [(value)]="card.name" [globalLang]="globalEditingLang()" />
                       <div>
-                        <label class="admin-field-label">Target Route</label>
-                        <input type="text" [(ngModel)]="card.link" class="admin-field-input font-mono text-xs" placeholder="/shop or /contact" />
+                        <label class="admin-field-label">Target Route / URL</label>
+                        <input type="text" [(ngModel)]="card.link" class="admin-field-input font-mono text-xs" placeholder="/posts/my-slug, /shop, etc." />
                       </div>
                       <div>
-                        <label class="admin-field-label">Tags (comma separated)</label>
+                        <label class="admin-field-label">Tags / Pills (comma separated)</label>
                         <input
                           type="text"
                           [ngModel]="getCellarTagsString(card)"
                           (ngModelChange)="updateCellarTags(card, $event)"
                           class="admin-field-input uppercase font-mono text-xs"
-                          placeholder="e.g. BRANDING, XINOMAVRO, 2021"
+                          placeholder="e.g. JOURNAL, VINTAGE, 2024"
                         />
+                      </div>
+                      <div>
+                        <label class="admin-field-label">Typography Style</label>
+                        <select [(ngModel)]="card.font_style" class="admin-field-input text-xs font-mono">
+                          <option value="font-serif tracking-wider font-semibold">Serif Classic Bold</option>
+                          <option value="font-serif tracking-widest uppercase font-light">Serif Editorial Light</option>
+                          <option value="font-sans font-bold tracking-tight">Sans Modern Bold</option>
+                          <option value="font-sans font-extrabold tracking-normal">Sans Heavy Impact</option>
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -658,10 +692,16 @@ export interface PageLibraryCard {
           <div class="admin-card">
             <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
               <h2 class="text-base font-bold text-slate-900 font-mono">{{ getHomeSectionTag('press') }}</h2>
-              <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                <input type="checkbox" [(ngModel)]="content.press.enabled" class="rounded border-slate-300 text-wine-600 focus:ring-wine-500" />
-                <span>Section Enabled</span>
-              </label>
+              <button
+                type="button"
+                (click)="content.press.enabled = !content.press.enabled"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold border transition-colors cursor-pointer select-none"
+                [class]="content.press.enabled ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'"
+                [title]="content.press.enabled ? 'Click to hide this section on live homepage' : 'Click to activate this section on live homepage'"
+              >
+                <span class="w-2 h-2 rounded-full" [class]="content.press.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
+                <span>{{ content.press.enabled ? 'SECTION ACTIVE' : 'SECTION HIDDEN' }}</span>
+              </button>
             </div>
 
             <div class="mb-6">
@@ -703,7 +743,7 @@ export interface PageLibraryCard {
 
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 @for (item of content.press.logos; track $index) {
-                  <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3">
+                  <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3">
                     <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
                       <span class="font-mono text-xs font-bold text-slate-600">Logo #{{ $index + 1 }}</span>
                       <button type="button" (click)="removePressLogo($index)" class="text-red-500 hover:text-red-700 text-xs font-bold cursor-pointer">✕</button>
@@ -726,10 +766,16 @@ export interface PageLibraryCard {
           <div class="admin-card">
             <div class="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
               <h2 class="text-base font-bold text-slate-900 font-mono">{{ getHomeSectionTag('contact') }}</h2>
-              <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer">
-                <input type="checkbox" [(ngModel)]="content.contact.enabled" class="rounded border-slate-300 text-wine-600 focus:ring-wine-500" />
-                <span>Section Enabled</span>
-              </label>
+              <button
+                type="button"
+                (click)="content.contact.enabled = !content.contact.enabled"
+                class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-mono font-bold border transition-colors cursor-pointer select-none"
+                [class]="content.contact.enabled ? 'bg-emerald-50 text-emerald-800 border-emerald-200 hover:bg-emerald-100' : 'bg-slate-100 text-slate-500 border-slate-200 hover:bg-slate-200'"
+                [title]="content.contact.enabled ? 'Click to hide this section on live homepage' : 'Click to activate this section on live homepage'"
+              >
+                <span class="w-2 h-2 rounded-full" [class]="content.contact.enabled ? 'bg-emerald-500 animate-pulse' : 'bg-slate-400'"></span>
+                <span>{{ content.contact.enabled ? 'SECTION ACTIVE' : 'SECTION HIDDEN' }}</span>
+              </button>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
@@ -750,9 +796,9 @@ export interface PageLibraryCard {
             <div class="mt-5 p-3.5 rounded-xl bg-slate-50 border border-slate-200/80 flex items-start gap-3 text-xs text-slate-600">
               <div class="w-5 h-5 rounded-md bg-wine-100 text-wine-800 flex items-center justify-center font-bold text-2xs shrink-0 mt-0.5">ℹ</div>
               <div class="space-y-1">
-                <span class="font-bold text-slate-900 block">Direct Lines &amp; Social Channels</span>
+                <span class="font-bold text-slate-900 block">Newsletter Registry &amp; GDPR Consent</span>
                 <p class="text-2xs text-slate-500 leading-relaxed">
-                  The contact card's email, phone, and social channels (Instagram, Facebook, Substack, etc.) are dynamically loaded from your global configuration in <a routerLink="/admin/settings" class="text-wine-700 font-bold hover:underline">Admin Settings &gt; Contact &amp; Socials</a>. No per-page social link editing is required.
+                  This section on the homepage powers visitor newsletter signups with active EU GDPR consent logging. You can view all subscribers and broadcast dispatches in the <a routerLink="/admin/newsletter" class="text-wine-700 font-bold hover:underline">Newsletter Studio</a>.
                 </p>
               </div>
             </div>
@@ -1040,7 +1086,7 @@ export interface PageLibraryCard {
 
             <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
               @for (bottle of shopContent.bottles; track bottle.id; let idx = $index) {
-                <div class="bg-slate-50 p-4 rounded-2xl border border-slate-200/80 space-y-3.5 flex flex-col justify-between">
+                <div class="bg-slate-50 p-4 rounded-xl border border-slate-200/80 space-y-3.5 flex flex-col justify-between">
                   <div class="space-y-3">
                     <div class="flex items-center justify-between border-b border-slate-200/60 pb-2">
                       <div class="flex items-center gap-2">
@@ -1048,7 +1094,7 @@ export interface PageLibraryCard {
                         <span class="font-mono text-xs text-wine-700 font-bold">{{ bottle.price }}</span>
                       </div>
                       <div class="flex items-center gap-1">
-                        <button type="button" (click)="moveShopBottleUp(idx)" [disabled] his="$index === 0" class="btn btn-secondary btn-xs !py-0.5 !px-1.5">↑</button>
+                        <button type="button" (click)="moveShopBottleUp(idx)" [disabled]="idx === 0" class="btn btn-secondary btn-xs !py-0.5 !px-1.5">↑</button>
                         <button type="button" (click)="moveShopBottleDown(idx)" [disabled]="idx === shopContent.bottles.length - 1" class="btn btn-secondary btn-xs !py-0.5 !px-1.5">↓</button>
                         <button type="button" (click)="removeShopBottle(idx)" class="text-red-500 hover:text-red-700 px-1 text-xs font-bold cursor-pointer">✕</button>
                       </div>
@@ -1274,7 +1320,7 @@ export interface PageLibraryCard {
     }
 
     <!-- Bottom Page Navigation Bar in Edit Mode -->
-    <div class="mt-8 pt-5 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/50 p-4 rounded-2xl">
+    <div class="mt-8 pt-5 border-t border-slate-200/80 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white/50 p-4 rounded-xl">
       <button
         type="button"
         (click)="backToLibrary()"
@@ -1299,10 +1345,120 @@ export interface PageLibraryCard {
         </button>
       </div>
     </div>
+
+    <!-- ========================================================================================= -->
+    <!-- POST PICKER MODAL (FOR SELECTED WORK & CELLAR SECTION)                                    -->
+    <!-- ========================================================================================= -->
+    @if (showPostPickerModal()) {
+      <div class="fixed inset-0 z-[9999] flex items-center justify-center p-4 sm:p-6 bg-slate-950/60 backdrop-blur-sm" (click)="closePostPicker()">
+        <div class="relative w-full max-w-3xl bg-white rounded-xl shadow-2xl border border-slate-200 overflow-hidden flex flex-col max-h-[85vh]" (click)="$event.stopPropagation()">
+          
+          <!-- Header -->
+          <div class="p-5 border-b border-slate-100 flex items-center justify-between bg-slate-50/70">
+            <div>
+              <div class="flex items-center gap-2">
+                <span class="font-mono text-xs uppercase px-2 py-0.5 rounded bg-wine-100 text-wine-800 font-bold">Posts Library</span>
+                <span class="font-mono text-xs text-slate-500">
+                  {{ targetCardIndexForPostFill() !== null ? 'Link Card #' + (targetCardIndexForPostFill()! + 1) : 'Insert New Card from Post' }}
+                </span>
+              </div>
+              <h3 class="text-base font-bold text-slate-900 mt-1">Select a Post to Pre-Fill Card</h3>
+            </div>
+            <button type="button" (click)="closePostPicker()" class="w-8 h-8 rounded-lg text-slate-400 hover:text-slate-700 hover:bg-slate-200/60 flex items-center justify-center text-base font-bold cursor-pointer transition-colors">✕</button>
+          </div>
+
+          <!-- Search Bar -->
+          <div class="p-4 border-b border-slate-100 bg-white">
+            <div class="relative">
+              <input
+                type="text"
+                [ngModel]="searchPostQuery()"
+                (ngModelChange)="searchPostQuery.set($event)"
+                placeholder="Search posts by title, category, type, or tags..."
+                class="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-800 placeholder:text-slate-400 outline-none focus:border-wine-500 focus:ring-1 focus:ring-wine-500 font-mono"
+              />
+              <svg class="absolute left-3 top-2.5 w-3.5 h-3.5 text-slate-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+            </div>
+          </div>
+
+          <!-- Posts List -->
+          <div class="flex-1 overflow-y-auto p-4 space-y-3">
+            @if (loadingPosts()) {
+              <div class="py-12 text-center text-slate-400 font-mono text-xs flex items-center justify-center gap-2">
+                <span class="w-4 h-4 border-2 border-slate-400 border-t-transparent rounded-full animate-spin"></span>
+                <span>Loading posts library…</span>
+              </div>
+            } @else if (filteredPosts().length === 0) {
+              <div class="py-12 text-center text-slate-400 font-mono text-xs">
+                No posts found. Create posts in the Posts section first or adjust your search filter.
+              </div>
+            } @else {
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                @for (post of filteredPosts(); track post.id) {
+                  <div
+                    (click)="selectPostForCard(post)"
+                    class="p-3 rounded-xl border border-slate-200/90 bg-white hover:border-wine-500 hover:shadow-md transition-all cursor-pointer flex gap-3 group items-start"
+                  >
+                    <!-- Thumbnail -->
+                    <div class="w-16 h-16 rounded-lg bg-slate-100 border border-slate-200/70 overflow-hidden shrink-0 flex items-center justify-center">
+                      @if (post.cover_image) {
+                        <img [src]="mediaUrl(post.cover_image)" [alt]="post.title" class="w-full h-full object-cover group-hover:scale-105 transition-transform" />
+                      } @else {
+                        <span class="text-2xs font-mono text-slate-400 font-bold uppercase">No Img</span>
+                      }
+                    </div>
+
+                    <!-- Details -->
+                    <div class="flex-1 min-w-0 space-y-1">
+                      <div class="flex items-center gap-1.5 flex-wrap">
+                        <span class="text-[9.5px] font-mono font-bold uppercase px-1.5 py-0.5 rounded bg-slate-100 text-slate-700">
+                          {{ post.post_type }}
+                        </span>
+                        @if (post.category) {
+                          <span class="text-[9.5px] font-mono text-slate-500">
+                            • {{ post.category }}
+                          </span>
+                        }
+                        <span class="text-[9.5px] font-mono font-bold px-1.5 py-0.5 rounded" [class]="post.published ? 'bg-emerald-50 text-emerald-700' : 'bg-slate-100 text-slate-500'">
+                          {{ post.published ? 'PUBLISHED' : 'DRAFT' }}
+                        </span>
+                      </div>
+
+                      <h4 class="text-xs font-bold text-slate-900 line-clamp-1 group-hover:text-wine-700 transition-colors">
+                        {{ post.title }}
+                      </h4>
+
+                      <p class="text-[10px] font-mono text-slate-400 truncate">
+                        /posts/{{ post.slug || post.id }}
+                      </p>
+                    </div>
+
+                    <!-- Select action -->
+                    <div class="self-center">
+                      <span class="px-2 py-1 rounded bg-slate-100 group-hover:bg-wine-700 group-hover:text-white text-2xs font-mono font-bold transition-colors">
+                        Select →
+                      </span>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+
+          <!-- Footer -->
+          <div class="p-3.5 border-t border-slate-100 bg-slate-50 flex items-center justify-between text-xs text-slate-500">
+            <span class="font-mono text-2xs">Admins can fully modify title, image, URL &amp; tags anytime after selection.</span>
+            <button type="button" (click)="closePostPicker()" class="btn btn-secondary btn-xs">Cancel</button>
+          </div>
+
+        </div>
+      </div>
+    }
   }
   `,
 })
 export class AdminHomepageEditor implements OnInit {
+  private api = inject(AdminApi);
   private settingsService = inject(SiteSettingsService);
   private confirmDialog = inject(AdminConfirm);
   private route = inject(ActivatedRoute);
@@ -1316,6 +1472,27 @@ export class AdminHomepageEditor implements OnInit {
   readonly saving = signal(false);
   readonly savedMessage = signal('');
   readonly error = signal('');
+
+  /* Post Picker state for Selected Work & Cellar */
+  readonly availablePosts = signal<Post[]>([]);
+  readonly loadingPosts = signal(false);
+  readonly showPostPickerModal = signal(false);
+  readonly targetCardIndexForPostFill = signal<number | null>(null);
+  readonly searchPostQuery = signal('');
+
+  readonly filteredPosts = computed(() => {
+    const q = this.searchPostQuery().trim().toLowerCase();
+    const list = this.availablePosts();
+    if (!q) return list;
+    return list.filter(
+      (p) =>
+        p.title?.toLowerCase().includes(q) ||
+        p.slug?.toLowerCase().includes(q) ||
+        p.category?.toLowerCase().includes(q) ||
+        p.post_type?.toLowerCase().includes(q) ||
+        (Array.isArray(p.tags) && p.tags.some((t) => t.toLowerCase().includes(q)))
+    );
+  });
 
   /* Active tabs per page */
   readonly activeHomeTab = signal('hero');
@@ -1422,7 +1599,7 @@ export class AdminHomepageEditor implements OnInit {
     { id: 'craft', defaultTag: '/ EXPERTISE & CRAFT' },
     { id: 'cellar', defaultTag: '/ SELECTED WORK & CELLAR' },
     { id: 'press', defaultTag: '/ PRESS & WORDS' },
-    { id: 'contact', defaultTag: '/ GET IN TOUCH' },
+    { id: 'contact', defaultTag: "/ LET'S CONNECT" },
     { id: 'footer', defaultTag: '/ FOOTER' },
   ];
 
@@ -1702,6 +1879,94 @@ export class AdminHomepageEditor implements OnInit {
       .split(',')
       .map((t) => t.trim().toUpperCase())
       .filter((t) => t.length > 0);
+  }
+
+  mediaUrl(url: string | null | undefined): string {
+    return resolveMediaUrl(url);
+  }
+
+  loadPostsForPicker(): void {
+    this.loadingPosts.set(true);
+    this.api.listPosts().subscribe({
+      next: (posts) => {
+        this.availablePosts.set(posts || []);
+        this.loadingPosts.set(false);
+      },
+      error: () => {
+        this.loadingPosts.set(false);
+      },
+    });
+  }
+
+  openPostPicker(targetCardIndex: number | null = null): void {
+    this.targetCardIndexForPostFill.set(targetCardIndex);
+    this.searchPostQuery.set('');
+    this.showPostPickerModal.set(true);
+    if (this.availablePosts().length === 0) {
+      this.loadPostsForPicker();
+    }
+  }
+
+  closePostPicker(): void {
+    this.showPostPickerModal.set(false);
+    this.targetCardIndexForPostFill.set(null);
+  }
+
+  selectPostForCard(post: Post): void {
+    const extractedTags: I18nText[] = [];
+    if (post.post_type) {
+      extractedTags.push({ en: post.post_type.toUpperCase(), el: '' });
+    }
+    if (post.category && post.category.toUpperCase() !== post.post_type?.toUpperCase()) {
+      extractedTags.push({ en: post.category.toUpperCase(), el: '' });
+    }
+    if (Array.isArray(post.tags)) {
+      for (const t of post.tags) {
+        if (
+          t &&
+          !extractedTags.some((x) => {
+            if (!x) return false;
+            const str = typeof x === 'string' ? x : (x as { en?: string }).en;
+            return str?.toLowerCase() === t.toLowerCase();
+          })
+        ) {
+          extractedTags.push({ en: t.toUpperCase(), el: '' });
+        }
+      }
+    }
+    if (extractedTags.length === 0) {
+      extractedTags.push({ en: 'JOURNAL', el: '' }, { en: 'CELLAR', el: '' });
+    }
+
+    const postUrl = post.slug ? `/posts/${post.slug}` : `/posts/${post.id}`;
+    const targetIndex = this.targetCardIndexForPostFill();
+
+    if (targetIndex !== null && this.content.cellar.items[targetIndex]) {
+      // Pre-fill existing card
+      const card = this.content.cellar.items[targetIndex];
+      card.name = { en: post.title, el: '' };
+      card.img = post.cover_image || '';
+      card.link = postUrl;
+      card.tags = extractedTags;
+      if (!card.font_style) {
+        card.font_style = 'font-serif tracking-wider font-semibold';
+      }
+    } else {
+      // Insert new card
+      this.content.cellar.items.push({
+        name: { en: post.title, el: '' },
+        font_style: 'font-serif tracking-wider font-semibold',
+        img: post.cover_image || '',
+        tags: extractedTags,
+        link: postUrl,
+        badge_bg: 'bg-[#111111]',
+      });
+    }
+
+    this.closePostPicker();
+    this.savedMessage.set(
+      `Card ${targetIndex !== null ? '#' + (targetIndex + 1) : 'inserted'} pre-filled from post "${post.title}". All fields remain fully editable.`
+    );
   }
 
   addPressQuote(): void {

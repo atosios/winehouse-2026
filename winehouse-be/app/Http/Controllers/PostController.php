@@ -32,10 +32,19 @@ class PostController extends Controller
             ]);
     }
 
-    /** Public: single published post by slug. */
-    public function publicShow(string $slug)
+    /** Public: single published post by slug or id. */
+    public function publicShow(Request $request, string $slug)
     {
-        return Post::where('published', true)->where('slug', $slug)->firstOrFail();
+        $query = Post::query();
+
+        if (!$request->user('sanctum') && !$request->has('preview')) {
+            $query->where('published', true);
+        }
+
+        return $query->where(function ($q) use ($slug) {
+            $q->where('slug', $slug)
+              ->orWhere('id', $slug);
+        })->firstOrFail();
     }
 
     public function index(Request $request)

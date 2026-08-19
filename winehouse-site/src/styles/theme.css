@@ -28,6 +28,7 @@
   --font-syne: 'Syne', 'Anton', sans-serif;
 
   /* Fluid type scale (min .. max, scales with viewport) */
+  --text-3xs: 0.5625rem;
   --text-2xs: 0.6875rem;
   --text-xs: 0.75rem;
   --text-sm: 0.875rem;

@@ -136,6 +136,26 @@
                       class="editorial-input resize-none font-mono text-xs uppercase"></textarea>
           </div>
 
+          <!-- EU GDPR Active Newsletter Opt-in Checkbox (Unchecked by Default) -->
+          <div class="pt-1 border-t border-[var(--color-foreground)]/10">
+            <label class="flex items-start gap-3 cursor-pointer select-none group">
+              <input
+                type="checkbox"
+                name="subscribeNewsletter"
+                [(ngModel)]="subscribeNewsletter"
+                class="mt-0.5 h-4 w-4 shrink-0 rounded-none border-[1.5px] border-[var(--color-foreground)] text-[var(--color-primary)] focus:ring-[var(--color-primary)] cursor-pointer"
+              />
+              <span class="flex flex-col gap-1 font-mono leading-snug">
+                <span class="text-[11px] uppercase tracking-wider text-[var(--color-foreground)]/85 group-hover:text-[var(--color-foreground)] transition-colors">
+                  Subscribe me to The Winehouse news, releases &amp; private cellar dispatches as well.
+                </span>
+                <span class="text-[9.5px] uppercase tracking-wider text-[var(--color-foreground)]/55">
+                  Unsubscribe at any time. <a routerLink="/about" class="text-[var(--color-primary)] underline font-bold hover:opacity-80 ml-0.5">Privacy Policy</a>.
+                </span>
+              </span>
+            </label>
+          </div>
+
           <div class="pt-2">
             <button type="submit"
                     [disabled]="sending()"

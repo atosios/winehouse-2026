@@ -73,6 +73,33 @@
           </address>
         </div>
 
+        <!-- Legal & Policies -->
+        <nav aria-label="Legal">
+          <h5 class="footer-heading text-gold-300">{{ isEl() ? 'Διαφάνεια & Όροι' : 'Legal & Policies' }}</h5>
+          <ul class="flex flex-col gap-1">
+            <li>
+              <a routerLink="/terms" class="text-sm text-sand-300 transition-colors hover:text-gold-200">
+                {{ isEl() ? 'Όροι Χρήσης & 18+' : 'Terms of Sale & 18+' }}
+              </a>
+            </li>
+            <li>
+              <a routerLink="/privacy" class="text-sm text-sand-300 transition-colors hover:text-gold-200">
+                {{ isEl() ? 'Πολιτική Απορρήτου & Cookies' : 'Privacy & Cookies' }}
+              </a>
+            </li>
+            <li>
+              <a routerLink="/terms" fragment="shipping-breakage" class="text-sm text-sand-300 transition-colors hover:text-gold-200">
+                {{ isEl() ? 'Αποστολές & Εγγύηση Θραύσης' : 'Shipping & Breakage Warranty' }}
+              </a>
+            </li>
+            <li>
+              <a routerLink="/terms" fragment="returns-withdrawal" class="text-sm text-sand-300 transition-colors hover:text-gold-200">
+                {{ isEl() ? 'Επιστροφές & Υπαναχώρηση' : 'Returns & Withdrawal' }}
+              </a>
+            </li>
+          </ul>
+        </nav>
+
         <!-- Hours -->
         <div>
           <h5 class="footer-heading">Hours</h5>
@@ -90,10 +117,20 @@
   </div>
 
   <!-- Bottom bar -->
-  <div class="relative border-t border-wine-900">
-    <div class="shell footer-bottom">
-      <span class="font-serif italic text-sand-500">Drink responsibly</span>
-      <span class="text-sand-500">© {{ year }} {{ site.legalName }}. All rights reserved.</span>
+  <div class="relative border-t border-wine-900/60 bg-black/30">
+    <div class="shell footer-bottom flex-col sm:flex-row justify-between items-center gap-3 py-3 text-2xs text-sand-400">
+      <div class="flex flex-wrap items-center gap-3">
+        <span class="font-serif italic text-gold-300/90 font-medium">Drink responsibly (18+)</span>
+        <span class="text-sand-600 hidden sm:inline">•</span>
+        <span class="text-sand-400">Γ.Ε.ΜΗ.: {{ siteConfig.gemiNumber }}</span>
+        <span class="text-sand-600 hidden sm:inline">•</span>
+        <span class="text-sand-400">ΑΦΜ: {{ siteConfig.vatNumber }}</span>
+      </div>
+      <div class="flex flex-wrap items-center gap-4">
+        <a routerLink="/terms" class="hover:text-gold-200 transition-colors underline">{{ isEl() ? 'Όροι Χρήσης' : 'Terms' }}</a>
+        <a routerLink="/privacy" class="hover:text-gold-200 transition-colors underline">{{ isEl() ? 'Προστασία Δεδομένων' : 'Privacy' }}</a>
+        <span class="text-sand-500">© {{ year }} {{ siteConfig.legalName }}</span>
+      </div>
     </div>
   </div>
 </footer>

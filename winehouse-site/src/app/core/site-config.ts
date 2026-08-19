@@ -49,6 +49,16 @@ export const SITE = {
     { label: 'Contact', path: '/contact' },
   ],
 
-  /* Footer legal line ---------------------------------------------------------- */
-  legalName: 'The Winehouse',
+  /* Footer legal line & company registration ---------------------------------- */
+  legalName: 'The Winehouse Fine Terroirs Single Member P.C.',
+  gemiNumber: '182394001000',
+  vatNumber: 'EL802495810',
+  taxOffice: 'D Athens',
+
+  /* Legal navigation ----------------------------------------------------------- */
+  legalNav: [
+    { label: 'Terms & Conditions', path: '/terms' },
+    { label: 'Privacy & Cookies', path: '/privacy' },
+    { label: 'Shipping & Returns', path: '/terms', fragment: 'shipping-breakage' },
+  ],
 } as const;

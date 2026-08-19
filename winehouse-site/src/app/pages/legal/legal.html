@@ -1,0 +1,229 @@
+<!-- ============================================================ 01: HERO SECTION -->
+<section class="shell pt-28 pb-14 md:pt-36 md:pb-16 border-b-[1.5px] border-[var(--color-foreground)]">
+  
+  <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+    <span class="editorial-tag">/ LEGAL &amp; CELLAR PROTOCOLS</span>
+    <span class="font-mono text-2xs uppercase tracking-widest text-[var(--color-foreground)]/60 bg-[var(--color-paper-light)] px-3 py-1 border border-[var(--color-foreground)]/20">
+      {{ t({ en: 'Jurisdiction: ' + t(metadata.regulatoryJurisdiction), el: 'Δικαιοδοσία: ' + t(metadata.regulatoryJurisdiction) }) }}
+    </span>
+  </div>
+
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 items-end">
+    <div class="lg:col-span-8 reveal" whReveal>
+      <h1 class="font-big text-[clamp(2.5rem,5vw,5rem)] uppercase leading-[0.92] tracking-tight text-[var(--color-foreground)]">
+        {{ t({ en: 'Terms of Sale, Policies & Transparency', el: 'Όροι Συναλλαγών, Πολιτικές & Διαφάνεια' }) }}
+      </h1>
+    </div>
+    
+    <div class="lg:col-span-4 reveal" whReveal [revealDelay]="100">
+      <div class="p-4 border-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] space-y-2">
+        <div class="flex justify-between items-center text-2xs font-mono font-bold text-[var(--color-primary)]">
+          <span>{{ t({ en: 'REVISION STATUS', el: 'ΚΑΤΑΣΤΑΣΗ ΕΝΗΜΕΡΩΣΗΣ' }) }}</span>
+          <span class="tape-sticker text-[10px]">{{ t(metadata.lastUpdated) }}</span>
+        </div>
+        <p class="font-mono text-[11px] text-[var(--color-foreground)]/80 leading-relaxed">
+          {{ t({
+            en: 'All purchases, deliveries, wine storage covenants, and digital interactions are governed by EU consumer protection and Hellenic commercial laws.',
+            el: 'Όλες οι συναλλαγές, αποστολές, εγγυήσεις διατήρησης οίνων και ψηφιακές υπηρεσίες διέπονται από το Ελληνικό και Ευρωπαϊκό δίκαιο προστασίας καταναλωτή.'
+          }) }}
+        </p>
+      </div>
+    </div>
+  </div>
+
+  <!-- Key Assurance Badges -->
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mt-10">
+    <div class="p-3 border border-[var(--color-foreground)]/30 bg-white/50 flex items-center gap-3">
+      <span class="font-mono text-sm font-bold text-[var(--color-primary)]">18+</span>
+      <span class="font-mono text-[10px] uppercase font-bold text-[var(--color-foreground)]">
+        {{ t({ en: 'Legal Age Restricted', el: 'Αυστηρό Όριο 18+' }) }}
+      </span>
+    </div>
+    <div class="p-3 border border-[var(--color-foreground)]/30 bg-white/50 flex items-center gap-3">
+      <span class="font-mono text-sm font-bold text-[var(--color-primary)]">🛡</span>
+      <span class="font-mono text-[10px] uppercase font-bold text-[var(--color-foreground)]">
+        {{ t({ en: 'Breakage Transit Warranty', el: 'Εγγύηση Θραύσης' }) }}
+      </span>
+    </div>
+    <div class="p-3 border border-[var(--color-foreground)]/30 bg-white/50 flex items-center gap-3">
+      <span class="font-mono text-sm font-bold text-[var(--color-primary)]">14D</span>
+      <span class="font-mono text-[10px] uppercase font-bold text-[var(--color-foreground)]">
+        {{ t({ en: 'EU Withdrawal Right', el: 'Δικαίωμα Υπαναχώρησης' }) }}
+      </span>
+    </div>
+    <div class="p-3 border border-[var(--color-foreground)]/30 bg-white/50 flex items-center gap-3">
+      <span class="font-mono text-sm font-bold text-[var(--color-primary)]">GDPR</span>
+      <span class="font-mono text-[10px] uppercase font-bold text-[var(--color-foreground)]">
+        {{ t({ en: 'Privacy & Data Protection', el: 'Προστασία Δεδομένων' }) }}
+      </span>
+    </div>
+  </div>
+
+</section>
+
+<!-- ============================================================ 02: QUICK JUMP FILTER TABS -->
+<nav class="sticky top-16 z-30 bg-[var(--color-paper)] border-b-[1.5px] border-[var(--color-foreground)] py-3 backdrop-blur-md bg-opacity-95" aria-label="Legal document navigation">
+  <div class="shell flex items-center gap-2 overflow-x-auto no-scrollbar py-1">
+    <button
+      type="button"
+      (click)="setFilter('all')"
+      class="font-mono text-2xs uppercase tracking-wider font-bold px-3 py-1.5 border transition-all whitespace-nowrap cursor-pointer"
+      [ngClass]="activeFilter() === 'all' 
+        ? 'bg-[var(--color-foreground)] text-white border-[var(--color-foreground)] shadow-[2px_2px_0px_0px_var(--color-primary)]' 
+        : 'bg-white border-[var(--color-foreground)]/30 text-[var(--color-foreground)] hover:border-[var(--color-foreground)]'"
+    >
+      {{ t({ en: '00. Show All Sections', el: '00. Όλες οι Ενότητες' }) }}
+    </button>
+
+    @for (sec of sections; track sec.id) {
+      <button
+        type="button"
+        (click)="setFilter(sec.id)"
+        class="font-mono text-2xs uppercase tracking-wider font-bold px-3 py-1.5 border transition-all whitespace-nowrap cursor-pointer"
+        [ngClass]="activeFilter() === sec.id 
+          ? 'bg-[var(--color-primary)] text-white border-[var(--color-primary)] shadow-[2px_2px_0px_0px_var(--color-foreground)]' 
+          : 'bg-white border-[var(--color-foreground)]/30 text-[var(--color-foreground)] hover:border-[var(--color-foreground)]'"
+      >
+        {{ t(sec.badge) }}
+      </button>
+    }
+  </div>
+</nav>
+
+<!-- ============================================================ 03: MAIN DOCUMENT BODY -->
+<section class="shell py-16 md:py-24">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    
+    <!-- LEFT: Sticky Table of Contents (Desktop) -->
+    <aside class="hidden lg:block lg:col-span-4 sticky top-36 space-y-6">
+      <div class="p-6 border-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] space-y-4">
+        <span class="font-mono text-xs uppercase font-bold tracking-widest text-[var(--color-primary)] block">
+          {{ t({ en: 'TABLE OF CONTENTS', el: 'ΠΙΝΑΚΑΣ ΠΕΡΙΕΧΟΜΕΝΩΝ' }) }}
+        </span>
+        
+        <ul class="space-y-3 font-mono text-xs">
+          @for (sec of sections; track sec.id) {
+            <li>
+              <button
+                type="button"
+                (click)="scrollToSection(sec.id)"
+                class="text-left flex items-start gap-2 text-[var(--color-foreground)]/80 hover:text-[var(--color-primary)] transition-colors group cursor-pointer w-full"
+                [ngClass]="{'font-bold text-[var(--color-primary)]': activeFilter() === sec.id}"
+              >
+                <span class="text-slate-400 group-hover:text-[var(--color-primary)]">›</span>
+                <span class="leading-tight">{{ t(sec.title) }}</span>
+              </button>
+            </li>
+          }
+        </ul>
+
+        <div class="pt-4 border-t border-[var(--color-foreground)]/15">
+          <p class="font-mono text-[10px] text-[var(--color-foreground)]/65 leading-normal">
+            {{ t({
+              en: 'Questions regarding cellar contracts or sommelier allocations? Contact our concierge at info@thewinehouse.gr',
+              el: 'Ερωτήσεις σχετικά με τους όρους ή τις παραγγελίες σας; Επικοινωνήστε μαζί μας στο info@thewinehouse.gr'
+            }) }}
+          </p>
+        </div>
+      </div>
+
+      <!-- Quick Contact Box -->
+      <div class="p-5 border-[1.5px] border-[var(--color-foreground)] bg-white space-y-2">
+        <span class="font-mono text-[10px] uppercase tracking-widest font-bold text-slate-500 block">
+          {{ t({ en: 'CUSTOMER SUPPORT & DISPUTES', el: 'ΥΠΟΣΤΗΡΙΞΗ & ΕΠΙΚΟΙΝΩΝΙΑ' }) }}
+        </span>
+        <p class="font-mono text-xs text-[var(--color-foreground)]">
+          <strong>Email:</strong> info&#64;thewinehouse.gr<br>
+          <strong>Tel:</strong> +30 210 000 0000<br>
+          <strong>Address:</strong> 14 Vasilissis Sofias Ave, Athens
+        </p>
+      </div>
+    </aside>
+
+    <!-- RIGHT: Structured Legal Sections -->
+    <div class="lg:col-span-8 space-y-16">
+      @for (sec of sections; track sec.id; let idx = $index) {
+        @if (activeFilter() === 'all' || activeFilter() === sec.id) {
+          <article 
+            [id]="sec.id" 
+            class="scroll-mt-36 p-6 sm:p-8 md:p-10 border-[1.5px] border-[var(--color-foreground)] bg-white shadow-[4px_4px_0px_0px_var(--color-foreground)] space-y-8 reveal" 
+            whReveal
+          >
+            <!-- Section Header -->
+            <div class="border-b-[1.5px] border-[var(--color-foreground)] pb-6 space-y-3">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <span class="font-mono text-xs uppercase font-bold tracking-widest text-[var(--color-primary)]">
+                  {{ t(sec.badge) }}
+                </span>
+                <span class="font-mono text-2xs text-[var(--color-foreground)]/50 uppercase">ARTICLE 0{{ idx + 1 }}</span>
+              </div>
+              <h2 class="font-big text-2xl sm:text-3xl lg:text-4xl uppercase tracking-tight text-[var(--color-foreground)] leading-tight">
+                {{ t(sec.title) }}
+              </h2>
+              <p class="font-serif text-base italic text-[var(--color-foreground)]/80 leading-relaxed">
+                {{ t(sec.summary) }}
+              </p>
+            </div>
+
+            <!-- Section Paragraphs -->
+            <div class="space-y-6">
+              @for (p of sec.paragraphs; track $index) {
+                <div 
+                  class="space-y-2"
+                  [ngClass]="p.highlight ? 'p-5 bg-[var(--color-paper-light)] border-l-4 border-[var(--color-primary)]' : ''"
+                >
+                  @if (p.heading) {
+                    <h3 class="font-mono text-xs uppercase font-bold tracking-wider text-[var(--color-foreground)]">
+                      {{ t(p.heading) }}
+                    </h3>
+                  }
+                  <p class="font-sans text-sm md:text-[15px] leading-relaxed text-[var(--color-foreground)]/85">
+                    {{ t(p.content) }}
+                  </p>
+                </div>
+              }
+            </div>
+
+            <!-- Footer of Article with back to top -->
+            <div class="pt-4 border-t border-[var(--color-foreground)]/10 flex items-center justify-between text-2xs font-mono text-[var(--color-foreground)]/60">
+              <span>THE WINEHOUSE • COMPLIANCE</span>
+              <button 
+                type="button" 
+                (click)="setFilter('all'); scrollToSection('terms-age')" 
+                class="hover:text-[var(--color-primary)] underline cursor-pointer"
+              >
+                ↑ {{ t({ en: 'Back to Top', el: 'Επιστροφή στην Κορυφή' }) }}
+              </button>
+            </div>
+
+          </article>
+        }
+      }
+    </div>
+
+  </div>
+</section>
+
+<!-- ============================================================ 04: BOTTOM CONCIERGE CTA -->
+<section class="shell pb-24 text-center">
+  <div class="p-10 border-[1.5px] border-[var(--color-foreground)] bg-[var(--color-paper-light)] flex flex-col items-center gap-6 max-w-3xl mx-auto shadow-md reveal" whReveal>
+    <span class="tape-sticker bg-[var(--color-foreground)] text-white">SOMMELIER CONCIERGE</span>
+    <h3 class="font-big text-2xl sm:text-4xl uppercase tracking-tight text-[var(--color-foreground)]">
+      {{ t({ en: 'Need Special Assistance or Clarification?', el: 'Χρειάζεστε Επιπλέον Διευκρίνιση;' }) }}
+    </h3>
+    <p class="font-serif text-base italic text-[var(--color-foreground)]/80 max-w-xl">
+      {{ t({
+        en: 'Our cellar team is always available to assist with custom orders, corporate gifting, or temperature-controlled logistics.',
+        el: 'Η ομάδα της κάβας μας βρίσκεται πάντα στη διάθεσή σας για ειδικές παραγγελίες, εταιρικά δώρα ή εξειδικευμένες αποστολές.'
+      }) }}
+    </p>
+    <div class="flex flex-wrap gap-4 pt-2">
+      <a routerLink="/shop" class="btn btn-primary font-mono text-xs uppercase tracking-wider font-bold">
+        <span>{{ t({ en: 'Browse Cellar Bottles →', el: 'Πλοήγηση στην Κάβα →' }) }}</span>
+      </a>
+      <a routerLink="/contact" class="btn btn-outline font-mono text-xs uppercase tracking-wider font-bold">
+        <span>{{ t({ en: 'Contact Atelier', el: 'Επικοινωνία με το Atelier' }) }}</span>
+      </a>
+    </div>
+  </div>
+</section>
