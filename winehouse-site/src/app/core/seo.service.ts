@@ -312,6 +312,41 @@ export class SeoService {
           '@type': 'Organization',
           name: SITE.name,
         },
+        hasMerchantReturnPolicy: {
+          '@type': 'MerchantReturnPolicy',
+          applicableCountry: 'GR',
+          returnPolicyCategory: 'https://schema.org/MerchantReturnFiniteReturnWindow',
+          merchantReturnDays: 14,
+          returnMethod: 'https://schema.org/ReturnByMail',
+          returnFees: 'https://schema.org/FreeReturn',
+        },
+        shippingDetails: {
+          '@type': 'OfferShippingDetails',
+          shippingRate: {
+            '@type': 'MonetaryAmount',
+            value: '0.00',
+            currency: 'EUR',
+          },
+          shippingDestination: {
+            '@type': 'DefinedRegion',
+            addressCountry: 'GR',
+          },
+          deliveryTime: {
+            '@type': 'ShippingDeliveryTime',
+            handlingTime: {
+              '@type': 'QuantitativeValue',
+              minValue: 1,
+              maxValue: 2,
+              unitCode: 'd',
+            },
+            transitTime: {
+              '@type': 'QuantitativeValue',
+              minValue: 1,
+              maxValue: 3,
+              unitCode: 'd',
+            },
+          },
+        },
       },
     };
 
@@ -319,7 +354,7 @@ export class SeoService {
       schema['productionDate'] = product.vintage;
     }
 
-    if (region || varietal || product.alcohol) {
+    if (region || varietal || product.alcohol || product.soil) {
       schema['additionalProperty'] = [];
       if (region) {
         schema['additionalProperty'].push({
@@ -340,6 +375,13 @@ export class SeoService {
           '@type': 'PropertyValue',
           name: 'Alcohol by Volume',
           value: product.alcohol,
+        });
+      }
+      if (product.soil) {
+        schema['additionalProperty'].push({
+          '@type': 'PropertyValue',
+          name: 'Soil & Geology',
+          value: this.i18n.t(product.soil),
         });
       }
     }
@@ -479,6 +521,56 @@ export class SeoService {
   }
 
   /**
+   * Generates WebSite Schema with Sitelinks Searchbox and SiteNavigationElement for Google SERPs.
+   */
+  setWebSiteStructuredData(siteSettings?: SiteSettings | null): void {
+    const origin = this.getSiteOrigin();
+    const settings = siteSettings || null;
+    const siteName = settings?.name || SITE.name;
+    const tagline = settings?.tagline || SITE.tagline;
+
+    const schema = {
+      '@context': 'https://schema.org',
+      '@graph': [
+        {
+          '@type': 'WebSite',
+          '@id': `${origin}/#website`,
+          url: origin,
+          name: siteName,
+          alternateName: [
+            `${siteName} Athens`,
+            `${siteName} Greece`,
+            'Winehouse',
+          ],
+          description: settings?.description || SITE.description || tagline,
+          inLanguage: ['en', 'el'],
+          potentialAction: {
+            '@type': 'SearchAction',
+            target: {
+              '@type': 'EntryPoint',
+              urlTemplate: `${origin}/shop?search={search_term_string}`,
+            },
+            'query-input': 'required name=search_term_string',
+          },
+        },
+        {
+          '@type': 'SiteNavigationElement',
+          '@id': `${origin}/#navigation`,
+          name: ['Home', 'e-Shop', 'About Us', 'Contact'],
+          url: [
+            `${origin}/`,
+            `${origin}/shop`,
+            `${origin}/about`,
+            `${origin}/contact`,
+          ],
+        },
+      ],
+    };
+
+    this.setStructuredData(schema, 'website-schema-jsonld');
+  }
+
+  /**
    * Sets enriched Winery / LocalBusiness structured data on general pages.
    */
   setOrganizationStructuredData(siteSettings?: SiteSettings | null): void {
@@ -490,10 +582,15 @@ export class SeoService {
 
     const schema = {
       '@context': 'https://schema.org',
-      '@type': 'Winery',
+      '@type': ['Winery', 'WineShop', 'LocalBusiness'],
       name: settings?.name || SITE.name,
+      legalName: settings?.legalName || SITE.legalName,
       url: origin,
-      logo: `${origin}/logo_default.png`,
+      logo: {
+        '@type': 'ImageObject',
+        url: `${origin}/logo_default.png`,
+        caption: settings?.name || SITE.name,
+      },
       image: `${origin}/hero_cellar.png`,
       description: settings?.description || SITE.description,
       priceRange: '€€€',

@@ -40,6 +40,7 @@ export class Home implements OnInit, AfterViewInit {
       image: seoConf.og_image,
       type: 'website',
     });
+    this.seo.setWebSiteStructuredData(this.settingsService.settings());
     this.seo.setOrganizationStructuredData(this.settingsService.settings());
   }
 

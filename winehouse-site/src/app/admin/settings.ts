@@ -564,11 +564,21 @@ import { WhSocialIcon, SOCIAL_ICON_LIBRARY, resolveSocialIconKey, SocialIconDef 
                   <span>English Metadata</span>
                 </div>
                 <div>
-                  <label class="admin-field-label">Page Title (EN)</label>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="admin-field-label !mb-0">Page Title (EN)</label>
+                    <span class="text-[10px] font-mono" [class.text-emerald-700]="getMetaLength($any(pageMeta.title).en, 40, 60)" [class.text-amber-700]="!getMetaLength($any(pageMeta.title).en, 40, 60)">
+                      {{ ($any(pageMeta.title).en || '').length }}/60 chars
+                    </span>
+                  </div>
                   <input class="admin-field-input text-xs" [(ngModel)]="$any(pageMeta.title).en" placeholder="Page Title in English" />
                 </div>
                 <div>
-                  <label class="admin-field-label">Meta Description (EN)</label>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="admin-field-label !mb-0">Meta Description (EN)</label>
+                    <span class="text-[10px] font-mono" [class.text-emerald-700]="getMetaLength($any(pageMeta.description).en, 130, 160)" [class.text-amber-700]="!getMetaLength($any(pageMeta.description).en, 130, 160)">
+                      {{ ($any(pageMeta.description).en || '').length }}/160 chars
+                    </span>
+                  </div>
                   <textarea class="admin-field-input text-xs min-h-20" [(ngModel)]="$any(pageMeta.description).en" placeholder="Meta description in English..."></textarea>
                 </div>
               </div>
@@ -580,12 +590,169 @@ import { WhSocialIcon, SOCIAL_ICON_LIBRARY, resolveSocialIconKey, SocialIconDef 
                   <span>Greek Metadata (Ελληνικά)</span>
                 </div>
                 <div>
-                  <label class="admin-field-label">Τίτλος Σελίδας (EL)</label>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="admin-field-label !mb-0">Τίτλος Σελίδας (EL)</label>
+                    <span class="text-[10px] font-mono" [class.text-emerald-700]="getMetaLength($any(pageMeta.title).el, 40, 60)" [class.text-amber-700]="!getMetaLength($any(pageMeta.title).el, 40, 60)">
+                      {{ ($any(pageMeta.title).el || '').length }}/60 chars
+                    </span>
+                  </div>
                   <input class="admin-field-input text-xs" [(ngModel)]="$any(pageMeta.title).el" placeholder="Τίτλος σελίδας στα ελληνικά" />
                 </div>
                 <div>
-                  <label class="admin-field-label">Meta Περιγραφή (EL)</label>
+                  <div class="flex items-center justify-between mb-1">
+                    <label class="admin-field-label !mb-0">Meta Περιγραφή (EL)</label>
+                    <span class="text-[10px] font-mono" [class.text-emerald-700]="getMetaLength($any(pageMeta.description).el, 130, 160)" [class.text-amber-700]="!getMetaLength($any(pageMeta.description).el, 130, 160)">
+                      {{ ($any(pageMeta.description).el || '').length }}/160 chars
+                    </span>
+                  </div>
                   <textarea class="admin-field-input text-xs min-h-20" [(ngModel)]="$any(pageMeta.description).el" placeholder="Περιγραφή σελίδας για μηχανές αναζήτησης..."></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Interactive Google SERP Simulator Card -->
+            <div class="mt-4 pt-4 border-t border-slate-200/80">
+              <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 mb-3">
+                <div class="flex items-center gap-2">
+                  <span class="inline-flex items-center justify-center w-6 h-6 rounded-full bg-blue-50 text-blue-700 font-black text-xs">G</span>
+                  <div>
+                    <h3 class="text-xs font-bold text-slate-900 tracking-tight">Live Google Search Result Preview</h3>
+                    <p class="text-[11px] text-slate-500">Real-time simulation of how this page appears on Google search results.</p>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <!-- Language Toggle -->
+                  <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200/80 text-[11px]">
+                    <button
+                      type="button"
+                      class="px-2 py-0.5 rounded-md font-semibold cursor-pointer transition-all"
+                      [class.bg-white]="serpLanguage() === 'en'"
+                      [class.shadow-2xs]="serpLanguage() === 'en'"
+                      [class.text-slate-900]="serpLanguage() === 'en'"
+                      [class.text-slate-500]="serpLanguage() !== 'en'"
+                      (click)="serpLanguage.set('en')"
+                    >
+                      🇬🇧 EN
+                    </button>
+                    <button
+                      type="button"
+                      class="px-2 py-0.5 rounded-md font-semibold cursor-pointer transition-all"
+                      [class.bg-white]="serpLanguage() === 'el'"
+                      [class.shadow-2xs]="serpLanguage() === 'el'"
+                      [class.text-slate-900]="serpLanguage() === 'el'"
+                      [class.text-slate-500]="serpLanguage() !== 'el'"
+                      (click)="serpLanguage.set('el')"
+                    >
+                      🇬🇷 EL
+                    </button>
+                  </div>
+
+                  <!-- Device Toggle -->
+                  <div class="inline-flex rounded-lg bg-slate-100 p-0.5 border border-slate-200/80 text-[11px]">
+                    <button
+                      type="button"
+                      class="px-2 py-0.5 rounded-md font-semibold cursor-pointer transition-all"
+                      [class.bg-white]="serpDeviceMode() === 'desktop'"
+                      [class.shadow-2xs]="serpDeviceMode() === 'desktop'"
+                      [class.text-slate-900]="serpDeviceMode() === 'desktop'"
+                      [class.text-slate-500]="serpDeviceMode() !== 'desktop'"
+                      (click)="serpDeviceMode.set('desktop')"
+                    >
+                      🖥️ Desktop
+                    </button>
+                    <button
+                      type="button"
+                      class="px-2 py-0.5 rounded-md font-semibold cursor-pointer transition-all"
+                      [class.bg-white]="serpDeviceMode() === 'mobile'"
+                      [class.shadow-2xs]="serpDeviceMode() === 'mobile'"
+                      [class.text-slate-900]="serpDeviceMode() === 'mobile'"
+                      [class.text-slate-500]="serpDeviceMode() !== 'mobile'"
+                      (click)="serpDeviceMode.set('mobile')"
+                    >
+                      📱 Mobile
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Google SERP Card -->
+              <div
+                class="p-4 sm:p-5 rounded-2xl border border-slate-200/90 bg-[#ffffff] shadow-sm transition-all"
+                [class.max-w-md]="serpDeviceMode() === 'mobile'"
+                [class.mx-auto]="serpDeviceMode() === 'mobile'"
+              >
+                <!-- Google Site Identity Header -->
+                <div class="flex items-center gap-2.5 mb-1.5">
+                  <div class="w-6 h-6 rounded-full bg-slate-100 border border-slate-200 flex items-center justify-center shrink-0 overflow-hidden">
+                    <img src="logo_default_mark.png" alt="Favicon" class="w-4 h-4 object-contain" />
+                  </div>
+                  <div class="min-w-0">
+                    <div class="text-[13px] font-medium text-[#202124] leading-tight truncate">
+                      {{ getSerpSiteName() }}
+                    </div>
+                    <div class="text-[11px] text-[#4d5156] font-mono leading-tight truncate">
+                      https://thewinehouse.gr{{ getSerpPagePath() }}
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Google Clickable Blue Title -->
+                <div class="mb-1.5">
+                  <h4 class="text-[17px] sm:text-[19px] text-[#1a0dab] hover:underline font-normal cursor-pointer leading-snug tracking-tight">
+                    {{ getSerpTitle() }}
+                  </h4>
+                </div>
+
+                <!-- Google Snippet Description -->
+                <p class="text-[13px] text-[#4d5156] leading-relaxed line-clamp-3">
+                  {{ getSerpDescription() }}
+                </p>
+
+                <!-- Optional Sitelinks & Sitelinks Searchbox (Shown on Home preview) -->
+                @if (selectedSeoPage() === 'home') {
+                  <div class="mt-3.5 pt-3 border-t border-slate-100 space-y-2.5">
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs">
+                      <div class="p-2 rounded-lg bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors">
+                        <span class="text-[#1a0dab] font-medium block hover:underline">e-Shop &amp; Rare Allocations</span>
+                        <span class="text-[11px] text-[#5f6368] line-clamp-1">Small-batch natural wines &amp; cellar reserves.</span>
+                      </div>
+                      <div class="p-2 rounded-lg bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors">
+                        <span class="text-[#1a0dab] font-medium block hover:underline">About Our Philosophy</span>
+                        <span class="text-[11px] text-[#5f6368] line-clamp-1">Sommelier curation &amp; terroir slow living.</span>
+                      </div>
+                      <div class="p-2 rounded-lg bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors">
+                        <span class="text-[#1a0dab] font-medium block hover:underline">Cellar Tastings &amp; Visits</span>
+                        <span class="text-[11px] text-[#5f6368] line-clamp-1">Book private tasting flights &amp; cellar tours.</span>
+                      </div>
+                      <div class="p-2 rounded-lg bg-slate-50 border border-slate-100 hover:border-slate-200 transition-colors">
+                        <span class="text-[#1a0dab] font-medium block hover:underline">Contact &amp; Concierge</span>
+                        <span class="text-[11px] text-[#5f6368] line-clamp-1">Direct inquiries &amp; sommelier consultations.</span>
+                      </div>
+                    </div>
+
+                    <!-- Searchbox Preview -->
+                    <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-slate-50 border border-slate-200 text-xs text-slate-400">
+                      <span>🔍</span>
+                      <span class="font-sans text-[11px]">Search thewinehouse.gr wines (Google Sitelinks Searchbox)</span>
+                    </div>
+                  </div>
+                }
+
+                <!-- Rich Features Quality Badges -->
+                <div class="mt-3 pt-2.5 border-t border-slate-100 flex flex-wrap items-center gap-1.5">
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-medium border border-emerald-200/80">
+                    ✓ Google Knowledge Graph (Winery)
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-medium border border-emerald-200/80">
+                    ✓ Sitelinks Searchbox
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-medium border border-emerald-200/80">
+                    ✓ BreadcrumbList Schema
+                  </span>
+                  <span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-emerald-50 text-emerald-800 text-[10px] font-medium border border-emerald-200/80">
+                    ✓ 14-Day Return &amp; Express Transit
+                  </span>
                 </div>
               </div>
             </div>
@@ -1294,6 +1461,89 @@ export class AdminSettings implements OnInit {
       page.description = { en: String(page.description || ''), el: '' };
     }
     return page;
+  }
+
+  serpDeviceMode = signal<'desktop' | 'mobile'>('desktop');
+  serpLanguage = signal<'en' | 'el'>('en');
+
+  getMetaLength(val: any, min: number, max: number): boolean {
+    const len = (String(val || '')).trim().length;
+    return len >= min && len <= max;
+  }
+
+  getSerpSiteName(): string {
+    return this.model.name || 'The Winehouse';
+  }
+
+  getSerpPagePath(): string {
+    const p = this.selectedSeoPage();
+    if (p === 'home') return '';
+    if (p === 'shop') return ' › shop';
+    if (p === 'about') return ' › about';
+    if (p === 'contact') return ' › contact';
+    return '';
+  }
+
+  getSerpTitle(): string {
+    const p = this.selectedSeoPage();
+    const lang = this.serpLanguage();
+    const pageMeta = this.ensurePageSeo(p);
+    const titleObj = pageMeta?.title as { en?: string; el?: string } | undefined;
+    const custom = titleObj?.[lang]?.trim();
+    if (custom) return custom;
+
+    if (p === 'home') {
+      return lang === 'el'
+        ? `${this.model.name || 'The Winehouse'} — Εκλεκτά Χειροποίητα Κρασιά, Terroir & Γευσιγνωσίες`
+        : `${this.model.name || 'The Winehouse'} — Artisanal Wines, Terroir & Tasting Atelier`;
+    }
+    if (p === 'shop') {
+      return lang === 'el'
+        ? `Επιλεγμένες Φιάλες & Σπάνιες Εσοδείες | ${this.model.name || 'The Winehouse'}`
+        : `Curated Bottlings & Cellar Vault | ${this.model.name || 'The Winehouse'}`;
+    }
+    if (p === 'about') {
+      return lang === 'el'
+        ? `Η Φιλοσοφία & οι Ρίζες της Κάβας μας | ${this.model.name || 'The Winehouse'}`
+        : `Our Philosophy & Cellar Roots | ${this.model.name || 'The Winehouse'}`;
+    }
+    if (p === 'contact') {
+      return lang === 'el'
+        ? `Επικοινωνία, Γευσιγνωσίες & Ερωτήσεις | ${this.model.name || 'The Winehouse'}`
+        : `Cellar Atelier, Tastings & Inquiries | ${this.model.name || 'The Winehouse'}`;
+    }
+    return `${this.model.name || 'The Winehouse'}`;
+  }
+
+  getSerpDescription(): string {
+    const p = this.selectedSeoPage();
+    const lang = this.serpLanguage();
+    const pageMeta = this.ensurePageSeo(p);
+    const descObj = pageMeta?.description as { en?: string; el?: string } | undefined;
+    const custom = descObj?.[lang]?.trim();
+    if (custom) return custom;
+
+    if (p === 'home') {
+      return lang === 'el'
+        ? 'Επιλεγμένα φυσικά και παραδοσιακά μεσογειακά κρασιά, μικροί ανεξάρτητοι παραγωγοί, καθοδηγούμενες γευσιγνωσίες και συμβουλευτική κάβας.'
+        : 'Curated natural and ancestral Mediterranean wines, small-batch independent growers, guided sommelier flights and cellar consulting.';
+    }
+    if (p === 'shop') {
+      return lang === 'el'
+        ? 'Ανακαλύψτε φυσικά κρασιά μικρής παραγωγής, αυτόριζα ηφαιστειακά Ασύρτικα, Ξινόμαυρα παλαιών κλημάτων και σπάνιες αρχειακές φιάλες.'
+        : 'Browse small-batch natural wines, ungrafted volcanic Assyrtiko, old-vine Xinomavro, and allocated cellar reserves.';
+    }
+    if (p === 'about') {
+      return lang === 'el'
+        ? 'Ανακαλύψτε τη φιλοσοφία του αργού χρόνου, τους αφοσιωμένους μικρούς παραγωγούς και τη διατήρηση του μεσογειακού terroir.'
+        : 'Discover our slow-living philosophy, passionate small-batch vignerons, and sustainable Mediterranean terroir preservation.';
+    }
+    if (p === 'contact') {
+      return lang === 'el'
+        ? 'Κλείστε ιδιωτικές γευσιγνωσίες sommelier, ζητήστε προσωποποιημένη συμβουλευτική κάβας ή επισκεφθείτε τον χώρο μας.'
+        : 'Book private sommelier tastings, inquire about bespoke cellar consulting, or visit our central Athens atelier.';
+    }
+    return this.model.description || '';
   }
 
   mediaUrl(path?: string): string {

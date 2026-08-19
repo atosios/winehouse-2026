@@ -3,6 +3,23 @@ Allow: /
 Disallow: /admin/
 Disallow: /admin/*
 
+# Search Engine Crawlers
+User-agent: Googlebot
+Allow: /
+Disallow: /admin/
+
+User-agent: Googlebot-Image
+Allow: /
+Allow: /storage/
+
+User-agent: Bingbot
+Allow: /
+Disallow: /admin/
+
+User-agent: Applebot
+Allow: /
+Disallow: /admin/
+
 # AI Search & Answer Engine Crawlers
 User-agent: GPTBot
 Allow: /
@@ -20,7 +37,10 @@ User-agent: Google-Extended
 Allow: /
 Disallow: /admin/
 
-# Sitemaps & AI Context Endpoints
+# Sitemaps & Machine Context Endpoints
+Sitemap: https://thewinehouse.gr/sitemap.xml
 Sitemap: https://winehouse.gr/sitemap.xml
+Sitemap: https://api.thewinehouse.gr/sitemap.xml
 Sitemap: https://api.winehouse.gr/sitemap.xml
-# LLM Context: https://winehouse.gr/llms.txt
+# LLM Context: https://thewinehouse.gr/llms.txt
+
