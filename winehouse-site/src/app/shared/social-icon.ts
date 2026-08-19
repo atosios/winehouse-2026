@@ -1,4 +1,5 @@
-import { ChangeDetectionStrategy, Component, Input, computed } from '@angular/core';
+import { ChangeDetectionStrategy, Component, Input, computed, inject } from '@angular/core';
+import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 
 export interface SocialIconDef {
   key: string;
@@ -143,18 +144,11 @@ export function resolveSocialIconKey(icon?: string | null, label?: string | null
   selector: 'wh-social-icon',
   changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
-    <svg
-      [attr.viewBox]="iconDef().viewBox || '0 0 24 24'"
-      [attr.fill]="iconDef().fill || 'currentColor'"
-      [attr.stroke]="iconDef().stroke || 'none'"
-      [attr.stroke-width]="iconDef().strokeWidth || null"
-      stroke-linecap="round"
-      stroke-linejoin="round"
-      [attr.width]="size"
-      [attr.height]="size"
+    <span
+      class="wh-social-icon-inner inline-flex items-center justify-center leading-none select-none pointer-events-none"
       [class]="class"
-      [innerHTML]="iconDef().rawSvg"
-    ></svg>
+      [innerHTML]="safeSvg()"
+    ></span>
   `,
   styles: [`
     :host {
@@ -162,10 +156,18 @@ export function resolveSocialIconKey(icon?: string | null, label?: string | null
       align-items: center;
       justify-content: center;
       line-height: 0;
+      vertical-align: middle;
+    }
+    :host ::ng-deep svg {
+      display: block;
+      width: 100%;
+      height: 100%;
     }
   `],
 })
 export class WhSocialIcon {
+  private sanitizer = inject(DomSanitizer);
+
   @Input() name?: string | null;
   @Input() label?: string | null;
   @Input() url?: string | null;
@@ -175,5 +177,16 @@ export class WhSocialIcon {
   readonly iconDef = computed<SocialIconDef>(() => {
     const key = resolveSocialIconKey(this.name, this.label, this.url);
     return SOCIAL_ICON_LIBRARY.find((item) => item.key === key) || SOCIAL_ICON_LIBRARY[SOCIAL_ICON_LIBRARY.length - 1];
+  });
+
+  readonly safeSvg = computed<SafeHtml>(() => {
+    const def = this.iconDef();
+    const sizeAttr = this.size ? `width="${this.size}" height="${this.size}"` : '';
+    const strokeAttr = def.stroke === 'currentColor' ? 'stroke="currentColor"' : 'stroke="none"';
+    const fillAttr = def.fill === 'currentColor' ? 'fill="currentColor"' : 'fill="none"';
+    const strokeWidthAttr = def.strokeWidth ? `stroke-width="${def.strokeWidth}"` : '';
+
+    const svg = `<svg viewBox="${def.viewBox || '0 0 24 24'}" ${fillAttr} ${strokeAttr} ${strokeWidthAttr} stroke-linecap="round" stroke-linejoin="round" ${sizeAttr}>${def.rawSvg}</svg>`;
+    return this.sanitizer.bypassSecurityTrustHtml(svg);
   });
 }

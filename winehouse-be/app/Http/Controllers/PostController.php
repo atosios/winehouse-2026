@@ -38,9 +38,20 @@ class PostController extends Controller
         return Post::where('published', true)->where('slug', $slug)->firstOrFail();
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return Post::orderByDesc('created_at')->get();
+        $query = Post::with('folder')->orderByDesc('created_at');
+
+        if ($request->has('folder_id')) {
+            $folderId = $request->query('folder_id');
+            if ($folderId === 'null' || $folderId === 'root' || $folderId === '') {
+                $query->whereNull('folder_id');
+            } elseif (is_numeric($folderId)) {
+                $query->where('folder_id', (int) $folderId);
+            }
+        }
+
+        return $query->get();
     }
 
     public function categories()
@@ -144,19 +155,21 @@ class PostController extends Controller
     {
         $data = $this->validated($request);
 
-        return response()->json(Post::create($data), 201);
+        $post = Post::create($data);
+
+        return response()->json($post->load('folder'), 201);
     }
 
     public function show(Post $post)
     {
-        return $post;
+        return $post->load('folder');
     }
 
     public function update(Request $request, Post $post)
     {
         $post->update($this->validated($request, $post));
 
-        return $post->fresh();
+        return $post->fresh(['folder']);
     }
 
     public function destroy(Post $post)
@@ -183,6 +196,7 @@ class PostController extends Controller
             'body' => ['nullable', 'string'],
             'cover_image' => ['nullable', 'string', 'max:500'],
             'published' => ['boolean'],
+            'folder_id' => ['nullable', 'integer', 'exists:folders,id'],
         ]);
 
         if (empty($data['title'])) {

@@ -11,7 +11,13 @@ class Page extends Model
         'slug',
         'body',
         'published',
+        'folder_id',
     ];
+
+    public function folder()
+    {
+        return $this->belongsTo(Folder::class);
+    }
 
     protected function casts(): array
     {

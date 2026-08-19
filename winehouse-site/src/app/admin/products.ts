@@ -1,4 +1,4 @@
-import { Component, inject, signal, computed, OnInit } from '@angular/core';
+import { Component, inject, signal, computed, OnInit, HostListener } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { AdminApi, Product, Asset, GrapeVarietyItem } from './api';
 import { WhI18nInput } from './i18n-input';
@@ -6,6 +6,8 @@ import { AdminConfirm } from './confirm-dialog';
 import { I18nService, I18nText } from '../core/i18n.service';
 import { SiteSettingsService } from '../core/site-settings.service';
 import { resolveMediaUrl } from '../core/media.utils';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 
 @Component({
   selector: 'wh-admin-products',
@@ -18,12 +20,12 @@ import { resolveMediaUrl } from '../core/media.utils';
         <p class="text-xs text-slate-500 mt-0.5">Manage vintage allocations, bottle pricing, cellar varietals, and bulk CSV imports.</p>
       </div>
 
-      <div class="flex items-center flex-wrap gap-2">
+      <div class="flex items-center gap-2 shrink-0">
         <!-- Download Template CSV Button -->
         <button
           type="button"
           (click)="downloadCsvTemplate()"
-          class="btn btn-secondary text-xs cursor-pointer flex items-center gap-1.5"
+          class="btn btn-secondary text-xs cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
           title="Download template CSV with expected headers and sample rows"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -38,7 +40,7 @@ import { resolveMediaUrl } from '../core/media.utils';
         <button
           type="button"
           (click)="openCsvImportModal()"
-          class="btn btn-secondary text-xs cursor-pointer flex items-center gap-1.5"
+          class="btn btn-secondary text-xs cursor-pointer flex items-center gap-1.5 whitespace-nowrap"
           title="Upload CSV to import multiple products at once"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
@@ -53,13 +55,21 @@ import { resolveMediaUrl } from '../core/media.utils';
         <button
           type="button"
           (click)="openCreateModal()"
-          class="btn btn-primary text-xs cursor-pointer flex items-center gap-1.5"
+          class="btn btn-primary text-xs cursor-pointer flex items-center gap-1.5 whitespace-nowrap shadow-sm"
         >
           <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
           <span>Add Product</span>
         </button>
       </div>
     </div>
+
+    <!-- Toast Notification for Hotkey Feedback -->
+    @if (copiedToast(); as msg) {
+      <div class="fixed top-6 right-6 z-[99999] px-4 py-2.5 rounded-xl bg-slate-900 text-white text-xs font-semibold shadow-2xl border border-white/20 flex items-center gap-2 animate-in fade-in slide-in-from-top-2">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-400"><polyline points="20 6 9 17 4 12"/></svg>
+        <span>{{ msg }}</span>
+      </div>
+    }
 
     <!-- Category Tabs & Search Bar -->
     <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6">
@@ -114,6 +124,15 @@ import { resolveMediaUrl } from '../core/media.utils';
           <table class="admin-table">
             <thead>
               <tr>
+                <th class="w-10 text-center">
+                  <input
+                    type="checkbox"
+                    [checked]="isAllSelected()"
+                    (change)="toggleSelectAll()"
+                    class="rounded border-slate-300 text-wine-600 focus:ring-wine-500 cursor-pointer"
+                    title="Select all products (Ctrl+A)"
+                  />
+                </th>
                 <th class="w-12">Cover</th>
                 <th>Product &amp; Vintage</th>
                 <th>Category</th>
@@ -126,9 +145,22 @@ import { resolveMediaUrl } from '../core/media.utils';
             </thead>
             <tbody>
               @for (item of filteredProducts(); track item.id) {
-                <tr>
+                <tr
+                  [class.bg-wine-50/30]="isSelected(item.id)"
+                  class="cursor-pointer select-none"
+                  (click)="handleRowClick(item, $event, $index)"
+                >
+                  <td class="w-10 text-center" (click)="$event.stopPropagation()">
+                    <input
+                      type="checkbox"
+                      [checked]="isSelected(item.id)"
+                      (change)="toggleSelect(item.id, $event)"
+                      class="rounded border-slate-300 text-wine-600 focus:ring-wine-500 cursor-pointer"
+                    />
+                  </td>
+
                   <!-- Thumbnail & Gallery Indicator -->
-                  <td>
+                  <td (click)="$event.stopPropagation(); openEditModal(item)">
                     <div class="relative w-10 h-12 bg-slate-100 rounded border border-slate-200 overflow-hidden shrink-0 flex items-center justify-center">
                       @if (item.cover_image) {
                         <img
@@ -150,7 +182,7 @@ import { resolveMediaUrl } from '../core/media.utils';
                   <!-- Name & Vintage -->
                   <td>
                     <div class="flex flex-col">
-                      <span class="text-xs font-bold text-slate-900">{{ item.name }}</span>
+                      <span class="text-xs font-bold text-slate-900 hover:text-wine-800">{{ item.name }}</span>
                       <span class="text-[11px] text-slate-500 font-mono">{{ item.vintage || 'NV' }}</span>
                     </div>
                   </td>
@@ -208,7 +240,7 @@ import { resolveMediaUrl } from '../core/media.utils';
                   </td>
 
                   <!-- Actions -->
-                  <td class="text-right">
+                  <td class="text-right" (click)="$event.stopPropagation()">
                     <div class="flex items-center justify-end gap-1.5">
                       <button
                         type="button"
@@ -234,6 +266,54 @@ import { resolveMediaUrl } from '../core/media.utils';
       </div>
     }
 
+    <!-- Floating Batch Actions Bar for Products -->
+    @if (selectedCount() > 0) {
+      <div class="fixed bottom-6 left-1/2 -translate-x-1/2 z-50 flex items-center flex-wrap gap-2.5 px-4 py-2.5 rounded-2xl bg-slate-900/95 backdrop-blur-xl border border-white/20 shadow-2xl text-white transition-all animate-slideUp">
+        <div class="flex items-center gap-2">
+          <span class="w-6 h-6 rounded-full bg-wine-600 text-white text-xs font-mono font-bold flex items-center justify-center shadow-xs">
+            {{ selectedCount() }}
+          </span>
+          <span class="text-xs font-medium text-slate-200 whitespace-nowrap">
+            {{ selectedCount() === 1 ? '1 product' : selectedCount() + ' products' }} selected
+          </span>
+        </div>
+
+        <div class="h-4 w-px bg-white/20"></div>
+
+        <!-- Copy Product Links/Names -->
+        <button
+          type="button"
+          (click)="copySelectedProducts()"
+          class="text-xs text-slate-200 hover:text-white px-2.5 py-1.5 rounded-xl bg-white/10 hover:bg-white/20 flex items-center gap-1.5 transition-colors cursor-pointer"
+          title="Copy URLs (Ctrl+C)"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+          <span>Copy Info</span>
+          <kbd class="text-3xs font-mono text-slate-400 bg-white/10 px-1 py-0.2 rounded">^C</kbd>
+        </button>
+
+        <button
+          type="button"
+          class="px-3 py-1.5 text-xs font-bold text-white bg-red-600 hover:bg-red-700 active:scale-[0.98] rounded-xl shadow-lg shadow-red-600/30 flex items-center gap-1.5 transition-all cursor-pointer select-none"
+          (click)="deleteSelected()"
+          title="Delete selected products (Delete / Backspace)"
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M3 6h18m-2 0v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6"/></svg>
+          <span>Delete ({{ selectedCount() }})</span>
+          <kbd class="text-3xs font-mono text-red-200 bg-red-800/60 px-1 py-0.2 rounded">Del</kbd>
+        </button>
+
+        <button
+          type="button"
+          class="text-xs text-slate-300 hover:text-white px-2 py-1.5 rounded-lg hover:bg-white/10 transition-colors cursor-pointer select-none"
+          (click)="deselectAll()"
+          title="Deselect all (Esc)"
+        >
+          <span>Esc</span>
+        </button>
+      </div>
+    }
+
     <!-- Single Uniform Modal: 2-Column Live Site Layout -->
     @if (isModalOpen()) {
       <div class="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex items-center justify-center p-3 sm:p-6 overflow-y-auto">
@@ -251,7 +331,31 @@ import { resolveMediaUrl } from '../core/media.utils';
               <p class="text-2xs text-slate-500 mt-0.5">Live store layout: showcase imagery on the left, commercial &amp; terroir dossier on the right.</p>
             </div>
 
-            <div class="flex items-center gap-3">
+            <div class="flex items-center gap-2.5">
+              <!-- Minimalist Modern Active / Draft Status Badge Switcher -->
+              <button
+                type="button"
+                (click)="formProduct.published = !formProduct.published"
+                class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-2xs font-mono font-bold tracking-wider uppercase transition-all duration-200 border cursor-pointer select-none shadow-2xs group"
+                [class.bg-emerald-50]="formProduct.published"
+                [class.text-emerald-700]="formProduct.published"
+                [class.border-emerald-200]="formProduct.published"
+                [class.hover:bg-emerald-100]="formProduct.published"
+                [class.bg-slate-100]="!formProduct.published"
+                [class.text-slate-600]="!formProduct.published"
+                [class.border-slate-200]="!formProduct.published"
+                [class.hover:bg-slate-200]="!formProduct.published"
+                title="Click to toggle status: {{ formProduct.published ? 'Live in e-Shop (Active)' : 'Hidden (Draft)' }}"
+              >
+                <span
+                  class="w-2 h-2 rounded-full transition-all duration-200"
+                  [class.bg-emerald-500]="formProduct.published"
+                  [class.shadow-[0_0_6px_rgba(16,185,129,0.8)]]="formProduct.published"
+                  [class.bg-slate-400]="!formProduct.published"
+                ></span>
+                <span>{{ formProduct.published ? 'Active' : 'Draft' }}</span>
+              </button>
+
               <!-- Minimalist Editorial Language Switcher (Homepage Style) -->
               <div
                 class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-2xs font-mono font-bold tracking-widest uppercase transition-all duration-300 border border-slate-200/80 bg-white shadow-2xs select-none text-slate-700"
@@ -379,10 +483,7 @@ import { resolveMediaUrl } from '../core/media.utils';
 
                   <!-- Gallery Thumbnails Strip (Click to switch main cover) -->
                   @if (uploadedImages().length > 0) {
-                    <div class="space-y-1.5 pt-1">
-                      <span class="text-2xs font-semibold text-slate-500 uppercase tracking-wider block">
-                        Gallery Collection (Click thumbnail to set as main)
-                      </span>
+                    <div class="pt-1">
                       <div class="grid grid-cols-4 gap-2">
                         @for (img of uploadedImages(); track img; let i = $index) {
                           <div
@@ -701,25 +802,13 @@ import { resolveMediaUrl } from '../core/media.utils';
                 </div>
 
                 <!-- Footer / Actions Bar -->
-                <div class="pt-3 border-t border-slate-200 flex items-center justify-between">
-                  <label class="flex items-center gap-2 text-xs font-semibold text-slate-700 cursor-pointer select-none">
-                    <input
-                      type="checkbox"
-                      name="productPublished"
-                      [(ngModel)]="formProduct.published"
-                      class="rounded border-slate-300 text-wine-600 focus:ring-wine-500"
-                    />
-                    <span>Show in Live e-Shop</span>
-                  </label>
-
-                  <div class="flex items-center gap-2.5">
-                    <button type="button" (click)="closeModal()" class="btn btn-secondary btn-sm cursor-pointer">
-                      Cancel
-                    </button>
-                    <button type="submit" [disabled]="saving() || uploadingCount() > 0" class="btn btn-primary btn-sm cursor-pointer shadow-sm">
-                      {{ saving() ? 'Saving…' : (editingProduct()?.id ? 'Update Product' : 'Create Product') }}
-                    </button>
-                  </div>
+                <div class="pt-3 border-t border-slate-200 flex items-center justify-end gap-2.5">
+                  <button type="button" (click)="closeModal()" class="btn btn-secondary btn-sm cursor-pointer">
+                    Cancel
+                  </button>
+                  <button type="submit" [disabled]="saving() || uploadingCount() > 0" class="btn btn-primary btn-sm cursor-pointer shadow-sm">
+                    {{ saving() ? 'Saving…' : (editingProduct()?.id ? 'Update Product' : 'Create Product') }}
+                  </button>
                 </div>
 
               </div>
@@ -1642,9 +1731,158 @@ export class AdminProducts implements OnInit {
       this.api.deleteProduct(product.id).subscribe({
         next: () => {
           this.products.update((list) => list.filter((p) => p.id !== product.id));
+          if (this.selectedIds().has(product.id)) {
+            const next = new Set(this.selectedIds());
+            next.delete(product.id);
+            this.selectedIds.set(next);
+          }
         },
       });
     }
+  }
+
+  readonly selectedIds = signal<Set<number>>(new Set());
+  readonly copiedToast = signal<string | null>(null);
+  lastSelectedIndex: number | null = null;
+
+  readonly selectedCount = computed(() => this.selectedIds().size);
+
+  readonly isAllSelected = computed(() => {
+    const list = this.filteredProducts();
+    if (list.length === 0) return false;
+    const set = this.selectedIds();
+    return list.every((p) => set.has(p.id));
+  });
+
+  isSelected(id: number): boolean {
+    return this.selectedIds().has(id);
+  }
+
+  handleRowClick(product: Product, event: MouseEvent, index: number): void {
+    if (event.shiftKey && this.lastSelectedIndex !== null) {
+      event.preventDefault();
+      const start = Math.min(this.lastSelectedIndex, index);
+      const end = Math.max(this.lastSelectedIndex, index);
+      const list = this.filteredProducts();
+      const current = new Set(this.selectedIds());
+      for (let i = start; i <= end; i++) {
+        if (list[i]) current.add(list[i].id);
+      }
+      this.selectedIds.set(current);
+    } else if (event.ctrlKey || event.metaKey) {
+      event.preventDefault();
+      this.toggleSelect(product.id);
+      this.lastSelectedIndex = index;
+    } else {
+      this.toggleSelect(product.id);
+      this.lastSelectedIndex = index;
+    }
+  }
+
+  toggleSelect(id: number, event?: Event): void {
+    if (event) event.stopPropagation();
+    const current = new Set(this.selectedIds());
+    if (current.has(id)) {
+      current.delete(id);
+    } else {
+      current.add(id);
+    }
+    this.selectedIds.set(current);
+  }
+
+  toggleSelectAll(): void {
+    if (this.isAllSelected()) {
+      this.deselectAll();
+    } else {
+      const allIds = new Set(this.filteredProducts().map((p) => p.id));
+      this.selectedIds.set(allIds);
+    }
+  }
+
+  deselectAll(): void {
+    this.selectedIds.set(new Set());
+    this.lastSelectedIndex = null;
+  }
+
+  showToast(message: string): void {
+    this.copiedToast.set(message);
+    setTimeout(() => this.copiedToast.set(null), 2200);
+  }
+
+  copySelectedProducts(): void {
+    const selected = this.products().filter((p) => this.selectedIds().has(p.id));
+    if (selected.length === 0) return;
+    const text = selected.map((p) => `${p.name} (${p.vintage || 'NV'}) - ${this.currencySymbol()} ${p.price.toFixed(2)}: ${window.location.origin}/shop/${p.slug}`).join('\n');
+    navigator.clipboard.writeText(text).then(() => {
+      this.showToast(`Copied info for ${selected.length} product${selected.length !== 1 ? 's' : ''}`);
+    });
+  }
+
+  @HostListener('window:keydown', ['$event'])
+  onKeyDown(e: KeyboardEvent): void {
+    if (this.isModalOpen() || this.isAssetModalOpen() || this.isCsvModalOpen()) return;
+    if (this.isTypingInInput(e.target)) return;
+
+    // Ctrl+A / Cmd+A: Select All
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'a') {
+      e.preventDefault();
+      this.toggleSelectAll();
+      return;
+    }
+
+    // Ctrl+C / Cmd+C: Copy selected products
+    if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === 'c') {
+      if (this.selectedCount() > 0) {
+        e.preventDefault();
+        this.copySelectedProducts();
+      }
+      return;
+    }
+
+    // Delete / Backspace: Delete selected
+    if (e.key === 'Delete' || e.key === 'Backspace') {
+      if (this.selectedCount() > 0) {
+        e.preventDefault();
+        this.deleteSelected();
+      }
+      return;
+    }
+
+    // Escape: Deselect
+    if (e.key === 'Escape') {
+      if (this.selectedCount() > 0) {
+        this.deselectAll();
+      }
+    }
+  }
+
+  private isTypingInInput(target: EventTarget | null): boolean {
+    if (!target || !(target instanceof HTMLElement)) return false;
+    const tag = target.tagName.toLowerCase();
+    return tag === 'input' || tag === 'textarea' || tag === 'select' || target.isContentEditable;
+  }
+
+  async deleteSelected(): Promise<void> {
+    const ids = Array.from(this.selectedIds());
+    if (ids.length === 0) return;
+
+    const confirmed = await this.confirmDialog.open({
+      title: `Delete ${ids.length} Product${ids.length !== 1 ? 's' : ''}?`,
+      message: `Are you sure you want to permanently delete these ${ids.length} selected products from the catalog?`,
+      confirmLabel: `Delete ${ids.length} Product${ids.length !== 1 ? 's' : ''}`,
+      cancelLabel: 'Cancel',
+      danger: true,
+    });
+    if (!confirmed) return;
+
+    forkJoin(ids.map((id) => this.api.deleteProduct(id).pipe(catchError(() => of(null))))).subscribe({
+      next: () => {
+        const set = new Set(ids);
+        this.products.update((list) => list.filter((p) => !set.has(p.id)));
+        this.deselectAll();
+        this.showToast(`Deleted ${ids.length} product${ids.length !== 1 ? 's' : ''}`);
+      },
+    });
   }
 
   // =========================================================================

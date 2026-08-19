@@ -40,8 +40,8 @@ class Setting extends Model
             ],
             'nav' => [
                 ['label' => 'Home', 'path' => '/'],
-                ['label' => 'About Us', 'path' => '/about'],
                 ['label' => 'e-Shop', 'path' => '/shop'],
+                ['label' => 'About Us', 'path' => '/about'],
                 ['label' => 'Contact', 'path' => '/contact'],
             ],
             'colors' => [

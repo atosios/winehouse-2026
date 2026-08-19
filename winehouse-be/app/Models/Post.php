@@ -21,7 +21,13 @@ class Post extends Model
         'cover_image',
         'published',
         'published_at',
+        'folder_id',
     ];
+
+    public function folder()
+    {
+        return $this->belongsTo(Folder::class);
+    }
 
     protected function casts(): array
     {

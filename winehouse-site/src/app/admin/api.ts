@@ -47,12 +47,28 @@ export interface PostMetaData {
   rsvp_link?: string;
 }
 
+export type FolderType = 'asset' | 'page' | 'post' | 'product';
+
+export interface Folder {
+  id: number;
+  name: string;
+  type: FolderType;
+  parent_id: number | null;
+  color?: string | null;
+  items_count?: number;
+  sort_order?: number;
+  created_at?: string;
+  updated_at?: string;
+}
+
 export interface Post {
   id: number;
   title: string;
   slug: string;
   post_type: PostType;
   category: string | null;
+  folder_id?: number | null;
+  folder?: Folder | null;
   tags: string[] | null;
   author_name: string | null;
   layout_style: LayoutStyle;
@@ -72,6 +88,8 @@ export interface Page {
   title: string;
   slug: string;
   body: string | null;
+  folder_id?: number | null;
+  folder?: Folder | null;
   published: boolean;
   created_at: string;
   updated_at: string;
@@ -83,6 +101,8 @@ export interface Asset {
   path: string;
   mime_type: string | null;
   size: number;
+  folder_id?: number | null;
+  folder?: Folder | null;
   url: string;
   created_at: string;
 }
@@ -508,6 +528,8 @@ export interface Product {
   varietal: I18nText;
   varieties?: GrapeVarietyItem[];
   category: string;
+  folder_id?: number | null;
+  folder?: Folder | null;
   price: number;
   compare_at_price?: number | null;
   stock_quantity: number;
@@ -697,20 +719,30 @@ export class AdminApi {
     return this.http.put<SiteSettings>(`${this.base}/settings`, data);
   }
 
+  // Folders
+  listFolders(type: FolderType): Observable<Folder[]> {
+    return this.http.get<Folder[]>(`${this.base}/folders`, { params: { type } });
+  }
+  createFolder(data: { name: string; type: FolderType; parent_id?: number | null; color?: string }): Observable<Folder> {
+    return this.http.post<Folder>(`${this.base}/folders`, data);
+  }
+  updateFolder(id: number, data: { name?: string; parent_id?: number | null; color?: string }): Observable<Folder> {
+    return this.http.put<Folder>(`${this.base}/folders/${id}`, data);
+  }
+  deleteFolder(id: number): Observable<{ ok: boolean }> {
+    return this.http.delete<{ ok: boolean }>(`${this.base}/folders/${id}`);
+  }
+  bulkMoveItems(type: FolderType, ids: number[], folder_id: number | null): Observable<{ ok: boolean; moved_count: number }> {
+    return this.http.post<{ ok: boolean; moved_count: number }>(`${this.base}/folders/bulk-move`, { type, ids, folder_id });
+  }
+
   // Posts
-  listPosts(): Observable<Post[]> {
-    return this.http.get<Post[]>(`${this.base}/posts`);
-  }
-  listCategories(): Observable<string[]> {
-    return this.http.get<string[]>(`${this.base}/categories`);
-  }
-  createCategory(name: string): Observable<string[]> {
-    return this.http.post<string[]>(`${this.base}/categories`, { name });
-  }
-  deleteCategory(name: string): Observable<{ success: boolean; categories: string[]; affected_posts: number }> {
-    return this.http.request<{ success: boolean; categories: string[]; affected_posts: number }>('delete', `${this.base}/categories`, {
-      body: { name },
-    });
+  listPosts(folder_id?: number | null | string): Observable<Post[]> {
+    const params: Record<string, string> = {};
+    if (folder_id !== undefined && folder_id !== null) {
+      params['folder_id'] = String(folder_id);
+    }
+    return this.http.get<Post[]>(`${this.base}/posts`, { params });
   }
   getPost(id: number): Observable<Post> {
     return this.http.get<Post>(`${this.base}/posts/${id}`);
@@ -724,10 +756,25 @@ export class AdminApi {
   deletePost(id: number): Observable<unknown> {
     return this.http.delete(`${this.base}/posts/${id}`);
   }
+  listCategories(): Observable<string[]> {
+    return this.http.get<string[]>(`${this.base}/categories`);
+  }
+  createCategory(name: string): Observable<string[]> {
+    return this.http.post<string[]>(`${this.base}/categories`, { name });
+  }
+  deleteCategory(name: string): Observable<{ success: boolean; categories: string[]; affected_posts: number }> {
+    return this.http.request<{ success: boolean; categories: string[]; affected_posts: number }>('delete', `${this.base}/categories`, {
+      body: { name },
+    });
+  }
 
   // Pages
-  listPages(): Observable<Page[]> {
-    return this.http.get<Page[]>(`${this.base}/pages`);
+  listPages(folder_id?: number | null | string): Observable<Page[]> {
+    const params: Record<string, string> = {};
+    if (folder_id !== undefined && folder_id !== null) {
+      params['folder_id'] = String(folder_id);
+    }
+    return this.http.get<Page[]>(`${this.base}/pages`, { params });
   }
   getPage(id: number): Observable<Page> {
     return this.http.get<Page>(`${this.base}/pages/${id}`);
@@ -743,13 +790,23 @@ export class AdminApi {
   }
 
   // Assets
-  listAssets(): Observable<Asset[]> {
-    return this.http.get<Asset[]>(`${this.base}/assets`);
+  listAssets(folder_id?: number | null | string): Observable<Asset[]> {
+    const params: Record<string, string> = {};
+    if (folder_id !== undefined && folder_id !== null) {
+      params['folder_id'] = String(folder_id);
+    }
+    return this.http.get<Asset[]>(`${this.base}/assets`, { params });
   }
-  uploadAsset(file: File): Observable<Asset> {
+  uploadAsset(file: File, folder_id?: number | null): Observable<Asset> {
     const form = new FormData();
     form.append('file', file);
+    if (folder_id !== undefined && folder_id !== null) {
+      form.append('folder_id', String(folder_id));
+    }
     return this.http.post<Asset>(`${this.base}/assets`, form);
+  }
+  updateAsset(id: number, data: { name?: string; folder_id?: number | null }): Observable<Asset> {
+    return this.http.put<Asset>(`${this.base}/assets/${id}`, data);
   }
   deleteAsset(id: number): Observable<unknown> {
     return this.http.delete(`${this.base}/assets/${id}`);

@@ -8,9 +8,20 @@ use Illuminate\Support\Facades\Storage;
 
 class AssetController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        return Asset::orderByDesc('created_at')->get();
+        $query = Asset::with('folder')->orderByDesc('created_at');
+
+        if ($request->has('folder_id')) {
+            $folderId = $request->query('folder_id');
+            if ($folderId === 'null' || $folderId === 'root' || $folderId === '') {
+                $query->whereNull('folder_id');
+            } elseif (is_numeric($folderId)) {
+                $query->where('folder_id', (int) $folderId);
+            }
+        }
+
+        return $query->get();
     }
 
     public function store(Request $request)
@@ -22,6 +33,7 @@ class AssetController extends Controller
                 'max:65536', // 64 MB for images & videos
                 'mimes:jpg,jpeg,png,webp,gif,svg,pdf,mp4,webm,mov,ogg,m4v,avif,heic,heif',
             ],
+            'folder_id' => ['nullable', 'integer', 'exists:folders,id'],
         ]);
 
         $file = $request->file('file');
@@ -51,9 +63,22 @@ class AssetController extends Controller
             'path' => $path,
             'mime_type' => $file->getMimeType() ?: $file->getClientMimeType(),
             'size' => $file->getSize(),
+            'folder_id' => $request->input('folder_id'),
         ]);
 
-        return response()->json($asset, 201);
+        return response()->json($asset->load('folder'), 201);
+    }
+
+    public function update(Request $request, Asset $asset)
+    {
+        $data = $request->validate([
+            'name' => ['sometimes', 'required', 'string', 'max:255'],
+            'folder_id' => ['nullable', 'integer', 'exists:folders,id'],
+        ]);
+
+        $asset->update($data);
+
+        return response()->json($asset->load('folder'));
     }
 
     public function destroy(Asset $asset)

@@ -40,14 +40,24 @@
 
         <!-- Socials -->
         <div>
-          <h5 class="footer-heading">Follow us</h5>
-          <ul class="flex flex-col gap-2">
-            @for (social of site.socials; track social.label) {
+          <h5 class="footer-heading text-gold-300">Follow us</h5>
+          <ul class="flex flex-col gap-2.5">
+            @for (social of site.socials; track social.label + $index) {
             <li>
-              <a [href]="social.url" target="_blank" rel="noopener noreferrer"
-                class="text-sm text-sand-300 transition-colors hover:text-gold-200 inline-flex items-center gap-2 group">
-                <wh-social-icon [name]="social.icon" [label]="social.label" [url]="social.url" [size]="15" class="w-3.5 h-3.5 text-sand-400 group-hover:text-gold-300 transition-colors" />
-                <span>{{ social.label }}</span>
+              <a
+                [href]="social.url"
+                target="_blank"
+                rel="noopener noreferrer"
+                class="text-sm font-medium text-sand-100 hover:text-white transition-colors inline-flex items-center gap-2.5 group cursor-pointer"
+              >
+                <wh-social-icon
+                  [name]="social.icon"
+                  [label]="social.label"
+                  [url]="social.url"
+                  [size]="16"
+                  class="w-4 h-4 text-gold-300 group-hover:text-white transition-colors shrink-0"
+                />
+                <span class="text-sand-100 group-hover:text-white group-hover:underline transition-colors">{{ social.label }}</span>
               </a>
             </li>
             }

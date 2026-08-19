@@ -179,17 +179,17 @@ import { WhSocialIcon, SOCIAL_ICON_LIBRARY, resolveSocialIconKey, SocialIconDef 
           </div>
         </div>
 
-        <!-- Row 2: Visiting Hours & Social Channels (2 columns) -->
+        <!-- Row 2: Operating Hours & Social Channels (2 columns) -->
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 items-start pt-2 border-t border-slate-200/80">
-          <!-- Section 3: Visiting Hours -->
+          <!-- Section 3: Operating Hours -->
           <div>
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
               <div>
-                <h2 class="text-base font-bold text-slate-900 tracking-tight">Visiting &amp; Cellar Hours</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Operating schedule shown in footer and contact page.</p>
+                <h2 class="text-base font-bold text-slate-900 tracking-tight">Operating Hours</h2>
+                <p class="text-xs text-slate-500 mt-0.5">Operating schedule shown across footer, contact page, and cellar notices.</p>
               </div>
               <button type="button" class="btn btn-secondary btn-xs flex items-center gap-1 cursor-pointer" (click)="addHourRow()">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="12" y2="12"/></svg>
                 <span>Add Row</span>
               </button>
             </div>
@@ -225,43 +225,18 @@ import { WhSocialIcon, SOCIAL_ICON_LIBRARY, resolveSocialIconKey, SocialIconDef 
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
               <div>
                 <h2 class="text-base font-bold text-slate-900 tracking-tight">Social Channels</h2>
-                <p class="text-xs text-slate-500 mt-0.5">Links and icons for Facebook, X (Twitter), Instagram, TikTok, YouTube, etc.</p>
+                <p class="text-xs text-slate-500 mt-0.5">Configured social media accounts displayed on the site.</p>
               </div>
               <button type="button" class="btn btn-secondary btn-xs flex items-center gap-1 cursor-pointer" (click)="addSocialRow()">
-                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-                <span>Add Custom Link</span>
-              </button>
-            </div>
-
-            <!-- Quick Add Presets Bar -->
-            <div class="mb-3.5 p-2.5 bg-slate-50 border border-slate-200/80 rounded-xl flex flex-wrap items-center gap-1.5">
-              <span class="text-[11px] font-mono font-bold uppercase text-slate-500 mr-1">Quick Add:</span>
-              <button type="button" class="btn btn-secondary !py-1 !px-2 text-2xs inline-flex items-center gap-1.5 cursor-pointer hover:border-pink-500 hover:text-pink-700" (click)="addPresetSocial('Instagram', 'https://instagram.com/', 'instagram')">
-                <wh-social-icon name="instagram" [size]="12" class="w-3 h-3 text-pink-600" />
-                <span>+ Instagram</span>
-              </button>
-              <button type="button" class="btn btn-secondary !py-1 !px-2 text-2xs inline-flex items-center gap-1.5 cursor-pointer hover:border-blue-600 hover:text-blue-700" (click)="addPresetSocial('Facebook', 'https://facebook.com/', 'facebook')">
-                <wh-social-icon name="facebook" [size]="12" class="w-3 h-3 text-blue-600" />
-                <span>+ Facebook</span>
-              </button>
-              <button type="button" class="btn btn-secondary !py-1 !px-2 text-2xs inline-flex items-center gap-1.5 cursor-pointer hover:border-slate-800 hover:text-slate-900" (click)="addPresetSocial('X (Twitter)', 'https://x.com/', 'x')">
-                <wh-social-icon name="x" [size]="12" class="w-3 h-3 text-slate-900" />
-                <span>+ X (Twitter)</span>
-              </button>
-              <button type="button" class="btn btn-secondary !py-1 !px-2 text-2xs inline-flex items-center gap-1.5 cursor-pointer hover:border-slate-800 hover:text-slate-900" (click)="addPresetSocial('TikTok', 'https://tiktok.com/@', 'tiktok')">
-                <wh-social-icon name="tiktok" [size]="12" class="w-3 h-3 text-slate-900" />
-                <span>+ TikTok</span>
-              </button>
-              <button type="button" class="btn btn-secondary !py-1 !px-2 text-2xs inline-flex items-center gap-1.5 cursor-pointer hover:border-red-600 hover:text-red-700" (click)="addPresetSocial('YouTube', 'https://youtube.com/', 'youtube')">
-                <wh-social-icon name="youtube" [size]="12" class="w-3 h-3 text-red-600" />
-                <span>+ YouTube</span>
+                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="12" y2="12"/></svg>
+                <span>Add Social Channel</span>
               </button>
             </div>
 
             <div class="admin-card space-y-3">
               @if (model.socials.length === 0) {
                 <div class="p-6 text-center text-xs text-slate-400 font-mono border border-dashed border-slate-200 rounded-xl">
-                  No social channels added yet. Click "+ Add Custom Link" or select a Quick Add preset above.
+                  No social channels added yet. Click "+ Add Social Channel" to configure one.
                 </div>
               }
 
@@ -1415,10 +1390,6 @@ export class AdminSettings implements OnInit {
 
   addSocialRow(): void {
     this.model.socials.push({ label: '', url: '', icon: 'instagram' });
-  }
-
-  addPresetSocial(label: string, url: string, icon: string): void {
-    this.model.socials.push({ label, url, icon });
   }
 
   removeSocialRow(index: number): void {

@@ -15,26 +15,38 @@ class PageController extends Controller
         return Page::where('published', true)->where('slug', $slug)->firstOrFail();
     }
 
-    public function index()
+    public function index(Request $request)
     {
-        return Page::orderBy('title')->get();
+        $query = Page::with('folder')->orderBy('title');
+
+        if ($request->has('folder_id')) {
+            $folderId = $request->query('folder_id');
+            if ($folderId === 'null' || $folderId === 'root' || $folderId === '') {
+                $query->whereNull('folder_id');
+            } elseif (is_numeric($folderId)) {
+                $query->where('folder_id', (int) $folderId);
+            }
+        }
+
+        return $query->get();
     }
 
     public function store(Request $request)
     {
-        return response()->json(Page::create($this->validated($request)), 201);
+        $page = Page::create($this->validated($request));
+        return response()->json($page->load('folder'), 201);
     }
 
     public function show(Page $page)
     {
-        return $page;
+        return $page->load('folder');
     }
 
     public function update(Request $request, Page $page)
     {
         $page->update($this->validated($request, $page));
 
-        return $page->fresh();
+        return $page->fresh(['folder']);
     }
 
     public function destroy(Page $page)
@@ -51,6 +63,7 @@ class PageController extends Controller
             'slug' => ['nullable', 'string', 'max:255', Rule::unique('pages', 'slug')->ignore($page?->id)],
             'body' => ['nullable', 'string'],
             'published' => ['boolean'],
+            'folder_id' => ['nullable', 'integer', 'exists:folders,id'],
         ]);
 
         if (empty($data['slug'])) {

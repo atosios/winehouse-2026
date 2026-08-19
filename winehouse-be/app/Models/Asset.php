@@ -7,9 +7,14 @@ use Illuminate\Support\Facades\Storage;
 
 class Asset extends Model
 {
-    protected $fillable = ['name', 'path', 'mime_type', 'size'];
+    protected $fillable = ['name', 'path', 'mime_type', 'size', 'folder_id'];
 
     protected $appends = ['url'];
+
+    public function folder()
+    {
+        return $this->belongsTo(Folder::class);
+    }
 
     public function getUrlAttribute(): string
     {

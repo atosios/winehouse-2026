@@ -3,6 +3,7 @@
 use App\Http\Controllers\AssetController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\ContactController;
+use App\Http\Controllers\FolderController;
 use App\Http\Controllers\LlmsTxtController;
 use App\Http\Controllers\OrderController;
 use App\Http\Controllers\PageController;
@@ -40,6 +41,10 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
     Route::get('/categories', [PostController::class, 'categories']);
     Route::post('/categories', [PostController::class, 'storeCategory']);
     Route::delete('/categories', [PostController::class, 'destroyCategory']);
+
+    Route::post('/folders/bulk-move', [FolderController::class, 'bulkMove']);
+    Route::apiResource('folders', FolderController::class);
+
     Route::apiResource('posts', PostController::class);
     Route::apiResource('pages', PageController::class);
     Route::apiResource('users', UserController::class);
@@ -65,6 +70,7 @@ Route::middleware('auth:sanctum')->prefix('admin')->group(function () {
 
     Route::get('/assets', [AssetController::class, 'index']);
     Route::post('/assets', [AssetController::class, 'store']);
+    Route::put('/assets/{asset}', [AssetController::class, 'update']);
     Route::post('/assets/bulk-delete', [AssetController::class, 'bulkDestroy']);
     Route::delete('/assets/{asset}', [AssetController::class, 'destroy']);
 });

@@ -30,7 +30,13 @@ class Product extends Model
         'gallery',
         'published',
         'sort_order',
+        'folder_id',
     ];
+
+    public function folder()
+    {
+        return $this->belongsTo(Folder::class);
+    }
 
     protected $casts = [
         'region' => 'array',
